@@ -18,7 +18,7 @@ const Header = () => {
           </div>
           <div className="flex space-x-4">
             <Link
-              to="/pets"
+              to="/"
               className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
             >
               Ver Pets

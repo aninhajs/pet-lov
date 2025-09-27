@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .vite
 
+test.html
+
 # Configurações do vs code
 .vscode/*
 !.vscode/extensions.json

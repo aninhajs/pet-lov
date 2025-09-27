@@ -18,12 +18,22 @@ const optimizeImageUrl = (url, width = 400, height = 300) => {
 const Pets = () => {
   const [selectedFilter, setSelectedFilter] = useState("todos");
   const [pets, setPets] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null);
 
   // Carregar todos os pets do localStorage
   useEffect(() => {
     const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
     setPets(petsStorage);
   }, []);
+
+  // Funções do modal
+  const openModal = (pet) => {
+    setSelectedPet(pet);
+  };
+
+  const closeModal = () => {
+    setSelectedPet(null);
+  };
 
   const filteredPets = pets.filter((pet) => {
     if (selectedFilter === "todos") return true;
@@ -160,14 +170,16 @@ const Pets = () => {
           {filteredPets.map((pet) => (
             <div
               key={pet.id}
-              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => openModal(pet)}
             >
-              <div className="relative w-full h-56 bg-gray-100 overflow-hidden rounded-t-lg group">
+              {/* Imagem do pet */}
+              <div className="relative w-full h-48 bg-gray-100 overflow-hidden rounded-t-lg group">
                 {pet.imagem ? (
                   <img
-                    src={optimizeImageUrl(pet.imagem, 400, 350)}
+                    src={optimizeImageUrl(pet.imagem, 400, 320)}
                     alt={pet.nome}
-                    className="w-full h-full object-cover object-center transition-all duration-300 group-hover:scale-105 group-hover:brightness-110"
+                    className="w-full h-full object-cover object-center transition-all duration-300 group-hover:scale-105"
                     loading="lazy"
                     onError={(e) => {
                       e.target.style.display = "none";
@@ -188,31 +200,16 @@ const Pets = () => {
                       : "🐾"}
                   </span>
                 </div>
-              </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {pet.nome}
-                  </h3>
-                  <span className="text-sm text-gray-500">{pet.sexo}</span>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
-                  <div>Idade: {pet.idade}</div>
-                  <div>Porte: {pet.porte}</div>
-                </div>
-
-                <p className="text-gray-600 mb-4 text-sm">{pet.descricao}</p>
-
-                <div className="flex gap-2 mb-4">
-                  {/* Badge de Status */}
+                {/* Badge de status no canto da imagem */}
+                <div className="absolute top-2 right-2">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    className={`text-xs px-2 py-1 rounded-full font-medium shadow-sm ${
                       pet.status === "disponivel"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-green-500 text-white"
                         : pet.status === "adotado"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-yellow-100 text-yellow-800"
+                        ? "bg-gray-500 text-white"
+                        : "bg-yellow-500 text-white"
                     }`}
                   >
                     {pet.status === "disponivel"
@@ -221,36 +218,18 @@ const Pets = () => {
                       ? "❤️ Adotado"
                       : "⏳ Em Processo"}
                   </span>
-
-                  {pet.castrado && (
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                      Castrado
-                    </span>
-                  )}
-                  {pet.vacinado && (
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      Vacinado
-                    </span>
-                  )}
                 </div>
+              </div>
 
-                {/* Botão condicional baseado no status */}
-                {pet.status === "disponivel" ? (
-                  <Link
-                    to="/questionnaire"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors inline-block text-center"
-                  >
-                    Quero Adotar
-                  </Link>
-                ) : pet.status === "adotado" ? (
-                  <div className="w-full bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium text-center">
-                    Pet já adotado ❤️
-                  </div>
-                ) : (
-                  <div className="w-full bg-yellow-300 text-yellow-800 px-4 py-2 rounded-md text-sm font-medium text-center">
-                    Processo em andamento ⏳
-                  </div>
-                )}
+              {/* Informações principais - apenas nome e idade */}
+              <div className="p-4 text-center">
+                <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                  {pet.nome}
+                </h3>
+                <p className="text-gray-600 text-sm">{pet.idade}</p>
+                <div className="mt-3 text-indigo-600 text-sm font-medium">
+                  Clique para ver mais →
+                </div>
               </div>
             </div>
           ))}
@@ -280,6 +259,177 @@ const Pets = () => {
           </div>
         )}
       </main>
+
+      {/* Modal de detalhes do pet */}
+      {selectedPet && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="relative">
+              {/* Botão fechar */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              {/* Imagem do pet */}
+              <div className="relative w-full h-80 bg-gray-100 overflow-hidden rounded-t-xl">
+                {selectedPet.imagem ? (
+                  <img
+                    src={optimizeImageUrl(selectedPet.imagem, 600, 400)}
+                    alt={selectedPet.nome}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gradient-to-br from-indigo-100 to-purple-100">
+                    <span className="text-8xl opacity-50">
+                      {selectedPet.tipo === "cão"
+                        ? "🐕"
+                        : selectedPet.tipo === "gato"
+                        ? "🐱"
+                        : "🐾"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Conteúdo do modal - Formato organizado */}
+              <div className="p-6">
+                {/* Nome do pet */}
+                <div className="text-center mb-6">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    {selectedPet.nome}
+                  </h2>
+
+                  {/* Status em destaque */}
+                  <span
+                    className={`inline-flex items-center px-4 py-2 rounded-full font-medium text-sm ${
+                      selectedPet.status === "disponivel"
+                        ? "bg-green-100 text-green-800"
+                        : selectedPet.status === "adotado"
+                        ? "bg-gray-100 text-gray-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {selectedPet.status === "disponivel"
+                      ? "🟢 Disponível para Adoção"
+                      : selectedPet.status === "adotado"
+                      ? "❤️ Já Adotado"
+                      : "⏳ Em Processo de Adoção"}
+                  </span>
+                </div>
+
+                {/* Informações básicas em linha */}
+                <div className="text-center mb-6">
+                  <div className="flex items-center justify-center text-gray-700 text-lg font-medium flex-wrap gap-3">
+                    <span>{selectedPet.sexo}</span>
+                    <span className="text-gray-400">•</span>
+                    <span>{selectedPet.idade}</span>
+                    <span className="text-gray-400">•</span>
+                    <span>Porte {selectedPet.porte}</span>
+                  </div>
+                </div>
+
+                {/* Status médicos */}
+                <div className="flex justify-center gap-4 mb-6">
+                  {selectedPet.castrado && (
+                    <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
+                      <span className="text-green-600">✅</span>
+                      <span className="text-green-800 font-medium">
+                        Castrado(a)
+                      </span>
+                    </div>
+                  )}
+                  {selectedPet.vacinado && (
+                    <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
+                      <span className="text-blue-600">💉</span>
+                      <span className="text-blue-800 font-medium">
+                        Vacinado(a)
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Situação do pet */}
+                {selectedPet.situacao && (
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-full border border-orange-200">
+                      <span className="text-orange-600">🏷️</span>
+                      <span className="text-orange-800 font-medium">
+                        {selectedPet.situacao}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* História do pet */}
+                {(selectedPet.descricao || selectedPet.historia) && (
+                  <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">📖</span>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Sua História
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {selectedPet.historia || selectedPet.descricao}
+                    </p>
+                  </div>
+                )}
+
+                {/* Cuidados especiais */}
+                {selectedPet.cuidados && (
+                  <div className="mb-6 bg-purple-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">💜</span>
+                      <h3 className="text-lg font-bold text-purple-900">
+                        Cuidados Especiais
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {selectedPet.cuidados}
+                    </p>
+                  </div>
+                )}
+
+                {/* Botão de adoção - mesmo estilo da página Home */}
+                <div className="text-center space-y-3">
+                  {selectedPet.status === "disponivel" ? (
+                    <Link
+                      to="/questionnaire"
+                      className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-colors"
+                      onClick={closeModal}
+                    >
+                      💖 Quero Adotar {selectedPet.nome}
+                    </Link>
+                  ) : selectedPet.status === "adotado" ? (
+                    <div className="inline-flex items-center bg-gray-400 text-white px-6 py-2.5 rounded-lg text-base font-semibold">
+                      ❤️ Pet já adotado
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center bg-yellow-500 text-white px-6 py-2.5 rounded-lg text-base font-semibold">
+                      ⏳ Em processo de adoção
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
