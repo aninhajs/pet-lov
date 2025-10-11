@@ -1,0 +1,180 @@
+// Este é o seu arquivo de schema do Prisma,
+// saiba mais sobre ele na documentação: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum TipoPet {
+  cao
+  gato
+  outros
+}
+
+enum PortePet {
+  pequeno
+  medio
+  grande
+}
+
+enum SexoPet {
+  macho
+  femea
+}
+
+enum StatusPet {
+  disponivel
+  em_processo
+  adotado
+  indisponivel
+}
+
+enum TipoUsuario {
+  admin
+  comum
+}
+
+// Tabelas
+model User {
+  id            String   @id @default(cuid())
+  nome          String
+  email         String   @unique
+  senha_hash    String
+  tipo          TipoUsuario @default(admin)
+  telefone      String?
+  endereco      String?
+  ativo         Boolean  @default(true)
+  data_criacao  DateTime @default(now())
+  data_atualizacao DateTime @updatedAt
+  
+  // Relacionamentos
+  pets_cadastrados Pet[]
+  
+  @@map("users")
+}
+
+model Pet {
+  id                    String     @id @default(cuid())
+  nome                  String
+  tipo                  TipoPet
+  idade                 String
+  porte                 PortePet
+  sexo                  SexoPet
+  cor                   String
+  peso                  Decimal?
+  descricao             String
+  temperamento          String?
+  castrado              Boolean    @default(false)
+  vacinado              Boolean    @default(false)
+  vermifugado           Boolean    @default(false)
+  necessidades_especiais String?
+  historia              String?
+  status                StatusPet  @default(disponivel)
+  data_cadastro         DateTime   @default(now())
+  data_atualizacao      DateTime   @updatedAt
+  
+  // Relacionamentos
+  usuario_id            String
+  usuario_cadastrou     User          @relation(fields: [usuario_id], references: [id])
+  imagens               PetImage[]
+  interesses           PetInterest[]
+  adocoes              Adoption[]
+  
+  @@map("pets")
+}
+
+model PetImage {
+  id            String   @id @default(cuid())
+  pet_id        String
+  url_imagem    String
+  nome_arquivo  String
+  tamanho       Int?
+  tipo_mime     String?
+  principal     Boolean  @default(false)
+  data_upload   DateTime @default(now())
+  
+  // Relacionamentos
+  pet           Pet      @relation(fields: [pet_id], references: [id], onDelete: Cascade)
+  
+  @@map("pet_images")
+}
+
+// Enums para Candidatos e Adoções
+enum StatusCandidato {
+  pendente
+  aprovado
+  rejeitado
+}
+
+enum StatusInteresse {
+  interessado
+  aprovado
+  rejeitado
+}
+
+enum StatusAdocao {
+  ativa
+  cancelada
+  devolvido
+}
+
+model AdoptionCandidate {
+  id                String         @id @default(cuid())
+  nome              String
+  email             String
+  telefone          String
+  endereco          String
+  tipo_moradia      String
+  tempo_disponivel  String
+  experiencia_pets  String
+  motivacao         String
+  ativo             Boolean        @default(true)
+  data_cadastro     DateTime       @default(now())
+  data_atualizacao  DateTime       @updatedAt
+  
+  // Relacionamentos
+  interesses        PetInterest[]
+  adocoes          Adoption[]
+  
+  @@map("adoption_candidates")
+}
+
+model PetInterest {
+  id                String            @id @default(cuid())
+  candidato_id      String
+  pet_id            String
+  status            StatusInteresse   @default(interessado)
+  data_interesse    DateTime          @default(now())
+  data_avaliacao    DateTime?
+  observacoes_admin String?
+  
+  // Relacionamentos
+  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
+  pet               Pet               @relation(fields: [pet_id], references: [id], onDelete: Cascade)
+  
+  @@unique([candidato_id, pet_id])
+  @@map("pet_interests")
+}
+
+model Adoption {
+  id            String        @id @default(cuid())
+  pet_id        String
+  candidato_id  String
+  data_adocao   DateTime      @default(now())
+  observacoes   String?
+  taxa_adocao   Decimal?
+  status        StatusAdocao  @default(ativa)
+  data_atualizacao DateTime   @updatedAt
+  
+  // Relacionamentos
+  pet           Pet           @relation(fields: [pet_id], references: [id])
+  candidato     AdoptionCandidate @relation(fields: [candidato_id], references: [id])
+  
+  @@map("adoptions")
+}
