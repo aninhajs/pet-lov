@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 
@@ -23,66 +23,6 @@ const Home = () => {
     setPets(petsStorage);
   }, []);
 
-  // Dados dos pets
-  // const petsData = {
-  //   luna: {
-  //     nome: "Luna",
-  //     idade: "2 anos",
-  //     sexo: "Fêmea",
-  //     porte: "Médio",
-  //     foto: "/cachorro.png",
-  //     historia:
-  //       "Resgatada das ruas após abandono. Chegou desnutrida mas se recuperou completamente com muito amor.",
-  //     cuidados:
-  //       "Precisa de exercícios diários e socialização. Ideal para famílias ativas.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Resgatada",
-  //   },
-  //   milo: {
-  //     nome: "Milo",
-  //     idade: "1 ano",
-  //     sexo: "Macho",
-  //     porte: "Pequeno",
-  //     foto: "/gatinho1.webp",
-  //     historia:
-  //       "Encontrado órfão muito novo. Foi cuidado com mamadeira e hoje é um gato saudável e sociável.",
-  //     cuidados:
-  //       "Gosta de ambientes tranquilos. Precisa de arranhador e brinquedos para se entreter.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Órfão",
-  //   },
-  //   thor: {
-  //     nome: "Thor",
-  //     idade: "3 anos",
-  //     sexo: "Macho",
-  //     porte: "Grande",
-  //     foto: "/cachorro2.jpg",
-  //     historia:
-  //       "Sofreu maus-tratos no passado. Com paciência e amor, voltou a confiar nas pessoas e é muito grato.",
-  //     cuidados:
-  //       "Precisa de dono experiente e ambiente seguro. Não gosta de barulhos altos inicialmente.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Maltratado",
-  //   },
-  //   bella: {
-  //     nome: "Bella",
-  //     idade: "6 meses",
-  //     sexo: "Fêmea",
-  //     porte: "Pequeno",
-  //     foto: "/gatinho2.png",
-  //     historia:
-  //       "Nasceu em um lar temporário. Mãe foi resgatada grávida e todos os filhotes foram bem cuidados.",
-  //     cuidados:
-  //       "Por ser jovem, precisa de estímulos e brincadeiras. Castração agendada quando atingir idade ideal.",
-  //     castrado: false,
-  //     vacinado: true,
-  //     situacao: "Filhote",
-  //   },
-  // };
-
   const openModal = (pet) => {
     setSelectedPet(pet);
   };
@@ -91,25 +31,25 @@ const Home = () => {
     setSelectedPet(null);
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
       {/* Header customizado para Home - sem botão "Ver Pets" */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-3">
               <img
-                src="/logoPet.jpeg"
+                src="/logoabrace.jpg"
                 alt="Pet Lov Logo"
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover shadow-lg border-2 border-yellow-200"
               />
-              <h1 className="text-2xl font-bold text-indigo-600">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
                 Amor Por Animais De Estimação
               </h1>
             </div>
             <div className="flex space-x-4">
               <Link
                 to="/questionnaire"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border-2 border-yellow-300"
               >
                 Adotar Pet
               </Link>
@@ -123,24 +63,27 @@ const Home = () => {
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-8">
             Encontre seu novo
-            <span className="text-indigo-600"> melhor amigo</span>
+            <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
+              {" "}
+              melhor amigo
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+          <p className="text-xl text-sky-700 mb-12 max-w-3xl mx-auto">
             Conectamos corações e patas! Descubra pets incríveis esperando por
             uma família amorosa. Cada adoção é uma segunda chance para a
             felicidade.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center ">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               to="/pets"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center justify-center overflow-hidden"
+              className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-200 inline-flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-yellow-300"
             >
               🐕 Ver Pets Disponíveis
             </Link>
             <Link
               to="/questionnaire"
-              className="bg-indigo-600  text-white px-8 py-4 rounded-lg text-lg font-semibold border-2 border-indigo-600 transition-colors inline-flex items-center justify-center"
+              className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-sky-900 px-8 py-4 rounded-full text-lg font-semibold border-2 border-sky-300 transition-all duration-200 inline-flex items-center justify-center shadow-lg hover:shadow-xl"
             >
               📝 Quero Adotar
             </Link>
@@ -204,7 +147,7 @@ const Home = () => {
                     {pet.nome}
                   </h3>
                   <p className="text-gray-600 text-sm">{pet.idade}</p>
-                  <div className="mt-3 text-indigo-600 text-sm font-medium">
+                  <div className="mt-3 bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent text-sm font-medium">
                     Clique para ver mais →
                   </div>
                 </div>
@@ -383,7 +326,7 @@ const Home = () => {
                     </span>
                   )}
                   {selectedPet.vacinado && (
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">
                       Vacinado(a)
                     </span>
                   )}
@@ -475,7 +418,7 @@ const Home = () => {
               <div className="text-center">
                 <Link
                   to="/questionnaire"
-                  className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-colors"
+                  className="inline-flex items-center bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-sky-900 px-6 py-2.5 rounded-full text-base font-semibold transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-sky-300"
                   onClick={closeModal}
                 >
                   💖 Quero Adotar {selectedPet.nome}

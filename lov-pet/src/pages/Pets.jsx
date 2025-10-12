@@ -98,30 +98,30 @@ const Pets = () => {
             </h3>
             <button
               onClick={() => setSelectedFilter("todos")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedFilter === "todos"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
+                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg border-2 border-yellow-300"
+                  : "bg-white text-sky-700 hover:bg-yellow-50 border-2 border-sky-200 hover:border-yellow-300"
               }`}
             >
               Todos os tipos
             </button>
             <button
               onClick={() => setSelectedFilter("cão")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedFilter === "cão"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
+                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg border-2 border-yellow-300"
+                  : "bg-white text-sky-700 hover:bg-yellow-50 border-2 border-sky-200 hover:border-yellow-300"
               }`}
             >
               🐕 Cães
             </button>
             <button
               onClick={() => setSelectedFilter("gato")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 selectedFilter === "gato"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
+                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-lg border-2 border-yellow-300"
+                  : "bg-white text-sky-700 hover:bg-yellow-50 border-2 border-sky-200 hover:border-yellow-300"
               }`}
             >
               🐱 Gatos

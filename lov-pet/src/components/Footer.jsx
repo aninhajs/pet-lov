@@ -3,16 +3,18 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gradient-to-br from-sky-800 to-sky-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo e Descrição */}
           <div className="md:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-2xl mr-2">🐾</span>
-              <h3 className="text-2xl font-bold">Pet Lov</h3>
+              <span className="text-2xl mr-2 text-yellow-300">🐾</span>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-yellow-300 to-yellow-400 bg-clip-text text-transparent">
+                Pet Lov
+              </h3>
             </div>
-            <p className="text-gray-300 mb-6 max-w-md">
+            <p className="text-sky-100 mb-6 max-w-md">
               ONG dedicada ao resgate, cuidado e adoção responsável de animais
               abandonados. Trabalhamos para dar uma segunda chance a pets que
               precisam de amor e um lar.
@@ -21,7 +23,7 @@ const Footer = () => {
               href="https://wa.me/5585989167022?text=Olá! Gostaria de fazer uma doação para a ONG Pet Lov 💖"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
+              className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-sky-900 px-6 py-3 rounded-lg font-semibold transition-all duration-200 inline-flex items-center shadow-lg hover:shadow-xl border-2 border-yellow-300"
             >
               ❤️ Quero Doar
             </a>
