@@ -1,6 +1,9 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+
+// 🔗 Centralize aqui o link do seu Google Forms
+const GOOGLE_FORM_URL = "https://forms.gle/Vs2Arsu5bwi5h3wA9";
 
 // Função para otimizar URLs de imagem
 const optimizeImageUrl = (url, width = 400, height = 300) => {
@@ -18,78 +21,15 @@ const optimizeImageUrl = (url, width = 400, height = 300) => {
 const Home = () => {
   const [selectedPet, setSelectedPet] = useState(null);
   const [pets, setPets] = useState([]);
+
   useEffect(() => {
     const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
     setPets(petsStorage);
   }, []);
 
-  // Dados dos pets
-  // const petsData = {
-  //   luna: {
-  //     nome: "Luna",
-  //     idade: "2 anos",
-  //     sexo: "Fêmea",
-  //     porte: "Médio",
-  //     foto: "/cachorro.png",
-  //     historia:
-  //       "Resgatada das ruas após abandono. Chegou desnutrida mas se recuperou completamente com muito amor.",
-  //     cuidados:
-  //       "Precisa de exercícios diários e socialização. Ideal para famílias ativas.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Resgatada",
-  //   },
-  //   milo: {
-  //     nome: "Milo",
-  //     idade: "1 ano",
-  //     sexo: "Macho",
-  //     porte: "Pequeno",
-  //     foto: "/gatinho1.webp",
-  //     historia:
-  //       "Encontrado órfão muito novo. Foi cuidado com mamadeira e hoje é um gato saudável e sociável.",
-  //     cuidados:
-  //       "Gosta de ambientes tranquilos. Precisa de arranhador e brinquedos para se entreter.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Órfão",
-  //   },
-  //   thor: {
-  //     nome: "Thor",
-  //     idade: "3 anos",
-  //     sexo: "Macho",
-  //     porte: "Grande",
-  //     foto: "/cachorro2.jpg",
-  //     historia:
-  //       "Sofreu maus-tratos no passado. Com paciência e amor, voltou a confiar nas pessoas e é muito grato.",
-  //     cuidados:
-  //       "Precisa de dono experiente e ambiente seguro. Não gosta de barulhos altos inicialmente.",
-  //     castrado: true,
-  //     vacinado: true,
-  //     situacao: "Maltratado",
-  //   },
-  //   bella: {
-  //     nome: "Bella",
-  //     idade: "6 meses",
-  //     sexo: "Fêmea",
-  //     porte: "Pequeno",
-  //     foto: "/gatinho2.png",
-  //     historia:
-  //       "Nasceu em um lar temporário. Mãe foi resgatada grávida e todos os filhotes foram bem cuidados.",
-  //     cuidados:
-  //       "Por ser jovem, precisa de estímulos e brincadeiras. Castração agendada quando atingir idade ideal.",
-  //     castrado: false,
-  //     vacinado: true,
-  //     situacao: "Filhote",
-  //   },
-  // };
+  const openModal = (pet) => setSelectedPet(pet);
+  const closeModal = () => setSelectedPet(null);
 
-  const openModal = (pet) => {
-    setSelectedPet(pet);
-  };
-
-  const closeModal = () => {
-    setSelectedPet(null);
-  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header customizado para Home - sem botão "Ver Pets" */}
@@ -107,12 +47,15 @@ const Home = () => {
               </h1>
             </div>
             <div className="flex space-x-4">
-              <Link
-                to="/questionnaire"
+              {/* 🔁 Alterado para <a> externo (Google Forms) */}
+              <a
+                href={GOOGLE_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
                 Adotar Pet
-              </Link>
+              </a>
             </div>
           </div>
         </nav>
@@ -131,140 +74,148 @@ const Home = () => {
             felicidade.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center ">
+          {/* Botões principais */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/pets"
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors inline-flex items-center justify-center overflow-hidden"
             >
               🐕 Ver Pets Disponíveis
             </Link>
-            <Link
-              to="/questionnaire"
-              className="bg-indigo-600  text-white px-8 py-4 rounded-lg text-lg font-semibold border-2 border-indigo-600 transition-colors inline-flex items-center justify-center"
+
+            {/* ✅ Mantido como externo (Google Forms) */}
+            <a
+              href={GOOGLE_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-indigo-600 text-white px-8 py-4 rounded-lg text-lg font-semibold border-2 border-indigo-600 transition-colors inline-flex items-center justify-center"
             >
               📝 Quero Adotar
-            </Link>
-          </div>
-        </div>
-
-        {/* Pets em Destaque */}
-        <div className="mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Pets Esperando por Você
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Conheça alguns dos nossos pets que estão procurando um lar
-            </p>
+            </a>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 auto-rows-fr">
-            {pets.slice(0, 4).map((pet) => (
-              <div
-                key={pet.id}
-                className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-105 group cursor-pointer"
-                onClick={() => openModal(pet)}
-              >
-                <div className="relative w-full h-56 bg-gray-100 overflow-hidden flex items-center justify-center">
-                  {pet.imagem ? (
-                    <img
-                      src={optimizeImageUrl(pet.imagem, 400, 320)}
-                      alt={pet.nome}
-                      className="absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-110 group-hover:brightness-110"
-                      loading="lazy"
-                      style={{
-                        objectPosition: "center center",
-                        objectFit: "cover",
-                        minHeight: "100%",
-                        minWidth: "100%",
-                      }}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.nextElementSibling.style.display = "flex";
-                      }}
-                    />
-                  ) : null}
-                  {/* Fallback quando não há imagem */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100"
-                    style={{ display: pet.imagem ? "none" : "flex" }}
-                  >
-                    <span className="text-6xl opacity-50">
-                      {pet.tipo === "cão"
-                        ? "🐕"
-                        : pet.tipo === "gato"
-                        ? "🐱"
-                        : "🐾"}
-                    </span>
+          {/* Pets em Destaque */}
+          <div className="mt-20">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Pets Esperando por Você
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Conheça alguns dos nossos pets que estão procurando um lar
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 auto-rows-fr">
+              {pets.slice(0, 4).map((pet) => (
+                <div
+                  key={pet.id}
+                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-105 group cursor-pointer"
+                  onClick={() => openModal(pet)}
+                >
+                  <div className="relative w-full h-56 bg-gray-100 overflow-hidden flex items-center justify-center">
+                    {pet.imagem ? (
+                      <img
+                        src={optimizeImageUrl(pet.imagem, 400, 320)}
+                        alt={pet.nome}
+                        className="absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:scale-110 group-hover:brightness-110"
+                        loading="lazy"
+                        style={{
+                          objectPosition: "center center",
+                          objectFit: "cover",
+                          minHeight: "100%",
+                          minWidth: "100%",
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display =
+                              "flex";
+                          }
+                        }}
+                      />
+                    ) : null}
+                    {/* Fallback quando não há imagem */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100"
+                      style={{ display: pet.imagem ? "none" : "flex" }}
+                    >
+                      <span className="text-6xl opacity-50">
+                        {pet.tipo === "cão"
+                          ? "🐕"
+                          : pet.tipo === "gato"
+                          ? "🐱"
+                          : "🐾"}
+                      </span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-                <div className="p-4 text-center">
-                  <h3 className="font-semibold text-gray-900 text-lg mb-1">
-                    {pet.nome}
-                  </h3>
-                  <p className="text-gray-600 text-sm">{pet.idade}</p>
-                  <div className="mt-3 text-indigo-600 text-sm font-medium">
-                    Clique para ver mais →
+                  <div className="p-4 text-center">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                      {pet.nome}
+                    </h3>
+                    <p className="text-gray-600 text-sm">{pet.idade}</p>
+                    <div className="mt-3 text-indigo-600 text-sm font-medium">
+                      Clique para ver mais →
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {pets.length === 0 && (
+              <div className="text-center py-12 mb-12">
+                <div className="text-6xl mb-4">🐾</div>
+                <p className="text-gray-500 text-lg mb-2">
+                  Nenhum pet disponível para adoção no momento.
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Novos pets são cadastrados regularmente. Volte em breve!
+                </p>
               </div>
-            ))}
+            )}
           </div>
 
-          {pets.length === 0 && (
-            <div className="text-center py-12 mb-12">
-              <div className="text-6xl mb-4">�</div>
-              <p className="text-gray-500 text-lg mb-2">
-                Nenhum pet disponível para adoção no momento.
-              </p>
-              <p className="text-gray-400 text-sm">
-                Novos pets são cadastrados regularmente. Volte em breve!
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Features */}
-        <div className="mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Por que Adotar?
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <div className="text-4xl mb-4">🏠</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Adoção Responsável
-              </h3>
-              <p className="text-gray-600">
-                Processo cuidadoso para garantir que cada pet encontre o lar
-                perfeito
-              </p>
+          {/* Features */}
+          <div className="mt-20">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Por que Adotar?
+              </h2>
             </div>
 
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <div className="text-4xl mb-4">❤️</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Amor Incondicional
-              </h3>
-              <p className="text-gray-600">
-                Pets resgatados prontos para oferecer todo seu amor e
-                companheirismo
-              </p>
-            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-4xl mb-4">🏠</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Adoção Responsável
+                </h3>
+                <p className="text-gray-600">
+                  Processo cuidadoso para garantir que cada pet encontre o lar
+                  perfeito
+                </p>
+              </div>
 
-            <div className="text-center p-6 bg-white rounded-lg shadow-sm">
-              <div className="text-4xl mb-4">🌟</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Nova Vida
-              </h3>
-              <p className="text-gray-600">
-                Dê uma segunda chance e transforme duas vidas: a sua e a do seu
-                novo pet
-              </p>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-4xl mb-4">❤️</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Amor Incondicional
+                </h3>
+                <p className="text-gray-600">
+                  Pets resgatados prontos para oferecer todo seu amor e
+                  companheirismo
+                </p>
+              </div>
+
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <div className="text-4xl mb-4">🌟</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Nova Vida
+                </h3>
+                <p className="text-gray-600">
+                  Dê uma segunda chance e transforme duas vidas: a sua e a do seu
+                  novo pet
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -304,6 +255,8 @@ const Home = () => {
               <button
                 onClick={closeModal}
                 className="absolute top-3 right-3 bg-white bg-opacity-90 hover:bg-opacity-100 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold transition-all shadow-lg"
+                aria-label="Fechar"
+                title="Fechar"
               >
                 ×
               </button>
@@ -316,6 +269,7 @@ const Home = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">
                   {selectedPet.nome}
                 </h2>
+
                 {/* Status do pet */}
                 {selectedPet.status && (
                   <span
@@ -462,24 +416,28 @@ const Home = () => {
               )}
 
               {/* Cuidados necessários */}
-              <div className="mb-5">
-                <h3 className="text-purple-600 text-base font-semibold mb-2 flex items-center">
-                  💜 Cuidados Especiais
-                </h3>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {selectedPet.cuidados}
-                </p>
-              </div>
+              {selectedPet.cuidados && (
+                <div className="mb-5">
+                  <h3 className="text-purple-600 text-base font-semibold mb-2 flex items-center">
+                    💜 Cuidados Especiais
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {selectedPet.cuidados}
+                  </p>
+                </div>
+              )}
 
-              {/* Botão de adoção */}
+              {/* Botão de adoção (EXTERNO) */}
               <div className="text-center">
-                <Link
-                  to="/questionnaire"
+                <a
+                  href={GOOGLE_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-colors"
                   onClick={closeModal}
                 >
                   💖 Quero Adotar {selectedPet.nome}
-                </Link>
+                </a>
               </div>
             </div>
           </div>
