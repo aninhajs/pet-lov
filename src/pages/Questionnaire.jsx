@@ -1,56 +1,33 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 
 const Questionnaire = () => {
-  const location = useLocation();
-  const { petName } = location.state || {};
-
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     telefone: "",
     endereco: "",
-    tipo_moradia: "",
-    tempo_disponivel: "",
-    experiencia_pets: "",
+    tipoMoradia: "",
+    tempoDisponivel: "",
+    experienciaPets: "",
     motivacao: "",
+    petPreferido: "",
   });
 
   const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError(""); // Limpar erro ao digitar
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-
-    // Simular um delay de envio
-    setTimeout(() => {
-      // Salvar no localStorage
-      const candidatos = JSON.parse(localStorage.getItem("candidatos") || "[]");
-      const novoCandidato = {
-        id: Date.now(),
-        ...formData,
-        petInteresse: petName || null,
-        dataEnvio: new Date().toISOString(),
-      };
-
-      candidatos.push(novoCandidato);
-      localStorage.setItem("candidatos", JSON.stringify(candidatos));
-
-      console.log("Formulário enviado:", novoCandidato);
-      setSubmitted(true);
-      setLoading(false);
-    }, 1500);
+    console.log("Dados do formulário:", formData);
+    setSubmitted(true);
   };
 
   if (submitted) {
@@ -107,15 +84,11 @@ const Questionnaire = () => {
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="quest-nome"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nome Completo *
                   </label>
                   <input
                     type="text"
-                    id="quest-nome"
                     name="nome"
                     value={formData.nome}
                     onChange={handleChange}
@@ -124,15 +97,11 @@ const Questionnaire = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="quest-email"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
                   </label>
                   <input
                     type="email"
-                    id="quest-email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -141,15 +110,11 @@ const Questionnaire = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="quest-telefone"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Telefone *
                   </label>
                   <input
                     type="tel"
-                    id="quest-telefone"
                     name="telefone"
                     value={formData.telefone}
                     onChange={handleChange}
@@ -158,15 +123,11 @@ const Questionnaire = () => {
                   />
                 </div>
                 <div>
-                  <label
-                    htmlFor="quest-endereco"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Endereço *
                   </label>
                   <input
                     type="text"
-                    id="quest-endereco"
                     name="endereco"
                     value={formData.endereco}
                     onChange={handleChange}
@@ -183,16 +144,12 @@ const Questionnaire = () => {
                 Sobre sua Moradia
               </h2>
               <div>
-                <label
-                  htmlFor="quest-tipo-moradia"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tipo de Moradia *
                 </label>
                 <select
-                  id="quest-tipo-moradia"
-                  name="tipo_moradia"
-                  value={formData.tipo_moradia}
+                  name="tipoMoradia"
+                  value={formData.tipoMoradia}
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -213,16 +170,12 @@ const Questionnaire = () => {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="quest-tempo-disponivel"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Tempo disponível para o pet diariamente *
                   </label>
                   <select
-                    id="quest-tempo-disponivel"
-                    name="tempo_disponivel"
-                    value={formData.tempo_disponivel}
+                    name="tempoDisponivel"
+                    value={formData.tempoDisponivel}
                     onChange={handleChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -236,16 +189,12 @@ const Questionnaire = () => {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="quest-experiencia-pets"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Já teve pets antes? *
                   </label>
                   <textarea
-                    id="quest-experiencia-pets"
-                    name="experiencia_pets"
-                    value={formData.experiencia_pets}
+                    name="experienciaPets"
+                    value={formData.experienciaPets}
                     onChange={handleChange}
                     required
                     rows={3}
@@ -263,14 +212,10 @@ const Questionnaire = () => {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label
-                    htmlFor="quest-motivacao"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Por que quer adotar um pet? *
                   </label>
                   <textarea
-                    id="quest-motivacao"
                     name="motivacao"
                     value={formData.motivacao}
                     onChange={handleChange}
@@ -281,82 +226,29 @@ const Questionnaire = () => {
                   />
                 </div>
 
-                {petName && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <div className="flex">
-                      <div className="flex-shrink-0">
-                        <span className="text-blue-400 text-xl">💝</span>
-                      </div>
-                      <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-800">
-                          Pet de interesse
-                        </h3>
-                        <div className="mt-2 text-sm text-blue-700">
-                          <p>
-                            Você está interessado em adotar:{" "}
-                            <strong>{petName}</strong>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Mensagem de erro */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <span className="text-red-400 text-xl">⚠️</span>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      Erro no envio
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>{error}</p>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tem algum pet específico em mente?
+                  </label>
+                  <input
+                    type="text"
+                    name="petPreferido"
+                    value={formData.petPreferido}
+                    onChange={handleChange}
+                    placeholder="Nome do pet ou 'Qualquer um'"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Botões */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium transition-colors"
               >
-                {loading ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Enviando...
-                  </>
-                ) : (
-                  "Enviar Formulário"
-                )}
+                Enviar Formulário
               </button>
               <Link
                 to="/pets"

@@ -98,19 +98,14 @@ const AdminAdoptants = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <Link to="/admin" className="flex items-center space-x-3">
-              <img
-                src="/logoabrace.jpg"
-                alt="Pet Lov Logo"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
-              />
-              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Pet Lov Admin
+          <div className="flex justify-between h-16 items-center">
+            <Link to="/admin" className="flex items-center">
+              <h1 className="text-2xl font-bold text-indigo-600">
+                🐾 Pet Lov Admin
               </h1>
             </Link>
             <div className="flex space-x-4">

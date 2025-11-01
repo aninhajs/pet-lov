@@ -81,7 +81,7 @@ const CadastrarPet = () => {
           <div className="space-y-3">
             <Link
               to="/admin"
-              className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3 rounded-full font-medium inline-block text-center transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-yellow-300"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-md font-medium inline-block text-center"
             >
               Voltar ao Dashboard
             </Link>
@@ -105,25 +105,20 @@ const CadastrarPet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <Link to="/admin" className="flex items-center space-x-3">
-              <img
-                src="/logoabrace.jpg"
-                alt="Pet Lov Logo"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
-              />
-              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Pet Lov Admin
+          <div className="flex justify-between h-16 items-center">
+            <Link to="/admin" className="flex items-center">
+              <h1 className="text-2xl font-bold text-indigo-600">
+                🐾 Pet Lov Admin
               </h1>
             </Link>
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               <Link
                 to="/admin"
-                className="text-sky-700 hover:text-sky-800 hover:bg-yellow-100 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border border-transparent hover:border-yellow-300"
+                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Dashboard
               </Link>
@@ -158,20 +153,16 @@ const CadastrarPet = () => {
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label
-                    htmlFor="pet-nome"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nome do Pet *
                   </label>
                   <input
                     type="text"
-                    id="pet-nome"
                     name="nome"
                     value={formData.nome}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-sky-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200 hover:border-yellow-400"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Ex: Luna"
                   />
                 </div>
@@ -483,7 +474,7 @@ const CadastrarPet = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 disabled:from-sky-300 disabled:to-sky-400 text-white px-6 py-3 rounded-full font-medium transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl border-2 border-yellow-300"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center"
               >
                 {isSubmitting ? (
                   <>
@@ -497,7 +488,7 @@ const CadastrarPet = () => {
 
               <Link
                 to="/admin"
-                className="flex-1 bg-white hover:bg-yellow-50 text-sky-700 px-6 py-3 rounded-full font-medium border-2 border-sky-300 hover:border-yellow-400 transition-all duration-200 text-center shadow-md hover:shadow-lg"
+                className="flex-1 bg-white hover:bg-gray-50 text-indigo-600 px-6 py-3 rounded-md font-medium border border-indigo-600 transition-colors text-center"
               >
                 Cancelar
               </Link>

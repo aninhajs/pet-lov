@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 
-// 🔗 URL do Google Forms para adoção - centralizada aqui
-const GOOGLE_FORM_URL = "https://forms.gle/Vs2Arsu5bwi5h3wA9";
-
 // Função para otimizar URLs de imagem
 const optimizeImageUrl = (url, width = 400, height = 300) => {
   if (!url) return null;
@@ -224,7 +221,7 @@ const Pets = () => {
                 </div>
               </div>
 
-              {/* Informações principais - nome e idade */}
+              {/* Informações principais - apenas nome e idade */}
               <div className="p-4 text-center">
                 <h3 className="font-semibold text-gray-900 text-lg mb-1">
                   {pet.nome}
@@ -335,114 +332,89 @@ const Pets = () => {
                   </span>
                 </div>
 
-                {/* Informações básicas em cards coloridos */}
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {selectedPet.sexo && (
-                      <div className="bg-gradient-to-r from-blue-100 to-blue-200 px-4 py-2 rounded-lg shadow-sm border border-blue-300">
-                        <span className="text-blue-800 font-bold text-sm">
-                          {selectedPet.sexo}
-                        </span>
-                      </div>
-                    )}
-                    {selectedPet.porte && (
-                      <div className="bg-gradient-to-r from-purple-100 to-purple-200 px-4 py-2 rounded-lg shadow-sm border border-purple-300">
-                        <span className="text-purple-800 font-bold text-sm">
-                          Porte {selectedPet.porte}
-                        </span>
-                      </div>
-                    )}
-                    {selectedPet.tipo && (
-                      <div className="bg-gradient-to-r from-green-100 to-green-200 px-4 py-2 rounded-lg shadow-sm border border-green-300">
-                        <span className="text-green-800 font-bold text-sm capitalize">
-                          {selectedPet.tipo}
-                        </span>
-                      </div>
-                    )}
-                    {selectedPet.cor && (
-                      <div className="bg-gradient-to-r from-orange-100 to-orange-200 px-4 py-2 rounded-lg shadow-sm border border-orange-300">
-                        <span className="text-orange-800 font-bold text-sm">
-                          {selectedPet.cor}
-                        </span>
-                      </div>
-                    )}
+                {/* Informações básicas em linha */}
+                <div className="text-center mb-6">
+                  <div className="flex items-center justify-center text-gray-700 text-lg font-medium flex-wrap gap-3">
+                    <span>{selectedPet.sexo}</span>
+                    <span className="text-gray-400">•</span>
+                    <span>{selectedPet.idade}</span>
+                    <span className="text-gray-400">•</span>
+                    <span>Porte {selectedPet.porte}</span>
                   </div>
                 </div>
 
-                {/* Status médicos com visual melhorado */}
-                <div className="flex gap-3 justify-center mb-6 flex-wrap">
-                  {selectedPet.castrado ? (
-                    <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200">
-                      ✓ Castrado(a)
-                    </span>
-                  ) : (
-                    <span className="bg-gradient-to-r from-amber-400 to-amber-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200">
-                      ⚠ A castrar
-                    </span>
+                {/* Status médicos */}
+                <div className="flex justify-center gap-4 mb-6">
+                  {selectedPet.castrado && (
+                    <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
+                      <span className="text-green-600">✅</span>
+                      <span className="text-green-800 font-medium">
+                        Castrado(a)
+                      </span>
+                    </div>
                   )}
                   {selectedPet.vacinado && (
-                    <span className="bg-gradient-to-r from-cyan-400 to-cyan-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200">
-                      💉 Vacinado(a)
-                    </span>
-                  )}
-                  {selectedPet.vermifugado && (
-                    <span className="bg-gradient-to-r from-violet-400 to-violet-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200">
-                      🛡️ Vermifugado(a)
-                    </span>
+                    <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
+                      <span className="text-blue-600">💉</span>
+                      <span className="text-blue-800 font-medium">
+                        Vacinado(a)
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {/* Situação do pet com visual melhorado */}
+                {/* Situação do pet */}
                 {selectedPet.situacao && (
                   <div className="text-center mb-6">
-                    <span
-                      className={`text-sm px-4 py-2 rounded-full font-bold shadow-lg transform hover:scale-105 transition-all duration-200 ${
-                        selectedPet.situacao === "Resgatada"
-                          ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white"
-                          : selectedPet.situacao === "Órfão"
-                          ? "bg-gradient-to-r from-orange-400 to-orange-500 text-white"
-                          : selectedPet.situacao === "Maltratado"
-                          ? "bg-gradient-to-r from-red-400 to-red-500 text-white"
-                          : selectedPet.situacao === "Filhote"
-                          ? "bg-gradient-to-r from-pink-400 to-pink-500 text-white"
-                          : "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
-                      }`}
-                    >
-                      {selectedPet.situacao === "Resgatada" && "🏠 "}
-                      {selectedPet.situacao === "Órfão" && "👶 "}
-                      {selectedPet.situacao === "Maltratado" && "💔 "}
-                      {selectedPet.situacao === "Filhote" && "🐾 "}
-                      {selectedPet.situacao}
-                    </span>
-                  </div>
-                )}
-
-                {/* Descrição do pet */}
-                {selectedPet.descricao && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">
-                      📝 Sobre {selectedPet.nome}
-                    </h3>
-                    <div className="bg-gradient-to-r from-sky-50 to-yellow-50 rounded-lg p-4 border border-sky-200">
-                      <p className="text-gray-700 text-sm leading-relaxed text-center">
-                        {selectedPet.descricao}
-                      </p>
+                    <div className="inline-flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-full border border-orange-200">
+                      <span className="text-orange-600">🏷️</span>
+                      <span className="text-orange-800 font-medium">
+                        {selectedPet.situacao}
+                      </span>
                     </div>
                   </div>
                 )}
 
-                {/* Botão de adoção - igual ao da página Home */}
+                {/* História do pet */}
+                {(selectedPet.descricao || selectedPet.historia) && (
+                  <div className="mb-6 bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">📖</span>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Sua História
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {selectedPet.historia || selectedPet.descricao}
+                    </p>
+                  </div>
+                )}
+
+                {/* Cuidados especiais */}
+                {selectedPet.cuidados && (
+                  <div className="mb-6 bg-purple-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-2xl">💜</span>
+                      <h3 className="text-lg font-bold text-purple-900">
+                        Cuidados Especiais
+                      </h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed">
+                      {selectedPet.cuidados}
+                    </p>
+                  </div>
+                )}
+
+                {/* Botão de adoção - mesmo estilo da página Home */}
                 <div className="text-center space-y-3">
                   {selectedPet.status === "disponivel" ? (
-                    <a
-                      href={GOOGLE_FORM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-full text-base font-bold transition-all duration-200 shadow-md hover:shadow-lg border-2 border-yellow-300 hover:border-yellow-400"
+                    <Link
+                      to="/questionnaire"
+                      className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-colors"
                       onClick={closeModal}
                     >
                       💖 Quero Adotar {selectedPet.nome}
-                    </a>
+                    </Link>
                   ) : selectedPet.status === "adotado" ? (
                     <div className="inline-flex items-center bg-gray-400 text-white px-6 py-2.5 rounded-lg text-base font-semibold">
                       ❤️ Pet já adotado

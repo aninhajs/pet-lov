@@ -1,15 +1,26 @@
-import express from 'express'
-import 'dotenv/config'
-import { supabase } from './services/supabase.js'
+import express from "express";
+import "dotenv/config";
+import { PrismaClient } from "@prisma/client";
+import petsRouter from "./routes/pets.js";
+import authRouter from "./routes/auth.js";
+import cors from "cors";
 
-const app = express()
-const port = process.env.PORT || 8081
+const prisma = new PrismaClient();
+const app = express();
+const port = process.env.PORT || 8081;
 
-app.get('/', async (req, res) => {
-  const { data: credencial_ong, error } = await supabase
-    .from('credencial_ong')
-    .select('*')
-  res.json(credencial_ong)
-})
+app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  })
+);
 
-app.listen(port, () => console.log(`Server on http://localhost:${port}`))
+app.get("/api/health", (req, res) => res.json({ ok: true }));
+app.use("/api/pets", petsRouter);
+app.use("/api/auth", authRouter);
+
+app.listen(port, "0.0.0.0", () =>
+  console.log(`✅ Server running on http://localhost:${port}`)
+);
