@@ -18,7 +18,8 @@ const Footer = () => {
               precisam de amor e um lar.
             </p>
             <a
-              href="https://wa.me/5585989167022?text=Olá! Gostaria de fazer uma doação para a ONG Pet Lov 💖"
+              href=" https://www.vakinha.com.br/vaquinha/campanha-nosso-lar?utm_source=instagram.com
+"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
@@ -73,7 +74,7 @@ const Footer = () => {
                 Facebook
               </a>
               <a
-                href="https://wa.me/5511999998888"
+                href=" https://www.facebook.com/AbraceUmaCausaAnimal"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors"

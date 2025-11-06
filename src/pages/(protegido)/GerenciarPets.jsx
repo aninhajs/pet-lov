@@ -31,10 +31,37 @@ const GerenciarPets = () => {
 
   const excluirPet = (id) => {
     if (window.confirm("Tem certeza que deseja excluir este pet?")) {
+      // Excluir o pet
       const petsAtualizados = pets.filter((pet) => pet.id !== id);
       setPets(petsAtualizados);
       localStorage.setItem("pets", JSON.stringify(petsAtualizados));
+
+      // Excluir vacinas do pet
+      const vacinasStorage = JSON.parse(
+        localStorage.getItem("vacinas") || "[]"
+      );
+      const vacinasAtualizadas = vacinasStorage.filter(
+        (vacina) => vacina.petId.toString() !== id.toString()
+      );
+      localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+
+      // Excluir atividades de vacina do pet
+      const atividadesStorage = JSON.parse(
+        localStorage.getItem("atividades") || "[]"
+      );
+      const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
+        // Remove atividades de vacina deste pet
+        if (atividade.tipo === "vacina") {
+          const petExcluido = pets.find((p) => p.id === id);
+          return atividade.petNome !== petExcluido?.nome;
+        }
+        return true;
+      });
+      localStorage.setItem("atividades", JSON.stringify(atividadesAtualizadas));
+
       setPetSelecionado(null);
+
+      console.log(`Pet ${id} excluído junto com suas vacinas e atividades`);
     }
   };
 

@@ -63,3 +63,23 @@ export const createPetWithAxios = async (petData) => {
     };
   }
 };
+
+// Função para cadastrar um admin
+export const createAdmin = async (adminData) => {
+  try {
+    const response = await api.post("/auth/register-admin", adminData);
+    return {
+      success: true,
+      data: response.data,
+      message: "Admin cadastrado com sucesso",
+    };
+  } catch (error) {
+    console.error("Erro ao cadastrar admin:", error);
+    return {
+      success: false,
+      data: null,
+      message: error.response?.data?.message || "Erro ao cadastrar admin",
+      error: error.message,
+    };
+  }
+};

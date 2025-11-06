@@ -24,7 +24,7 @@ test.html
 informacoes
 backend
 .github
-
+.vite
 # Configurações do vs code
 .vscode/*
 !.vscode/extensions.json
