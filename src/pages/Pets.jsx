@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header from "../components/Header";
 
 // Função para otimizar URLs de imagem
 const optimizeImageUrl = (url, width = 400, height = 300) => {
@@ -57,7 +56,37 @@ const Pets = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Header customizado para Pets - sem botão "Ver Pets" */}
+      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20 items-center">
+            <div className="flex items-center space-x-3">
+              <img
+                src="/logoabrace.jpg"
+                alt="Abrace Uma Causa Animal"
+                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+              />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
+                Abrace Uma Causa Animal
+              </h1>
+            </div>
+            <div className="flex space-x-4">
+              <Link
+                to="/"
+                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Início
+              </Link>
+              <Link
+                to="/questionnaire"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+              >
+                Adotar Pet
+              </Link>
+            </div>
+          </div>
+        </nav>
+      </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Título e filtros */}
@@ -332,75 +361,106 @@ const Pets = () => {
                   </span>
                 </div>
 
-                {/* Informações básicas em linha */}
-                <div className="text-center mb-6">
-                  <div className="flex items-center justify-center text-gray-700 text-lg font-medium flex-wrap gap-3">
-                    <span>{selectedPet.sexo}</span>
-                    <span className="text-gray-400">•</span>
-                    <span>{selectedPet.idade}</span>
-                    <span className="text-gray-400">•</span>
-                    <span>Porte {selectedPet.porte}</span>
-                  </div>
+                {/* Informações básicas em grid */}
+                <div className="grid grid-cols-3 gap-2 mb-4 max-w-lg mx-auto">
+                  {selectedPet.sexo && (
+                    <div className="bg-sky-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Sexo</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedPet.sexo}
+                      </p>
+                    </div>
+                  )}
+                  {selectedPet.idade && (
+                    <div className="bg-yellow-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Idade</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedPet.idade}
+                      </p>
+                    </div>
+                  )}
+                  {selectedPet.porte && (
+                    <div className="bg-sky-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Porte</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedPet.porte}
+                      </p>
+                    </div>
+                  )}
+                  {selectedPet.tipo && (
+                    <div className="bg-yellow-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Tipo</p>
+                      <p className="text-sm font-semibold text-gray-900 capitalize">
+                        {selectedPet.tipo}
+                      </p>
+                    </div>
+                  )}
+                  {selectedPet.cor && (
+                    <div className="bg-sky-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Cor</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedPet.cor}
+                      </p>
+                    </div>
+                  )}
+                  {selectedPet.peso && (
+                    <div className="bg-yellow-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-500">Peso</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {selectedPet.peso}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Status médicos */}
-                <div className="flex justify-center gap-4 mb-6">
-                  {selectedPet.castrado && (
-                    <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
-                      <span className="text-green-600">✅</span>
-                      <span className="text-green-800 font-medium">
-                        Castrado(a)
-                      </span>
-                    </div>
+                {/* Tags de situação */}
+                <div className="flex gap-2 justify-center mb-6 flex-wrap">
+                  {selectedPet.castrado ? (
+                    <span className="bg-green-100 text-green-800 text-xs px-3 py-1.5 rounded-full font-medium">
+                      ✓ Castrado(a)
+                    </span>
+                  ) : (
+                    <span className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1.5 rounded-full font-medium">
+                      ⏳ A castrar
+                    </span>
                   )}
                   {selectedPet.vacinado && (
-                    <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
-                      <span className="text-blue-600">💉</span>
-                      <span className="text-blue-800 font-medium">
-                        Vacinado(a)
-                      </span>
-                    </div>
+                    <span className="bg-sky-100 text-sky-800 text-xs px-3 py-1.5 rounded-full font-medium">
+                      ✓ Vacinado(a)
+                    </span>
+                  )}
+                  {selectedPet.vermifugado && (
+                    <span className="bg-purple-100 text-purple-800 text-xs px-3 py-1.5 rounded-full font-medium">
+                      ✓ Vermifugado(a)
+                    </span>
+                  )}
+                  {selectedPet.situacao && (
+                    <span
+                      className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+                        selectedPet.situacao === "Resgatada"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : selectedPet.situacao === "Órfão"
+                          ? "bg-orange-100 text-orange-800"
+                          : selectedPet.situacao === "Maltratado"
+                          ? "bg-red-100 text-red-800"
+                          : selectedPet.situacao === "Filhote"
+                          ? "bg-pink-100 text-pink-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {selectedPet.situacao}
+                    </span>
                   )}
                 </div>
 
-                {/* Situação do pet */}
-                {selectedPet.situacao && (
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-full border border-orange-200">
-                      <span className="text-orange-600">🏷️</span>
-                      <span className="text-orange-800 font-medium">
-                        {selectedPet.situacao}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* História do pet */}
-                {(selectedPet.descricao || selectedPet.historia) && (
+                {/* Descrição do pet */}
+                {selectedPet.descricao && (
                   <div className="mb-6 bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">📖</span>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        Sua História
-                      </h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">
-                      {selectedPet.historia || selectedPet.descricao}
-                    </p>
-                  </div>
-                )}
-
-                {/* Cuidados especiais */}
-                {selectedPet.cuidados && (
-                  <div className="mb-6 bg-purple-50 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-2xl">💜</span>
-                      <h3 className="text-lg font-bold text-purple-900">
-                        Cuidados Especiais
-                      </h3>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">
-                      {selectedPet.cuidados}
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      Sobre o pet
+                    </h4>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {selectedPet.descricao}
                     </p>
                   </div>
                 )}
@@ -410,7 +470,7 @@ const Pets = () => {
                   {selectedPet.status === "disponivel" ? (
                     <Link
                       to="/questionnaire"
-                      className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-colors"
+                      className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                       onClick={closeModal}
                     >
                       💖 Quero Adotar {selectedPet.nome}

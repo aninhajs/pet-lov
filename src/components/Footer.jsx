@@ -1,16 +1,31 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Instagram,
+  Facebook,
+  MessageCircle,
+  Heart,
+} from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gradient-to-br from-gray-900 via-sky-900 to-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo e Descrição */}
           <div className="md:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-2xl mr-2">🐾</span>
-              <h3 className="text-2xl font-bold">Pet Lov</h3>
+              <img
+                src="/logoabrace.jpg"
+                alt="Abrace Uma Causa Animal"
+                className="w-12 h-12 rounded-full object-cover shadow-lg border-2 border-yellow-400 mr-3"
+              />
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-sky-400 to-yellow-400 bg-clip-text text-transparent">
+                Abrace Uma Causa Animal
+              </h3>
             </div>
             <p className="text-gray-300 mb-6 max-w-md">
               ONG dedicada ao resgate, cuidado e adoção responsável de animais
@@ -22,9 +37,10 @@ const Footer = () => {
 "
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center"
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-gray-900 px-6 py-3 rounded-lg font-semibold transition-all inline-flex items-center shadow-lg gap-2"
             >
-              ❤️ Quero Doar
+              <Heart className="w-5 h-5" />
+              Quero Doar
             </a>
           </div>
 
@@ -33,7 +49,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Contato</h4>
             <div className="space-y-3 text-gray-300">
               <div className="flex items-start">
-                <span className="mr-2 mt-1">📍</span>
+                <MapPin className="w-5 h-5 mr-2 mt-1 flex-shrink-0 text-sky-400" />
                 <div>
                   <p>Rua 1016, 138</p>
                   <p>Conjunto Ceará</p>
@@ -41,11 +57,11 @@ const Footer = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                <span className="mr-2">📞</span>
+                <Phone className="w-5 h-5 mr-2 text-yellow-400" />
                 <p>(11) 9999-8888</p>
               </div>
               <div className="flex items-center">
-                <span className="mr-2">📧</span>
+                <Mail className="w-5 h-5 mr-2 text-sky-400" />
                 <p>contato@petlov.org</p>
               </div>
             </div>
@@ -56,37 +72,38 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Siga-nos</h4>
             <div className="space-y-3">
               <a
-                href="https://instagram.com/petlov"
+                href=" https://www.instagram.com/ong.abrace?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==
+"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-gray-300 hover:text-white transition-colors"
+                className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <span className="mr-3 text-xl">📷</span>
+                <Instagram className="w-5 h-5 mr-3 text-yellow-400 group-hover:text-yellow-300" />
                 Instagram
               </a>
               <a
-                href="https://facebook.com/petlov"
+                href="https://www.facebook.com/AbraceUmaCausaAnimal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-gray-300 hover:text-white transition-colors"
+                className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <span className="mr-3 text-xl">📘</span>
+                <Facebook className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
                 Facebook
               </a>
               <a
                 href=" https://www.facebook.com/AbraceUmaCausaAnimal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center text-gray-300 hover:text-white transition-colors"
+                className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <span className="mr-3 text-xl">💬</span>
+                <MessageCircle className="w-5 h-5 mr-3 text-yellow-400 group-hover:text-yellow-300" />
                 WhatsApp
               </a>
               <a
                 href="mailto:contato@petlov.org"
-                className="flex items-center text-gray-300 hover:text-white transition-colors"
+                className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <span className="mr-3 text-xl">✉️</span>
+                <Mail className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
                 Email
               </a>
             </div>
@@ -124,19 +141,22 @@ const Footer = () => {
         </div>
 
         {/* Linha de Separação e Copyright */}
-        <div className="border-t border-gray-700 mt-8 pt-8">
+        <div className="border-t border-sky-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Pet Lov ONG. Todos os direitos reservados.
+              © 2024 Abrace Uma Causa Animal. Todos os direitos reservados.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0 text-sm text-gray-400">
               <a
                 href="#privacidade"
-                className="hover:text-white transition-colors"
+                className="hover:text-sky-400 transition-colors"
               >
                 Política de Privacidade
               </a>
-              <a href="#termos" className="hover:text-white transition-colors">
+              <a
+                href="#termos"
+                className="hover:text-sky-400 transition-colors"
+              >
                 Termos de Uso
               </a>
             </div>
