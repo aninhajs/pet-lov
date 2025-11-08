@@ -103,11 +103,9 @@ const AdminAdoptants = () => {
       <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link to="/admin" className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">
-                🐾 Pet Lov Admin
-              </h1>
-            </Link>
+            <h1 className="text-2xl font-bold text-indigo-600">
+              🐾 Central de Gerenciamento
+            </h1>
             <div className="flex space-x-4">
               <Link
                 to="/admin"
@@ -148,43 +146,39 @@ const AdminAdoptants = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedStatus("todos")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedStatus === "todos"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStatus === "todos"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               Todos ({candidatos.length})
             </button>
             <button
               onClick={() => setSelectedStatus("pendente")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedStatus === "pendente"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStatus === "pendente"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               Pendentes (
               {candidatos.filter((c) => c.status === "pendente").length})
             </button>
             <button
               onClick={() => setSelectedStatus("aprovado")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedStatus === "aprovado"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStatus === "aprovado"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               Aprovados (
               {candidatos.filter((c) => c.status === "aprovado").length})
             </button>
             <button
               onClick={() => setSelectedStatus("rejeitado")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedStatus === "rejeitado"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedStatus === "rejeitado"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               Rejeitados (
               {candidatos.filter((c) => c.status === "rejeitado").length})

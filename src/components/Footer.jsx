@@ -51,18 +51,18 @@ const Footer = () => {
               <div className="flex items-start">
                 <MapPin className="w-5 h-5 mr-2 mt-1 flex-shrink-0 text-sky-400" />
                 <div>
-                  <p>Rua 1016, 138</p>
-                  <p>Conjunto Ceará</p>
-                  <p>CEP: 01234-567</p>
+                  <p>Rua Doguinhos, 00</p>
+                  <p>Amora Ceará</p>
+                  <p>CEP: xxxxxxx</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <Phone className="w-5 h-5 mr-2 text-yellow-400" />
-                <p>(11) 9999-8888</p>
+                <p>(85) 8812-8654</p>
               </div>
               <div className="flex items-center">
                 <Mail className="w-5 h-5 mr-2 text-sky-400" />
-                <p>contato@petlov.org</p>
+                <p>contato@ongabrace.com.br</p>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ const Footer = () => {
                 Facebook
               </a>
               <a
-                href=" https://www.facebook.com/AbraceUmaCausaAnimal"
+                href="https://wa.me/+558588128654"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"
@@ -144,7 +144,7 @@ const Footer = () => {
         <div className="border-t border-sky-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Abrace Uma Causa Animal. Todos os direitos reservados.
+              © 2025 Abrace Uma Causa Animal. Todos os direitos reservados.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0 text-sm text-gray-400">
               <a

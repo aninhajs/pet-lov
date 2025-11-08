@@ -127,31 +127,28 @@ const Pets = () => {
             </h3>
             <button
               onClick={() => setSelectedFilter("todos")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "todos"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "todos"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               Todos os tipos
             </button>
             <button
               onClick={() => setSelectedFilter("cão")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "cão"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "cão"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               🐕 Cães
             </button>
             <button
               onClick={() => setSelectedFilter("gato")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "gato"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "gato"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               🐱 Gatos
             </button>
@@ -163,31 +160,28 @@ const Pets = () => {
             </h3>
             <button
               onClick={() => setSelectedFilter("disponivel")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "disponivel"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "disponivel"
                   ? "bg-green-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               🟢 Disponíveis
             </button>
             <button
               onClick={() => setSelectedFilter("em_processo")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "em_processo"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "em_processo"
                   ? "bg-yellow-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               ⏳ Em Processo
             </button>
             <button
               onClick={() => setSelectedFilter("adotado")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "adotado"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedFilter === "adotado"
                   ? "bg-gray-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+                }`}
             >
               ❤️ Adotados
             </button>
@@ -225,27 +219,26 @@ const Pets = () => {
                     {pet.tipo === "cão"
                       ? "🐕"
                       : pet.tipo === "gato"
-                      ? "🐱"
-                      : "🐾"}
+                        ? "🐱"
+                        : "🐾"}
                   </span>
                 </div>
 
                 {/* Badge de status no canto da imagem */}
                 <div className="absolute top-2 right-2">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium shadow-sm ${
-                      pet.status === "disponivel"
+                    className={`text-xs px-2 py-1 rounded-full font-medium shadow-sm ${pet.status === "disponivel"
                         ? "bg-green-500 text-white"
                         : pet.status === "adotado"
-                        ? "bg-gray-500 text-white"
-                        : "bg-yellow-500 text-white"
-                    }`}
+                          ? "bg-gray-500 text-white"
+                          : "bg-yellow-500 text-white"
+                      }`}
                   >
                     {pet.status === "disponivel"
                       ? "🟢 Disponível"
                       : pet.status === "adotado"
-                      ? "❤️ Adotado"
-                      : "⏳ Em Processo"}
+                        ? "❤️ Adotado"
+                        : "⏳ Em Processo"}
                   </span>
                 </div>
               </div>
@@ -328,8 +321,8 @@ const Pets = () => {
                       {selectedPet.tipo === "cão"
                         ? "🐕"
                         : selectedPet.tipo === "gato"
-                        ? "🐱"
-                        : "🐾"}
+                          ? "🐱"
+                          : "🐾"}
                     </span>
                   </div>
                 )}
@@ -345,19 +338,18 @@ const Pets = () => {
 
                   {/* Status em destaque */}
                   <span
-                    className={`inline-flex items-center px-4 py-2 rounded-full font-medium text-sm ${
-                      selectedPet.status === "disponivel"
+                    className={`inline-flex items-center px-4 py-2 rounded-full font-medium text-sm ${selectedPet.status === "disponivel"
                         ? "bg-green-100 text-green-800"
                         : selectedPet.status === "adotado"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
                   >
                     {selectedPet.status === "disponivel"
                       ? "🟢 Disponível para Adoção"
                       : selectedPet.status === "adotado"
-                      ? "❤️ Já Adotado"
-                      : "⏳ Em Processo de Adoção"}
+                        ? "❤️ Já Adotado"
+                        : "⏳ Em Processo de Adoção"}
                   </span>
                 </div>
 
@@ -436,17 +428,16 @@ const Pets = () => {
                   )}
                   {selectedPet.situacao && (
                     <span
-                      className={`text-xs px-3 py-1.5 rounded-full font-medium ${
-                        selectedPet.situacao === "Resgatada"
+                      className={`text-xs px-3 py-1.5 rounded-full font-medium ${selectedPet.situacao === "Resgatada"
                           ? "bg-yellow-100 text-yellow-800"
                           : selectedPet.situacao === "Órfão"
-                          ? "bg-orange-100 text-orange-800"
-                          : selectedPet.situacao === "Maltratado"
-                          ? "bg-red-100 text-red-800"
-                          : selectedPet.situacao === "Filhote"
-                          ? "bg-pink-100 text-pink-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+                            ? "bg-orange-100 text-orange-800"
+                            : selectedPet.situacao === "Maltratado"
+                              ? "bg-red-100 text-red-800"
+                              : selectedPet.situacao === "Filhote"
+                                ? "bg-pink-100 text-pink-800"
+                                : "bg-gray-100 text-gray-800"
+                        }`}
                     >
                       {selectedPet.situacao}
                     </span>
@@ -469,7 +460,9 @@ const Pets = () => {
                 <div className="text-center space-y-3">
                   {selectedPet.status === "disponivel" ? (
                     <Link
-                      to="/questionnaire"
+                      to="https://forms.gle/Vs2Arsu5bwi5h3wA9"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                       onClick={closeModal}
                     >

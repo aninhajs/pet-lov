@@ -45,9 +45,7 @@ const AdminDashboard = () => {
       <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link to="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">🐾 Pet Lov Admin</h1>
-            </Link>
+            <h1 className="text-2xl font-bold text-indigo-600">🐾 Central de Gerenciamento</h1>
             <div className="flex space-x-4">
               <Link
                 to="/"

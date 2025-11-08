@@ -183,8 +183,8 @@ const Home = () => {
                   <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
                     <p>
                       <strong className="text-sky-600">1. CADASTRO:</strong>{" "}
-                      Acesse o App Sua Nota Tem Valor ou pelo site
-                      suanotatemvalor.ce.gov.br
+                      Acesse o app sua nota tem valor ou pelo
+                      <a href="https://suanotatemvalor.sefaz.ce.gov.br/"> <strong>site</strong></a>
                     </p>
                   </div>
                   <div className="bg-white/80 p-3 rounded-lg border-l-4 border-yellow-400">
@@ -466,7 +466,6 @@ const Home = () => {
           </div>
         </div>
       )}
-      Link discreto para login admin (apenas para desenvolvimento)
       <div className="fixed bottom-4 right-4">
         <Link
           to="/login"
