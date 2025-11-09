@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../../services/api";
 
 const CadastrarPet = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const CadastrarPet = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,26 +47,48 @@ const CadastrarPet = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
 
-    // Simula salvamento
-    setTimeout(() => {
-      // Salvar no localStorage (em um app real, seria enviado para o backend)
-      const pets = JSON.parse(localStorage.getItem("pets") || "[]");
-      const newPet = {
-        ...formData,
-        id: Date.now(),
-        datacadastro: new Date().toISOString(),
-        status: "disponivel",
+    try {
+      // Preparar dados para envio
+      const petData = {
+        nome: formData.nome,
+        tipo: formData.tipo.toLowerCase(),
+        idade: formData.idade,
+        porte: formData.porte.toLowerCase(),
+        sexo: formData.sexo.toLowerCase(),
+        cor: formData.cor,
+        peso: formData.peso ? parseFloat(formData.peso) : null,
+        descricao: formData.descricao,
+        castrado: formData.castrado,
+        vacinado: formData.vacinado,
+        vermifugado: formData.vermifugado,
+        // Por enquanto, sem imagens - implementaremos upload depois
+        imagens: formData.imagem
+          ? [{ url: formData.imagem, nome: "pet-image.jpg" }]
+          : [],
       };
-      pets.push(newPet);
-      localStorage.setItem("pets", JSON.stringify(pets));
 
+      // Enviar para API
+      const response = await api.post("/pets", petData);
+
+      if (response.data.success) {
+        setShowSuccess(true);
+      } else {
+        setError(response.data.error?.message || "Erro ao cadastrar pet");
+      }
+    } catch (error) {
+      console.error("Erro ao cadastrar pet:", error);
+      setError(
+        error.response?.data?.error?.message ||
+          "Erro ao conectar com o servidor"
+      );
+    } finally {
       setIsSubmitting(false);
-      setShowSuccess(true);
-    }, 1000);
+    }
   };
 
   if (showSuccess) {
@@ -145,6 +169,15 @@ const CadastrarPet = () => {
             Preencha as informações do pet para disponibilizá-lo para adoção
           </p>
 
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <div className="text-red-600 mr-2">⚠️</div>
+                <p className="text-red-800 font-medium">{error}</p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Informações Básicas */}
             <div>
@@ -181,8 +214,6 @@ const CadastrarPet = () => {
                     <option value="">Selecione...</option>
                     <option value="cão">Cão</option>
                     <option value="gato">Gato</option>
-                    <option value="coelho">Coelho</option>
-                    <option value="outro">Outro</option>
                   </select>
                 </div>
 
@@ -265,7 +296,7 @@ const CadastrarPet = () => {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Temperamento
                   </label>
@@ -277,7 +308,7 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Ex: Dócil, brincalhão, protetor"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -324,7 +355,7 @@ const CadastrarPet = () => {
                   </label>
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Necessidades Especiais
                   </label>
@@ -336,7 +367,7 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Descreva se há alguma necessidade especial"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -361,7 +392,7 @@ const CadastrarPet = () => {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     História do Pet
                   </label>
@@ -373,7 +404,7 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="Como o pet chegou até a ONG..."
                   />
-                </div>
+                </div> */}
               </div>
             </div>
 

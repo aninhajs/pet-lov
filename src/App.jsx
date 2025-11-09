@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
@@ -16,46 +17,20 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          {/* Rotas Públicas */}
+          {/* Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/pets" element={<Pets />} />
           <Route path="/questionnaire" element={<Questionnaire />} />
           <Route path="/login" element={<Login />} />
           <Route path="/teste" element={<TestePage />} />
 
-          {/* Rotas Administrativas (Protegidas) */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/adoptants"
-            element={
-              <ProtectedRoute>
-                <AdminAdoptants />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/cadastrar-pet"
-            element={
-              <ProtectedRoute>
-                <CadastrarPet />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/gerenciar-pets"
-            element={
-              <ProtectedRoute>
-                <GerenciarPets />
-              </ProtectedRoute>
-            }
-          />
+          {/* Grupo protegido */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/adoptants" element={<AdminAdoptants />} />
+            <Route path="/admin/cadastrar-pet" element={<CadastrarPet />} />
+            <Route path="/admin/gerenciar-pets" element={<GerenciarPets />} />
+          </Route>
         </Routes>
       </div>
     </Router>

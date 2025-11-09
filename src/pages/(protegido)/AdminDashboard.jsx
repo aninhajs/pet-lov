@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     totalPets: 0,
     petsAdotados: 0,
@@ -23,35 +25,19 @@ const AdminDashboard = () => {
   }, []);
 
   const [recentActivity] = useState([
-    {
-      id: 1,
-      acao: "Nova candidatura de adoção",
-      pet: "Luna",
-      candidato: "Maria Silva",
-      tempo: "2h atrás",
-    },
-    {
-      id: 2,
-      acao: "Pet adotado",
-      pet: "Max",
-      candidato: "João Santos",
-      tempo: "5h atrás",
-    },
-    {
-      id: 3,
-      acao: "Novo pet cadastrado",
-      pet: "Buddy",
-      candidato: "-",
-      tempo: "1 dia atrás",
-    },
-    {
-      id: 4,
-      acao: "Formulário aprovado",
-      pet: "Mila",
-      candidato: "Ana Costa",
-      tempo: "2 dias atrás",
-    },
+    { id: 1, acao: "Nova candidatura de adoção", pet: "Luna", candidato: "Maria Silva", tempo: "2h atrás" },
+    { id: 2, acao: "Pet adotado", pet: "Max", candidato: "João Santos", tempo: "5h atrás" },
+    { id: 3, acao: "Novo pet cadastrado", pet: "Buddy", candidato: "-", tempo: "1 dia atrás" },
+    { id: 4, acao: "Formulário aprovado", pet: "Mila", candidato: "Ana Costa", tempo: "2 dias atrás" },
   ]);
+
+  const handleLogout = () => {
+    // remove só o que quebra a sessão
+    localStorage.removeItem("token");
+    // opcional: limpe outros dados de sessão se existir (ex.: user)
+    // localStorage.removeItem("user");
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -59,11 +45,7 @@ const AdminDashboard = () => {
       <header className="bg-white shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <Link to="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">
-                🐾 Pet Lov Admin
-              </h1>
-            </Link>
+            <h1 className="text-2xl font-bold text-indigo-600">🐾 Central de Gerenciamento</h1>
             <div className="flex space-x-4">
               <Link
                 to="/"
@@ -78,10 +60,7 @@ const AdminDashboard = () => {
                 Ver Candidatos
               </Link>
               <button
-                onClick={() => {
-                  localStorage.removeItem("isAdminLoggedIn");
-                  window.location.href = "/";
-                }}
+                onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
                 Sair
@@ -94,64 +73,48 @@ const AdminDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Título */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard Administrativo
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie pets, adoções e candidatos
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard Administrativo</h1>
+          <p className="text-gray-600 mt-2">Gerencie pets, adoções e candidatos</p>
         </div>
 
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div className="bg-white  hover:bg-indigo-100 rounded-lg shadow-sm p-6">
+          <div className="bg-white hover:bg-indigo-100 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="text-2xl mr-3">🐕</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total de Pets
-                </p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {stats.totalPets}
-                </p>
+                <p className="text-sm font-medium text-gray-600">Total de Pets</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalPets}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white  hover:bg-indigo-100 rounded-lg shadow-sm p-6 ">
+          <div className="bg-white hover:bg-indigo-100 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="text-2xl mr-3">❤️</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pets Adotados
-                </p>
-                <p className="text-3xl font-bold text-green-600">
-                  {stats.petsAdotados}
-                </p>
+                <p className="text-sm font-medium text-gray-600">Pets Adotados</p>
+                <p className="text-3xl font-bold text-green-600">{stats.petsAdotados}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white  hover:bg-indigo-100 rounded-lg shadow-sm p-6 ">
+          <div className="bg-white hover:bg-indigo-100 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="text-2xl mr-3">👥</div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Candidatos</p>
-                <p className="text-3xl font-bold text-blue-600">
-                  {stats.candidatos}
-                </p>
+                <p className="text-3xl font-bold text-blue-600">{stats.candidatos}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white  hover:bg-indigo-100 rounded-lg shadow-sm p-6">
+          <div className="bg-white hover:bg-indigo-100 rounded-lg shadow-sm p-6">
             <div className="flex items-center">
               <div className="text-2xl mr-3">⏳</div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Pendências</p>
-                <p className="text-3xl font-bold text-orange-600">
-                  {stats.processosPendentes}
-                </p>
+                <p className="text-3xl font-bold text-orange-600">{stats.processosPendentes}</p>
               </div>
             </div>
           </div>
@@ -161,9 +124,7 @@ const AdminDashboard = () => {
           {/* Atividades Recentes */}
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Atividades Recentes
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">Atividades Recentes</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -176,17 +137,13 @@ const AdminDashboard = () => {
                         {activity.pet && (
                           <>
                             {" - "}
-                            <span className="text-indigo-600">
-                              {activity.pet}
-                            </span>
+                            <span className="text-indigo-600">{activity.pet}</span>
                           </>
                         )}
                         {activity.candidato && activity.candidato !== "-" && (
                           <>
                             {" por "}
-                            <span className="font-medium">
-                              {activity.candidato}
-                            </span>
+                            <span className="font-medium">{activity.candidato}</span>
                           </>
                         )}
                       </p>
@@ -201,9 +158,7 @@ const AdminDashboard = () => {
           {/* Ações Rápidas */}
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Ações Rápidas
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">Ações Rápidas</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -213,12 +168,8 @@ const AdminDashboard = () => {
                 >
                   <div className="text-2xl mr-4">📋</div>
                   <div>
-                    <p className="font-medium text-gray-900">
-                      Gerenciar Candidatos
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Ver e aprovar formulários de adoção
-                    </p>
+                    <p className="font-medium text-gray-900">Gerenciar Candidatos</p>
+                    <p className="text-sm text-gray-600">Ver e aprovar formulários de adoção</p>
                   </div>
                 </Link>
                 <Link
@@ -228,9 +179,7 @@ const AdminDashboard = () => {
                   <div className="text-2xl mr-4">🐾</div>
                   <div>
                     <p className="font-medium text-gray-900">Gerenciar Pets</p>
-                    <p className="text-sm text-gray-600">
-                      Ver, editar e controlar status dos pets
-                    </p>
+                    <p className="text-sm text-gray-600">Ver, editar e controlar status dos pets</p>
                   </div>
                 </Link>
               </div>

@@ -1,62 +1,68 @@
+// src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../lib/api";
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: "",
-  });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Verifica se o usuário já está logado ao carregar a página
+  // Verifica token ao carregar
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
-    if (isLoggedIn) {
-      navigate("/admin");
-    }
+    const checkToken = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const res = await api.get("/api/auth/me");
+        if (res?.data?.user) navigate("/admin", { replace: true });
+        else localStorage.removeItem("token");
+      } catch {
+        localStorage.removeItem("token");
+      }
+    };
+    checkToken();
   }, [navigate]);
 
-  // Credenciais de exemplo (em um app real, isso seria validado no backend)
-  const adminCredentials = {
-    email: "admin@petlov.com",
-    password: "admin123",
-  };
-
   const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value,
-    });
-    setError(""); // Limpa erro ao digitar
+    setCredentials((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Simula validação
-    setTimeout(() => {
-      if (
-        credentials.email === adminCredentials.email &&
-        credentials.password === adminCredentials.password
-      ) {
-        // Login bem-sucedido
-        localStorage.setItem("isAdminLoggedIn", "true");
-        navigate("/admin");
+    try {
+      const res = await api.post("/api/auth/login", {
+        email: credentials.email.trim(),
+        password: credentials.password,
+      });
+
+      if (res.status === 200 && res.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        navigate("/admin", { replace: true });
       } else {
-        setError("Email ou senha incorretos");
+        setError(res.data?.error || "Erro no login");
       }
+    } catch (err) {
+      const status = err.response?.status;
+      const body = err.response?.data;
+      if (body?.error) setError(body.error);
+      else if (status === 401) setError("Credenciais inválidas");
+      else if (status) setError(`Erro ${status}`);
+      else setError("Erro de conexão");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo e título */}
           <div className="text-center mb-8">
             <div className="text-4xl mb-4">🐾</div>
             <h1 className="text-2xl font-bold text-gray-900">Pet Lov Admin</h1>
@@ -64,7 +70,7 @@ const Login = () => {
               Faça login para acessar o painel administrativo
             </p>
           </div>
-          {/* Formulário */}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -78,6 +84,7 @@ const Login = () => {
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 placeholder="admin@petlov.com"
+                autoComplete="username"
               />
             </div>
 
@@ -93,6 +100,7 @@ const Login = () => {
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
             </div>
 
@@ -118,7 +126,6 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Link para voltar */}
           <div className="mt-6 text-center">
             <Link
               to="/"

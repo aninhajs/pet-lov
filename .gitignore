@@ -13,8 +13,18 @@ dist-ssr
 *.local
 .vite
 
-test.html
+# Arquivos de ambiente (contêm informações sensíveis)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
+test.html
+informacoes
+backend
+.github
+.vite
 # Configurações do vs code
 .vscode/*
 !.vscode/extensions.json
