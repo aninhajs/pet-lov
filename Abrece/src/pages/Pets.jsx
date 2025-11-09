@@ -18,6 +18,8 @@ const Pets = () => {
   const [selectedFilter, setSelectedFilter] = useState("todos");
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   // Carregar todos os pets do localStorage
   useEffect(() => {
@@ -28,10 +30,29 @@ const Pets = () => {
   // Funções do modal
   const openModal = (pet) => {
     setSelectedPet(pet);
+    setModalImageIndex(0);
   };
 
   const closeModal = () => {
     setSelectedPet(null);
+    setModalImageIndex(0);
+  };
+
+  // Funções para navegar no carrossel
+  const handlePrevImage = (petId, e) => {
+    e.stopPropagation();
+    setCurrentImageIndexes((prev) => ({
+      ...prev,
+      [petId]: Math.max(0, (prev[petId] || 0) - 1),
+    }));
+  };
+
+  const handleNextImage = (petId, totalImages, e) => {
+    e.stopPropagation();
+    setCurrentImageIndexes((prev) => ({
+      ...prev,
+      [petId]: Math.min(totalImages - 1, (prev[petId] || 0) + 1),
+    }));
   };
 
   const filteredPets = pets.filter((pet) => {
@@ -55,9 +76,9 @@ const Pets = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Header customizado para Pets - sem botão "Ver Pets" */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center space-x-3">
@@ -199,12 +220,110 @@ const Pets = () => {
           {filteredPets.map((pet) => (
             <div
               key={pet.id}
-              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+              className="bg-yellow-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-2 border-gray-600"
               onClick={() => openModal(pet)}
             >
               {/* Imagem do pet */}
               <div className="relative w-full h-48 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden rounded-t-lg group flex items-center justify-center">
-                {pet.imagem ? (
+                {pet.imagens && pet.imagens.length > 0 ? (
+                  <>
+                    <img
+                      src={optimizeImageUrl(
+                        pet.imagens[currentImageIndexes[pet.id] || 0],
+                        400,
+                        320
+                      )}
+                      alt={`${pet.nome} - Foto ${
+                        (currentImageIndexes[pet.id] || 0) + 1
+                      }`}
+                      className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextElementSibling.style.display = "flex";
+                      }}
+                    />
+
+                    {/* Setas de navegação */}
+                    {pet.imagens.length > 1 && (
+                      <>
+                        <button
+                          onClick={(e) => handlePrevImage(pet.id, e)}
+                          disabled={
+                            !currentImageIndexes[pet.id] ||
+                            currentImageIndexes[pet.id] === 0
+                          }
+                          className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              !currentImageIndexes[pet.id] ||
+                              currentImageIndexes[pet.id] === 0
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-5 h-5 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={(e) =>
+                            handleNextImage(pet.id, pet.imagens.length, e)
+                          }
+                          disabled={
+                            currentImageIndexes[pet.id] >=
+                            pet.imagens.length - 1
+                          }
+                          className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              currentImageIndexes[pet.id] >=
+                              pet.imagens.length - 1
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-5 h-5 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* Indicadores */}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                          {pet.imagens.map((_, index) => (
+                            <div
+                              key={index}
+                              className={`h-2 rounded-full transition-all ${
+                                index === (currentImageIndexes[pet.id] || 0)
+                                  ? "bg-white w-6"
+                                  : "bg-white/60 w-2"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : pet.imagem ? (
                   <img
                     src={optimizeImageUrl(pet.imagem, 400, 320)}
                     alt={pet.nome}
@@ -219,7 +338,10 @@ const Pets = () => {
                 {/* Fallback quando não há imagem */}
                 <div
                   className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-100 to-yellow-100"
-                  style={{ display: pet.imagem ? "none" : "flex" }}
+                  style={{
+                    display:
+                      pet.imagens?.length > 0 || pet.imagem ? "none" : "flex",
+                  }}
                 >
                   <span className="text-6xl opacity-50">
                     {pet.tipo === "cão"
@@ -256,7 +378,7 @@ const Pets = () => {
                   {pet.nome}
                 </h3>
                 <p className="text-gray-600 text-sm">{pet.idade}</p>
-                <div className="mt-3 text-indigo-600 text-sm font-medium">
+                <div className="mt-3 text-gray-900 text-sm font-medium">
                   Clique para ver mais →
                 </div>
               </div>
@@ -292,7 +414,7 @@ const Pets = () => {
       {/* Modal de detalhes do pet */}
       {selectedPet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-yellow-50 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="relative">
               {/* Botão fechar */}
               <button
@@ -316,7 +438,100 @@ const Pets = () => {
 
               {/* Imagem do pet */}
               <div className="relative w-full h-80 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden rounded-t-xl flex items-center justify-center">
-                {selectedPet.imagem ? (
+                {selectedPet.imagens && selectedPet.imagens.length > 0 ? (
+                  <>
+                    <img
+                      src={optimizeImageUrl(
+                        selectedPet.imagens[modalImageIndex],
+                        600,
+                        400
+                      )}
+                      alt={`${selectedPet.nome} - Foto ${modalImageIndex + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+
+                    {/* Setas de navegação no modal */}
+                    {selectedPet.imagens.length > 1 && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setModalImageIndex(Math.max(0, modalImageIndex - 1))
+                          }
+                          disabled={modalImageIndex === 0}
+                          className={`absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              modalImageIndex === 0
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-6 h-6 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setModalImageIndex(
+                              Math.min(
+                                selectedPet.imagens.length - 1,
+                                modalImageIndex + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            modalImageIndex >= selectedPet.imagens.length - 1
+                          }
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              modalImageIndex >= selectedPet.imagens.length - 1
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-6 h-6 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* Indicadores */}
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                          {selectedPet.imagens.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setModalImageIndex(index)}
+                              className={`h-2.5 rounded-full transition-all ${
+                                index === modalImageIndex
+                                  ? "bg-white w-8"
+                                  : "bg-white/60 w-2.5 hover:bg-white/80"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : selectedPet.imagem ? (
                   <img
                     src={optimizeImageUrl(selectedPet.imagem, 600, 400)}
                     alt={selectedPet.nome}

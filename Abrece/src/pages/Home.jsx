@@ -21,19 +21,45 @@ const optimizeImageUrl = (url, width = 400, height = 300) => {
 const Home = () => {
   const [selectedPet, setSelectedPet] = useState(null);
   const [pets, setPets] = useState([]);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   useEffect(() => {
     const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
     setPets(petsStorage);
   }, []);
 
-  const openModal = (pet) => setSelectedPet(pet);
-  const closeModal = () => setSelectedPet(null);
+  const openModal = (pet) => {
+    setSelectedPet(pet);
+    setModalImageIndex(0);
+  };
+
+  const closeModal = () => {
+    setSelectedPet(null);
+    setModalImageIndex(0);
+  };
+
+  // Funções para navegar no carrossel
+  const handlePrevImage = (petId, e) => {
+    e.stopPropagation(); // Evita abrir o modal
+    setCurrentImageIndexes((prev) => ({
+      ...prev,
+      [petId]: Math.max(0, (prev[petId] || 0) - 1),
+    }));
+  };
+
+  const handleNextImage = (petId, totalImages, e) => {
+    e.stopPropagation(); // Evita abrir o modal
+    setCurrentImageIndexes((prev) => ({
+      ...prev,
+      [petId]: Math.min(totalImages - 1, (prev[petId] || 0) + 1),
+    }));
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Header customizado para Home - sem botão "Ver Pets" */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center space-x-3">
@@ -69,14 +95,39 @@ const Home = () => {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-8">
-            Encontre seu novo
-            <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
-              {" "}
-              melhor amigo
-            </span>
+          <h1 className="text-4xl md:text-6xl font-bold mb-8">
+            <span className="text-yellow-500">E</span>
+            <span className="text-blue-500">n</span>
+            <span className="text-red-500">c</span>
+            <span className="text-green-500">o</span>
+            <span className="text-yellow-500">n</span>
+            <span className="text-blue-500">t</span>
+            <span className="text-red-500">r</span>
+            <span className="text-green-500">e</span>
+            <span className="text-yellow-500"> </span>
+            <span className="text-blue-500">s</span>
+            <span className="text-red-500">e</span>
+            <span className="text-green-500">u</span>
+            <span className="text-yellow-500"> </span>
+            <span className="text-blue-500">n</span>
+            <span className="text-red-500">o</span>
+            <span className="text-green-500">v</span>
+            <span className="text-yellow-500">o</span>
+            <span className="text-blue-500"> </span>
+            <span className="text-red-500">m</span>
+            <span className="text-green-500">e</span>
+            <span className="text-yellow-500">l</span>
+            <span className="text-blue-500">h</span>
+            <span className="text-red-500">o</span>
+            <span className="text-green-500">r</span>
+            <span className="text-yellow-500"> </span>
+            <span className="text-blue-500">a</span>
+            <span className="text-red-500">m</span>
+            <span className="text-green-500">i</span>
+            <span className="text-yellow-500">g</span>
+            <span className="text-blue-500">o</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto font-bold">
             Conectamos corações e patas! Descubra pets incríveis esperando por
             uma família amorosa. Cada adoção é uma segunda chance para a
             felicidade.
@@ -88,7 +139,7 @@ const Home = () => {
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Pets Esperando por Você
               </h2>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-lg font-bold">
                 Conheça alguns dos nossos pets que estão procurando um lar
               </p>
             </div>
@@ -97,11 +148,114 @@ const Home = () => {
               {pets.slice(0, 4).map((pet) => (
                 <div
                   key={pet.id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-105 group cursor-pointer"
+                  className="bg-yellow-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-105 group cursor-pointer border-2 border-gray-600"
                   onClick={() => openModal(pet)}
                 >
                   <div className="relative w-full h-56 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden flex items-center justify-center">
-                    {pet.imagem ? (
+                    {pet.imagens && pet.imagens.length > 0 ? (
+                      <>
+                        <img
+                          src={optimizeImageUrl(
+                            pet.imagens[currentImageIndexes[pet.id] || 0],
+                            400,
+                            320
+                          )}
+                          alt={`${pet.nome} - Foto ${
+                            (currentImageIndexes[pet.id] || 0) + 1
+                          }`}
+                          className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            if (e.currentTarget.nextElementSibling) {
+                              e.currentTarget.nextElementSibling.style.display =
+                                "flex";
+                            }
+                          }}
+                        />
+
+                        {/* Setas de navegação - aparecem apenas se houver mais de 1 foto */}
+                        {pet.imagens.length > 1 && (
+                          <>
+                            {/* Seta Esquerda */}
+                            <button
+                              onClick={(e) => handlePrevImage(pet.id, e)}
+                              disabled={
+                                !currentImageIndexes[pet.id] ||
+                                currentImageIndexes[pet.id] === 0
+                              }
+                              className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                                ${
+                                  !currentImageIndexes[pet.id] ||
+                                  currentImageIndexes[pet.id] === 0
+                                    ? "opacity-40 cursor-not-allowed"
+                                    : "hover:scale-110"
+                                }`}
+                            >
+                              <svg
+                                className="w-5 h-5 text-gray-800"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 19l-7-7 7-7"
+                                />
+                              </svg>
+                            </button>
+
+                            {/* Seta Direita */}
+                            <button
+                              onClick={(e) =>
+                                handleNextImage(pet.id, pet.imagens.length, e)
+                              }
+                              disabled={
+                                currentImageIndexes[pet.id] >=
+                                pet.imagens.length - 1
+                              }
+                              className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                                ${
+                                  currentImageIndexes[pet.id] >=
+                                  pet.imagens.length - 1
+                                    ? "opacity-40 cursor-not-allowed"
+                                    : "hover:scale-110"
+                                }`}
+                            >
+                              <svg
+                                className="w-5 h-5 text-gray-800"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+
+                            {/* Indicadores de foto (pontinhos) */}
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                              {pet.imagens.map((_, index) => (
+                                <div
+                                  key={index}
+                                  className={`h-2 rounded-full transition-all ${
+                                    index === (currentImageIndexes[pet.id] || 0)
+                                      ? "bg-white w-6"
+                                      : "bg-white/60 w-2"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </>
+                    ) : pet.imagem ? (
                       <img
                         src={optimizeImageUrl(pet.imagem, 400, 320)}
                         alt={pet.nome}
@@ -116,10 +270,15 @@ const Home = () => {
                         }}
                       />
                     ) : null}
-                    {/* Fallback quando não há imagem */}
+                    {/* Fallback quando não há nenhuma imagem */}
                     <div
                       className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-100 to-yellow-100"
-                      style={{ display: pet.imagem ? "none" : "flex" }}
+                      style={{
+                        display:
+                          pet.imagens?.length > 0 || pet.imagem
+                            ? "none"
+                            : "flex",
+                      }}
                     >
                       <span className="text-6xl opacity-50">
                         {pet.tipo === "cão"
@@ -136,7 +295,7 @@ const Home = () => {
                       {pet.nome}
                     </h3>
                     <p className="text-gray-600 text-sm">{pet.idade}</p>
-                    <div className="mt-3 text-sky-600 text-sm font-medium">
+                    <div className="mt-3 text-gray-900 text-sm font-medium">
                       Clique para ver mais →
                     </div>
                   </div>
@@ -166,21 +325,20 @@ const Home = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="p-6 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg shadow-lg border-2 border-sky-200">
+              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
                 <div className="text-center mb-4">
-                  <div className="text-4xl mb-2">💰</div>
-                  <h3 className="text-2xl font-bold text-sky-600 mb-3">
+                  <h3 className="text-2xl font-bold text-green-600 mb-3">
                     Sua Nota Tem Valor
                   </h3>
                 </div>
                 <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
                     <p>
-                      <strong className="text-sky-600">1. CADASTRO:</strong>{" "}
+                      <strong className="text-green-600">1. CADASTRO:</strong>{" "}
                       <strong>Acesse o app sua nota tem valor ou pelo</strong>{" "}
                       <a
                         href="https://suanotatemvalor.sefaz.ce.gov.br/"
-                        className="text-sky-600 hover:text-sky-700 underline"
+                        className="text-green-600 hover:text-green-700 underline"
                       >
                         <strong>site</strong>
                       </a>
@@ -196,9 +354,9 @@ const Home = () => {
                       </strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
                     <p>
-                      <strong className="text-sky-600">
+                      <strong className="text-green-600">
                         3. PEÇA CPF NA NOTA:
                       </strong>{" "}
                       <strong>
@@ -211,10 +369,9 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg shadow-lg border-2 border-sky-200">
+              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
                 <div className="text-center mb-4">
-                  <div className="text-4xl mb-2">🛍️</div>
-                  <h3 className="text-2xl font-bold text-sky-600 mb-3">
+                  <h3 className="text-2xl font-bold text-green-600 mb-3">
                     Campanha do Bazar Solidário
                   </h3>
                   <p className="text-gray-900 font-semibold mb-3">
@@ -222,9 +379,9 @@ const Home = () => {
                   </p>
                 </div>
                 <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
                     <p>
-                      <strong className="text-sky-600">01</strong>
+                      <strong className="text-green-600">01</strong>
                       <strong> roupas e sapatos </strong>
                     </p>
                   </div>
@@ -234,9 +391,9 @@ const Home = () => {
                       <strong> acessórios pet</strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
                     <p>
-                      <strong className="text-sky-600">03</strong>
+                      <strong className="text-green-600">03</strong>
                       <strong> bijuterias</strong>
                     </p>
                   </div>
@@ -249,15 +406,14 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg shadow-lg border-2 border-sky-200">
+              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
                 <div className="text-center mb-4">
-                  <div className="text-4xl mb-2">�</div>
-                  <h3 className="text-2xl font-bold text-sky-600 mb-3">
+                  <h3 className="text-2xl font-bold text-green-600 mb-3">
                     DOE RAÇÃO
                   </h3>
                 </div>
                 <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500">
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
                         {" "}
@@ -272,9 +428,13 @@ const Home = () => {
                       Ajude a encher mais de 150 barriguinhas! Doe!
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-sky-500 text-center">
-                    <p className="font-semibold text-sky-600 mb-1">CHAVE PIX</p>
-                    <p className="font-bold text-lg text-sky-700">ONG ABRACE</p>
+                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500 text-center">
+                    <p className="font-semibold text-green-600 mb-1">
+                      CHAVE PIX
+                    </p>
+                    <p className="font-bold text-lg text-green-700">
+                      ONG ABRACE
+                    </p>
                     <p className="font-mono text-gray-900 font-semibold">
                       24287894000100
                     </p>
@@ -289,11 +449,108 @@ const Home = () => {
       {/* Modal flutuante para detalhes do pet */}
       {selectedPet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-lg sm:max-w-xl md:max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div className="bg-yellow-50 rounded-2xl max-w-lg sm:max-w-xl md:max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             {/* Header do modal */}
             <div className="relative">
               <div className="h-40 sm:h-44 md:h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center">
-                {selectedPet.imagem ? (
+                {selectedPet.imagens && selectedPet.imagens.length > 0 ? (
+                  <>
+                    <img
+                      src={optimizeImageUrl(
+                        selectedPet.imagens[modalImageIndex],
+                        600,
+                        400
+                      )}
+                      alt={`${selectedPet.nome} - Foto ${modalImageIndex + 1}`}
+                      className="max-w-full max-h-full object-contain"
+                      style={{
+                        objectFit: "contain",
+                        objectPosition: "center center",
+                      }}
+                    />
+
+                    {/* Setas de navegação no modal */}
+                    {selectedPet.imagens.length > 1 && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setModalImageIndex(Math.max(0, modalImageIndex - 1))
+                          }
+                          disabled={modalImageIndex === 0}
+                          className={`absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              modalImageIndex === 0
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-6 h-6 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
+                          </svg>
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setModalImageIndex(
+                              Math.min(
+                                selectedPet.imagens.length - 1,
+                                modalImageIndex + 1
+                              )
+                            )
+                          }
+                          disabled={
+                            modalImageIndex >= selectedPet.imagens.length - 1
+                          }
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                            ${
+                              modalImageIndex >= selectedPet.imagens.length - 1
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                        >
+                          <svg
+                            className="w-6 h-6 text-gray-800"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* Indicadores */}
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                          {selectedPet.imagens.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setModalImageIndex(index)}
+                              className={`h-2.5 rounded-full transition-all ${
+                                index === modalImageIndex
+                                  ? "bg-white w-8"
+                                  : "bg-white/60 w-2.5 hover:bg-white/80"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : selectedPet.imagem ? (
                   <img
                     src={optimizeImageUrl(selectedPet.imagem, 600, 400)}
                     alt={`${selectedPet.nome} - Pet para adoção`}

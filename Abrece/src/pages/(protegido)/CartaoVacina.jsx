@@ -4,17 +4,9 @@ import { Link } from "react-router-dom";
 const CartaoVacina = () => {
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState("");
-  const [formData, setFormData] = useState({
-    nomeVacina1: "",
-    dataVacina1: "",
-    dataRevacina1: "",
-    nomeVacina2: "",
-    dataVacina2: "",
-    dataRevacina2: "",
-    nomeVacina3: "",
-    dataVacina3: "",
-    dataRevacina3: "",
-  });
+  const [vacinas, setVacinas] = useState([
+    { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
+  ]);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   // Carregar pets do localStorage
@@ -23,8 +15,24 @@ const CartaoVacina = () => {
     setPets(petsStorage);
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (index, field, value) => {
+    const novasVacinas = [...vacinas];
+    novasVacinas[index][field] = value;
+    setVacinas(novasVacinas);
+  };
+
+  const adicionarVacina = () => {
+    setVacinas([
+      ...vacinas,
+      { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
+    ]);
+  };
+
+  const removerVacina = (index) => {
+    if (vacinas.length > 1) {
+      const novasVacinas = vacinas.filter((_, i) => i !== index);
+      setVacinas(novasVacinas);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -55,21 +63,17 @@ const CartaoVacina = () => {
     const atividades = JSON.parse(localStorage.getItem("atividades") || "[]");
     const novasVacinas = [];
 
-    // Processar cada vacina (1, 2 e 3)
-    for (let i = 1; i <= 3; i++) {
-      const nomeVacina = formData[`nomeVacina${i}`];
-      const dataVacina = formData[`dataVacina${i}`];
-      const dataRevacina = formData[`dataRevacina${i}`];
-
+    // Processar cada vacina
+    vacinas.forEach((vacina, index) => {
       // Só adiciona se tiver nome e data
-      if (nomeVacina && dataVacina) {
+      if (vacina.nomeVacina && vacina.dataVacina) {
         const novaVacina = {
-          id: Date.now().toString() + `_${i}`,
+          id: Date.now().toString() + `_${index}`,
           petId: selectedPet,
           petNome: pet.nome,
-          nomeVacina: nomeVacina,
-          dataVacina: dataVacina,
-          dataRevacina: dataRevacina,
+          nomeVacina: vacina.nomeVacina,
+          dataVacina: vacina.dataVacina,
+          dataRevacina: vacina.dataRevacina,
           dataCadastro: new Date().toISOString(),
         };
 
@@ -78,17 +82,17 @@ const CartaoVacina = () => {
 
         // Adicionar à atividade
         const novaAtividade = {
-          id: Date.now().toString() + `_vacina_${i}`,
+          id: Date.now().toString() + `_vacina_${index}`,
           tipo: "vacina",
           petNome: pet.nome,
-          nomeVacina: nomeVacina,
-          dataVacina: dataVacina,
-          dataRevacina: dataRevacina || "Não informada",
+          nomeVacina: vacina.nomeVacina,
+          dataVacina: vacina.dataVacina,
+          dataRevacina: vacina.dataRevacina || "Não informada",
           data: new Date().toLocaleString("pt-BR"),
         };
         atividades.unshift(novaAtividade);
       }
-    }
+    });
 
     if (novasVacinas.length === 0) {
       setMessage({ type: "error", text: "Preencha pelo menos uma vacina" });
@@ -109,24 +113,16 @@ const CartaoVacina = () => {
       type: "success",
       text: `${novasVacinas.length} vacina(s) cadastrada(s) com sucesso!`,
     });
-    setFormData({
-      nomeVacina1: "",
-      dataVacina1: "",
-      dataRevacina1: "",
-      nomeVacina2: "",
-      dataVacina2: "",
-      dataRevacina2: "",
-      nomeVacina3: "",
-      dataVacina3: "",
-      dataRevacina3: "",
-    });
+    setVacinas([
+      { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
+    ]);
     setSelectedPet("");
 
     setTimeout(() => setMessage({ type: "", text: "" }), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Toast Flutuante */}
       {message.text && (
         <div
@@ -146,7 +142,7 @@ const CartaoVacina = () => {
       )}
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/admin" className="flex items-center space-x-3">
@@ -181,7 +177,7 @@ const CartaoVacina = () => {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
             Gerenciar Cartão de Vacina
           </h1>
@@ -207,153 +203,84 @@ const CartaoVacina = () => {
 
           {/* Formulário de Cadastro */}
           <form onSubmit={handleSubmit} className="space-y-6 mb-8">
-            {/* Vacina 1 */}
-            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-900 mb-3">Vacina 1</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome da Vacina
-                  </label>
-                  <input
-                    type="text"
-                    name="nomeVacina1"
-                    value={formData.nomeVacina1}
-                    onChange={handleChange}
-                    placeholder="Ex: V10, Antirrábica"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
+            {/* Lista de Vacinas */}
+            {vacinas.map((vacina, index) => (
+              <div
+                key={vacina.id}
+                className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative"
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold text-gray-900">
+                    Vacina {index + 1}
+                  </h3>
+                  {vacinas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removerVacina(index)}
+                      className="text-red-600 hover:text-red-800 font-medium text-sm"
+                    >
+                      ✕ Remover
+                    </button>
+                  )}
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data da Vacina
+                      Nome da Vacina
                     </label>
                     <input
-                      type="date"
-                      name="dataVacina1"
-                      value={formData.dataVacina1}
-                      onChange={handleChange}
+                      type="text"
+                      value={vacina.nomeVacina}
+                      onChange={(e) =>
+                        handleChange(index, "nomeVacina", e.target.value)
+                      }
+                      placeholder="Ex: V10, Antirrábica, Leishmaniose"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data de Revacinação
-                    </label>
-                    <input
-                      type="date"
-                      name="dataRevacina1"
-                      value={formData.dataRevacina1}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Data da Vacina
+                      </label>
+                      <input
+                        type="date"
+                        value={vacina.dataVacina}
+                        onChange={(e) =>
+                          handleChange(index, "dataVacina", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
 
-            {/* Vacina 2 */}
-            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-900 mb-3">
-                Vacina 2 (Opcional)
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome da Vacina
-                  </label>
-                  <input
-                    type="text"
-                    name="nomeVacina2"
-                    value={formData.nomeVacina2}
-                    onChange={handleChange}
-                    placeholder="Ex: Leishmaniose"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data da Vacina
-                    </label>
-                    <input
-                      type="date"
-                      name="dataVacina2"
-                      value={formData.dataVacina2}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data de Revacinação
-                    </label>
-                    <input
-                      type="date"
-                      name="dataRevacina2"
-                      value={formData.dataRevacina2}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Data de Revacinação (Opcional)
+                      </label>
+                      <input
+                        type="date"
+                        value={vacina.dataRevacina}
+                        onChange={(e) =>
+                          handleChange(index, "dataRevacina", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
 
-            {/* Vacina 3 */}
-            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-              <h3 className="font-semibold text-gray-900 mb-3">
-                Vacina 3 (Opcional)
-              </h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome da Vacina
-                  </label>
-                  <input
-                    type="text"
-                    name="nomeVacina3"
-                    value={formData.nomeVacina3}
-                    onChange={handleChange}
-                    placeholder="Ex: Gripe Canina"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data da Vacina
-                    </label>
-                    <input
-                      type="date"
-                      name="dataVacina3"
-                      value={formData.dataVacina3}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Data de Revacinação
-                    </label>
-                    <input
-                      type="date"
-                      name="dataRevacina3"
-                      value={formData.dataRevacina3}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Botão Adicionar Vacina */}
+            <button
+              type="button"
+              onClick={adicionarVacina}
+              className="w-full border-2 border-dashed border-gray-300 hover:border-sky-500 rounded-lg p-4 text-gray-600 hover:text-sky-600 font-medium transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <span className="text-2xl">+</span>
+              <span>Adicionar outra vacina</span>
+            </button>
 
             <div className="flex gap-4">
               <button

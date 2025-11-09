@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 const TestePage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-sky-200 max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent mb-4">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-yellow-300 max-w-md w-full text-center">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-yellow-700 bg-clip-text text-transparent mb-4">
           🧪 Página de Teste
         </h1>
         <p className="text-gray-600 mb-6">

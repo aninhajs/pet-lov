@@ -17,12 +17,57 @@ const CadastrarPet = () => {
     vermifugado: false,
     necessidadesEspeciais: "",
     historia: "",
-    imagem: null,
+    imagens: [],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  // Função para comprimir e redimensionar imagem
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Criar canvas para redimensionar
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          // Definir tamanho máximo (800px na maior dimensão)
+          const maxSize = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          // Desenhar imagem redimensionada
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Converter para base64 com qualidade reduzida (70%)
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(compressedBase64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,18 +77,46 @@ const CadastrarPet = () => {
     });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
+  const handleImageChange = async (e) => {
+    const files = Array.from(e.target.files);
+
+    if (files.length > 0) {
+      // Limitar a 5 fotos
+      const maxFiles = 5;
+      const remainingSlots = maxFiles - formData.imagens.length;
+      const filesToProcess = files.slice(0, remainingSlots);
+
+      if (filesToProcess.length === 0) {
+        alert(`Você já selecionou o máximo de ${maxFiles} fotos`);
+        return;
+      }
+
+      setIsCompressing(true);
+
+      try {
+        // Comprimir todas as imagens
+        const compressedImages = await Promise.all(
+          filesToProcess.map((file) => compressImage(file))
+        );
+
         setFormData({
           ...formData,
-          imagem: e.target.result,
+          imagens: [...formData.imagens, ...compressedImages],
         });
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Erro ao comprimir imagens:", error);
+        alert("Erro ao processar as imagens. Tente novamente.");
+      } finally {
+        setIsCompressing(false);
+      }
     }
+  };
+
+  const handleRemoveImage = (index) => {
+    setFormData({
+      ...formData,
+      imagens: formData.imagens.filter((_, i) => i !== index),
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -67,7 +140,7 @@ const CadastrarPet = () => {
         vacinado: formData.vacinado,
         vermifugado: formData.vermifugado,
         status: "disponivel",
-        imagem: formData.imagem || null,
+        imagens: formData.imagens,
         dataCadastro: new Date().toISOString(),
       };
 
@@ -88,7 +161,7 @@ const CadastrarPet = () => {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 flex items-center justify-center">
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-xl p-8 text-center border-2 border-sky-200">
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -124,9 +197,9 @@ const CadastrarPet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Header */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/admin" className="flex items-center space-x-3">
@@ -416,7 +489,7 @@ const CadastrarPet = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Foto Principal
+                    Fotos do Pet (até 5 fotos)
                   </label>
 
                   {/* Botão customizado para upload */}
@@ -425,76 +498,131 @@ const CadastrarPet = () => {
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
+                      multiple
+                      disabled={isCompressing || formData.imagens.length >= 5}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       id="file-upload"
                     />
                     <label
                       htmlFor="file-upload"
-                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-sky-300 rounded-lg cursor-pointer bg-sky-50 hover:bg-sky-100 transition-colors duration-200"
+                      className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors duration-200 ${
+                        isCompressing || formData.imagens.length >= 5
+                          ? "border-gray-300 bg-gray-100 cursor-not-allowed"
+                          : "border-sky-300 bg-sky-50 hover:bg-sky-100 cursor-pointer"
+                      }`}
                     >
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg
-                          className="w-8 h-8 mb-2 text-sky-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                          />
-                        </svg>
-                        <p className="mb-1 text-sm text-sky-600 font-medium">
-                          <span>Clique para fazer upload</span>
-                        </p>
-                        <p className="text-xs text-sky-500">
-                          PNG, JPG, JPEG até 10MB
-                        </p>
+                        {isCompressing ? (
+                          <>
+                            <div className="animate-spin rounded-full h-8 w-8 border-4 border-sky-500 border-t-transparent mb-2"></div>
+                            <p className="text-sm text-sky-600 font-medium">
+                              Comprimindo imagens...
+                            </p>
+                          </>
+                        ) : formData.imagens.length >= 5 ? (
+                          <>
+                            <svg
+                              className="w-8 h-8 mb-2 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                            <p className="text-sm text-gray-500 font-medium">
+                              Limite máximo atingido
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <svg
+                              className="w-8 h-8 mb-2 text-sky-500"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                              />
+                            </svg>
+                            <p className="mb-1 text-sm text-sky-600 font-medium">
+                              <span>Clique para fazer upload múltiplo</span>
+                            </p>
+                            <p className="text-xs text-sky-500">
+                              PNG, JPG, JPEG (serão comprimidas automaticamente)
+                            </p>
+                          </>
+                        )}
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {formData.imagem && (
+                {formData.imagens && formData.imagens.length > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-medium text-gray-700">
-                        Preview da imagem:
+                        {formData.imagens.length} foto(s) selecionada(s):
                       </p>
                       <button
                         type="button"
                         onClick={() =>
-                          setFormData({ ...formData, imagem: null })
+                          setFormData({ ...formData, imagens: [] })
                         }
                         className="text-red-600 hover:text-red-800 text-sm font-medium"
                       >
-                        Remover
+                        Remover todas
                       </button>
                     </div>
-                    <div className="relative inline-block">
-                      <img
-                        src={formData.imagem}
-                        alt="Preview do pet"
-                        className="w-40 h-40 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
-                      />
-                      <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {formData.imagens.map((img, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={img}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                           />
-                        </svg>
-                      </div>
+                          {/* Badge com número da foto */}
+                          <div className="absolute top-2 left-2 bg-sky-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md">
+                            {index + 1}
+                          </div>
+                          {/* Botão para remover foto individual */}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:bg-red-700"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
                     </div>
+
+                    <p className="text-xs text-gray-500">
+                      💡 Dica: A primeira foto será a foto principal do card.
+                      Máximo de 5 fotos.
+                    </p>
                   </div>
                 )}
               </div>

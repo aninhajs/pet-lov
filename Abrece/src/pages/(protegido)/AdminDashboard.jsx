@@ -61,7 +61,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Header */}
       <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-sm border-b-2 border-sky-200">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,52 +113,48 @@ const AdminDashboard = () => {
 
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div className="bg-white hover:bg-sky-50 rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-2xl mr-3">🐕</div>
+              <div className="text-3xl mr-3">🐕</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total de Pets
-                </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-sm font-bold text-gray-800">Total de Pets</p>
+                <p className="text-4xl font-extrabold text-gray-900">
                   {stats.totalPets}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white hover:bg-sky-50 rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-2xl mr-3">❤️</div>
+              <div className="text-3xl mr-3">❤️</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pets Adotados
-                </p>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-sm font-bold text-gray-800">Pets Adotados</p>
+                <p className="text-4xl font-extrabold text-green-700">
                   {stats.petsAdotados}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white hover:bg-sky-50 rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-2xl mr-3">👥</div>
+              <div className="text-3xl mr-3">👥</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Candidatos</p>
-                <p className="text-3xl font-bold text-blue-600">
+                <p className="text-sm font-bold text-gray-800">Candidatos</p>
+                <p className="text-4xl font-extrabold text-blue-700">
                   {stats.candidatos}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white hover:bg-sky-50 rounded-lg shadow-sm p-6">
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-2xl mr-3">⏳</div>
+              <div className="text-3xl mr-3">⏳</div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Pendências</p>
-                <p className="text-3xl font-bold text-orange-600">
+                <p className="text-sm font-bold text-gray-800">Pendências</p>
+                <p className="text-4xl font-extrabold text-orange-700">
                   {stats.processosPendentes}
                 </p>
               </div>
@@ -168,9 +164,9 @@ const AdminDashboard = () => {
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Cartão de Vacinas Recentes */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50">
-              <h2 className="text-xl font-semibold text-sky-700 flex items-center mb-4">
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg shadow-lg">
+            <div className="p-6 border-b-2 border-yellow-300 bg-gradient-to-r from-yellow-200 to-yellow-300">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center mb-4">
                 💉 Vacinas Recentes
               </h2>
               {/* Campo de Busca */}
@@ -198,29 +194,29 @@ const AdminDashboard = () => {
                   {vacinas.map((vacina) => (
                     <div
                       key={vacina.id}
-                      className="border-l-4 border-sky-500 pl-4 py-2 bg-sky-50 rounded-r-lg"
+                      className="border-l-4 border-green-600 pl-4 py-2 bg-white rounded-r-lg shadow-md"
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-base font-bold text-gray-900">
                             🐾 {vacina.petNome}
                           </p>
-                          <p className="text-sm text-sky-700 font-medium mt-1">
+                          <p className="text-sm text-green-700 font-bold mt-1">
                             {vacina.nomeVacina}
                           </p>
                           <div className="mt-2 space-y-1">
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-700 font-semibold">
                               📅 Aplicada em:{" "}
-                              <span className="font-medium">
+                              <span className="font-bold text-gray-900">
                                 {new Date(vacina.dataVacina).toLocaleDateString(
                                   "pt-BR"
                                 )}
                               </span>
                             </p>
                             {vacina.dataRevacina && (
-                              <p className="text-xs text-orange-600">
+                              <p className="text-xs text-orange-700 font-semibold">
                                 🔔 Revacinar em:{" "}
-                                <span className="font-semibold">
+                                <span className="font-extrabold text-orange-800">
                                   {new Date(
                                     vacina.dataRevacina
                                   ).toLocaleDateString("pt-BR")}
@@ -255,50 +251,50 @@ const AdminDashboard = () => {
           </div>
 
           {/* Ações Rápidas */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Ações Rápidas
-              </h2>
+          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg shadow-lg">
+            <div className="p-6 border-b-2 border-yellow-300 bg-gradient-to-r from-yellow-200 to-yellow-300">
+              <h2 className="text-xl font-bold text-gray-900">Ações Rápidas</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
                 <Link
                   to="/admin/adoptants"
-                  className="flex items-center p-4 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
+                  className="flex items-center p-4 bg-white hover:bg-green-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-green-600"
                 >
-                  <div className="text-2xl mr-4">📋</div>
+                  <div className="text-3xl mr-4">📋</div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-bold text-gray-900 text-lg">
                       Gerenciar Candidatos
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-700 font-semibold">
                       Ver e aprovar formulários de adoção
                     </p>
                   </div>
                 </Link>
                 <Link
                   to="/admin/gerenciar-pets"
-                  className="flex items-center p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors"
+                  className="flex items-center p-4 bg-white hover:bg-blue-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-blue-600"
                 >
-                  <div className="text-2xl mr-4">🐾</div>
+                  <div className="text-3xl mr-4">🐾</div>
                   <div>
-                    <p className="font-medium text-gray-900">Gerenciar Pets</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-bold text-gray-900 text-lg">
+                      Gerenciar Pets
+                    </p>
+                    <p className="text-sm text-gray-700 font-semibold">
                       Ver, editar e controlar status dos pets
                     </p>
                   </div>
                 </Link>
                 <Link
                   to="/admin/cartao-vacina"
-                  className="flex items-center p-4 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors"
+                  className="flex items-center p-4 bg-white hover:bg-purple-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-purple-600"
                 >
-                  <div className="text-2xl mr-4">💉</div>
+                  <div className="text-3xl mr-4">💉</div>
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-bold text-gray-900 text-lg">
                       Cartão de Vacina
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-700 font-semibold">
                       Registrar vacinas e histórico de saúde
                     </p>
                   </div>
