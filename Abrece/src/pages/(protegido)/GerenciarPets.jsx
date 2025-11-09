@@ -1,0 +1,582 @@
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+const GerenciarPets = () => {
+  const [pets, setPets] = useState([]);
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [petSelecionado, setPetSelecionado] = useState(null);
+
+  // Carregar pets do localStorage
+  useEffect(() => {
+    console.log("GerenciarPets: Carregando pets do localStorage");
+    const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
+    console.log("GerenciarPets: Pets carregados:", petsStorage);
+    setPets(petsStorage);
+  }, []);
+
+  const petsFiltrados =
+    filtroStatus === "todos"
+      ? pets
+      : pets.filter(
+          (pet) => pet.status?.toLowerCase() === filtroStatus.toLowerCase()
+        );
+
+  const alterarStatusPet = (id, novoStatus) => {
+    const petsAtualizados = pets.map((pet) =>
+      pet.id === id ? { ...pet, status: novoStatus } : pet
+    );
+    setPets(petsAtualizados);
+    localStorage.setItem("pets", JSON.stringify(petsAtualizados));
+
+    // Se o pet foi adotado, remover suas vacinas do sistema
+    if (novoStatus === "adotado") {
+      const vacinasStorage = JSON.parse(
+        localStorage.getItem("vacinas") || "[]"
+      );
+      const vacinasAtualizadas = vacinasStorage.filter(
+        (vacina) => vacina.petId.toString() !== id.toString()
+      );
+      localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+
+      // Remover atividades de vacina do pet adotado
+      const atividadesStorage = JSON.parse(
+        localStorage.getItem("atividades") || "[]"
+      );
+      const petAdotado = pets.find((p) => p.id === id);
+      const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
+        if (atividade.tipo === "vacina") {
+          return atividade.petNome !== petAdotado?.nome;
+        }
+        return true;
+      });
+      localStorage.setItem("atividades", JSON.stringify(atividadesAtualizadas));
+
+      console.log(`Pet ${id} adotado - vacinas removidas do sistema`);
+    }
+  };
+
+  const excluirPet = (id) => {
+    if (window.confirm("Tem certeza que deseja excluir este pet?")) {
+      // Excluir o pet
+      const petsAtualizados = pets.filter((pet) => pet.id !== id);
+      setPets(petsAtualizados);
+      localStorage.setItem("pets", JSON.stringify(petsAtualizados));
+
+      // Excluir vacinas do pet
+      const vacinasStorage = JSON.parse(
+        localStorage.getItem("vacinas") || "[]"
+      );
+      const vacinasAtualizadas = vacinasStorage.filter(
+        (vacina) => vacina.petId.toString() !== id.toString()
+      );
+      localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+
+      // Excluir atividades de vacina do pet
+      const atividadesStorage = JSON.parse(
+        localStorage.getItem("atividades") || "[]"
+      );
+      const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
+        // Remove atividades de vacina deste pet
+        if (atividade.tipo === "vacina") {
+          const petExcluido = pets.find((p) => p.id === id);
+          return atividade.petNome !== petExcluido?.nome;
+        }
+        return true;
+      });
+      localStorage.setItem("atividades", JSON.stringify(atividadesAtualizadas));
+
+      setPetSelecionado(null);
+
+      console.log(`Pet ${id} excluído junto com suas vacinas e atividades`);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "disponivel":
+        return "bg-green-100 text-green-800";
+      case "adotado":
+        return "bg-blue-100 text-blue-800";
+      case "em_processo":
+        return "bg-yellow-100 text-yellow-800";
+      case "indisponivel":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "disponivel":
+        return "Disponível";
+      case "adotado":
+        return "Adotado";
+      case "em_processo":
+        return "Em Processo";
+      case "indisponivel":
+        return "Indisponível";
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-yellow-50 to-sky-100">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-20 items-center">
+            <Link to="/admin" className="flex items-center space-x-3">
+              <img
+                src="/logoabrace.jpg"
+                alt="Abrace Uma Causa Animal"
+                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+              />
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
+                  Abrace Uma Causa Animal
+                </h1>
+                <p className="text-xs text-sky-600 font-medium">
+                  Gerenciar Pets
+                </p>
+              </div>
+            </Link>
+            <div className="flex space-x-3">
+              <Link
+                to="/admin"
+                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                🏠 Dashboard
+              </Link>
+              <Link
+                to="/admin/cadastrar-pet"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+              >
+                ➕ Novo Pet
+              </Link>
+              <button
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("user");
+                  window.location.href = "/login";
+                }}
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+              >
+                🚪 Sair
+              </button>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Título e filtros */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-3">
+            <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
+              Gerenciar Pets 🐾
+            </span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Visualize e gerencie todos os pets cadastrados
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setFiltroStatus("todos")}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+                filtroStatus === "todos"
+                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white scale-105"
+                  : "bg-white text-gray-700 hover:bg-sky-50 hover:text-sky-600 hover:scale-105"
+              }`}
+            >
+              📋 Todos ({pets.length})
+            </button>
+            <button
+              onClick={() => setFiltroStatus("disponivel")}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+                filtroStatus === "disponivel"
+                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105"
+                  : "bg-white text-gray-700 hover:bg-green-50 hover:text-green-600 hover:scale-105"
+              }`}
+            >
+              ✅ Disponíveis (
+              {pets.filter((p) => p.status === "disponivel").length})
+            </button>
+            <button
+              onClick={() => setFiltroStatus("em_processo")}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+                filtroStatus === "em_processo"
+                  ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 scale-105"
+                  : "bg-white text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 hover:scale-105"
+              }`}
+            >
+              ⏳ Em Processo (
+              {pets.filter((p) => p.status === "em_processo").length})
+            </button>
+            <button
+              onClick={() => setFiltroStatus("adotado")}
+              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+                filtroStatus === "adotado"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-105"
+                  : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-105"
+              }`}
+            >
+              ❤️ Adotados ({pets.filter((p) => p.status === "adotado").length})
+            </button>
+          </div>
+        </div>
+
+        {/* Lista de pets */}
+        <div className="bg-white shadow-xl rounded-xl overflow-hidden border-2 border-sky-200">
+          <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50">
+            <h2 className="text-xl font-bold text-sky-700">
+              🐾 Pets Cadastrados ({petsFiltrados.length})
+            </h2>
+          </div>
+
+          <div className="divide-y divide-gray-200">
+            {petsFiltrados.map((pet) => (
+              <div
+                key={pet.id}
+                className="px-6 py-5 hover:bg-gradient-to-r hover:from-sky-50 hover:to-yellow-50 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg overflow-hidden shadow-sm flex items-center justify-center">
+                      {pet.imagem ? (
+                        <img
+                          src={pet.imagem}
+                          alt={pet.nome}
+                          className="w-full h-full object-contain hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                            e.target.nextElementSibling.style.display = "flex";
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`absolute inset-0 flex items-center justify-center ${
+                          pet.imagem ? "hidden" : "flex"
+                        }`}
+                      >
+                        <span className="text-2xl opacity-60">
+                          {pet.tipo === "cão"
+                            ? "🐕"
+                            : pet.tipo === "gato"
+                            ? "🐱"
+                            : "🐾"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3">
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {pet.nome}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                            pet.status
+                          )}`}
+                        >
+                          {getStatusText(pet.status)}
+                        </span>
+                      </div>
+
+                      <div className="mt-1 text-sm text-gray-600">
+                        <p>
+                          {pet.tipo} • {pet.sexo} • {pet.idade} • {pet.porte}
+                        </p>
+                        <p className="mt-1">{pet.descricao}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setPetSelecionado(pet)}
+                      className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                    >
+                      Detalhes
+                    </button>
+
+                    {pet.status === "disponivel" && (
+                      <button
+                        onClick={() => alterarStatusPet(pet.id, "em_processo")}
+                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                      >
+                        ⏳ Em Processo
+                      </button>
+                    )}
+
+                    {pet.status === "em_processo" && (
+                      <>
+                        <button
+                          onClick={() => alterarStatusPet(pet.id, "adotado")}
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                        >
+                          ❤️ Adotado
+                        </button>
+                        <button
+                          onClick={() => alterarStatusPet(pet.id, "disponivel")}
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                        >
+                          ✅ Disponível
+                        </button>
+                      </>
+                    )}
+
+                    {pet.status === "adotado" && (
+                      <button
+                        onClick={() => alterarStatusPet(pet.id, "disponivel")}
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                      >
+                        🔄 Reativar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {petsFiltrados.length === 0 && (
+            <div className="px-6 py-8 text-center">
+              <div className="text-4xl mb-4">🐾</div>
+              <p className="text-gray-500 mb-2">
+                {pets.length === 0
+                  ? "Nenhum pet cadastrado ainda."
+                  : `Nenhum pet encontrado com o status "${filtroStatus}".`}
+              </p>
+              {pets.length === 0 && (
+                <Link
+                  to="/admin/cadastrar-pet"
+                  className="mt-4 inline-block bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-lg transition-all hover:scale-105"
+                >
+                  ➕ Cadastrar Primeiro Pet
+                </Link>
+              )}
+              {filtroStatus !== "todos" && pets.length > 0 && (
+                <button
+                  onClick={() => setFiltroStatus("todos")}
+                  className="mt-4 text-sky-600 hover:text-sky-700 font-semibold"
+                >
+                  📋 Ver todos os pets
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Modal de detalhes */}
+      {petSelecionado && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-sky-200">
+            <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-sky-700 flex items-center">
+                🐾 Detalhes do Pet
+              </h2>
+              <button
+                onClick={() => setPetSelecionado(null)}
+                className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-6 py-4 space-y-4">
+              <div className="text-center">
+                <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-xl shadow-lg bg-gradient-to-br from-sky-50 to-yellow-50 flex items-center justify-center">
+                  {petSelecionado.imagem ? (
+                    <img
+                      src={petSelecionado.imagem}
+                      alt={petSelecionado.nome}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextElementSibling.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center ${
+                      petSelecionado.imagem ? "hidden" : "flex"
+                    }`}
+                  >
+                    <span className="text-8xl opacity-50">
+                      {petSelecionado.tipo === "cão"
+                        ? "🐕"
+                        : petSelecionado.tipo === "gato"
+                        ? "🐱"
+                        : "🐾"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold text-sky-700 mb-3 text-base flex items-center">
+                    ℹ️ Informações Básicas
+                  </h3>
+                  <div className="bg-gradient-to-br from-sky-50 to-blue-50 p-4 rounded-lg space-y-2 text-sm border border-sky-100">
+                    <p className="flex justify-between">
+                      <span className="text-gray-600">Nome:</span>
+                      <strong className="text-gray-900">
+                        {petSelecionado.nome}
+                      </strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-gray-600">Tipo:</span>
+                      <strong className="text-gray-900">
+                        {petSelecionado.tipo}
+                      </strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-gray-600">Idade:</span>
+                      <strong className="text-gray-900">
+                        {petSelecionado.idade}
+                      </strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-gray-600">Sexo:</span>
+                      <strong className="text-gray-900">
+                        {petSelecionado.sexo}
+                      </strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-gray-600">Porte:</span>
+                      <strong className="text-gray-900">
+                        {petSelecionado.porte}
+                      </strong>
+                    </p>
+                    {petSelecionado.cor && (
+                      <p className="flex justify-between">
+                        <span className="text-gray-600">Cor:</span>
+                        <strong className="text-gray-900">
+                          {petSelecionado.cor}
+                        </strong>
+                      </p>
+                    )}
+                    {petSelecionado.peso && (
+                      <p className="flex justify-between">
+                        <span className="text-gray-600">Peso:</span>
+                        <strong className="text-gray-900">
+                          {petSelecionado.peso}kg
+                        </strong>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold text-sky-700 mb-3 text-base flex items-center">
+                    💊 Status de Saúde
+                  </h3>
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg space-y-2 text-sm border border-green-100">
+                    <p className="flex justify-between items-center">
+                      <span className="text-gray-600">Castrado:</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          petSelecionado.castrado
+                            ? "bg-green-200 text-green-800"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {petSelecionado.castrado ? "✓ Sim" : "✗ Não"}
+                      </span>
+                    </p>
+                    <p className="flex justify-between items-center">
+                      <span className="text-gray-600">Vacinado:</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          petSelecionado.vacinado
+                            ? "bg-green-200 text-green-800"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {petSelecionado.vacinado ? "✓ Sim" : "✗ Não"}
+                      </span>
+                    </p>
+                    <p className="flex justify-between items-center">
+                      <span className="text-gray-600">Vermifugado:</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          petSelecionado.vermifugado
+                            ? "bg-green-200 text-green-800"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {petSelecionado.vermifugado ? "✓ Sim" : "✗ Não"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-sky-700 mb-2 text-base">
+                  📝 Descrição
+                </h3>
+                <div className="bg-gradient-to-br from-sky-50 to-yellow-50 p-4 rounded-lg text-sm border border-sky-100">
+                  <p className="text-gray-700 leading-relaxed">
+                    {petSelecionado.descricao}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-sky-700 mb-2 text-base">
+                  📊 Status Atual
+                </h3>
+                <span
+                  className={`px-4 py-2 text-sm rounded-full font-semibold shadow-sm ${getStatusColor(
+                    petSelecionado.status
+                  )}`}
+                >
+                  {getStatusText(petSelecionado.status)}
+                </span>
+              </div>
+
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    if (petSelecionado.status === "disponivel") {
+                      alterarStatusPet(petSelecionado.id, "em_processo");
+                    } else if (petSelecionado.status === "em_processo") {
+                      alterarStatusPet(petSelecionado.id, "adotado");
+                    } else if (petSelecionado.status === "adotado") {
+                      alterarStatusPet(petSelecionado.id, "disponivel");
+                    }
+                    setPetSelecionado(null);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                >
+                  {petSelecionado.status === "disponivel" &&
+                    "⏳ Marcar como Em Processo"}
+                  {petSelecionado.status === "em_processo" &&
+                    "❤️ Marcar como Adotado"}
+                  {petSelecionado.status === "adotado" && "🔄 Reativar Pet"}
+                </button>
+
+                <button
+                  onClick={() => excluirPet(petSelecionado.id)}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                >
+                  🗑️ Excluir
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GerenciarPets;
