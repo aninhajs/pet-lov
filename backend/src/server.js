@@ -4,11 +4,14 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 
-// Importar rotas
+// Importar rotas públicas
 import petsRoutes from "./routes/pets.js";
 import authRoutes from "./routes/auth.js";
 import candidatosRoutes from "./routes/candidatos.js";
 import adocoesRoutes from "./routes/adocoes.js";
+
+// Importar rotas privadas (admin)
+import privateRoutes from "./routes/private/index.js";
 
 // Configurar variáveis de ambiente
 dotenv.config();
@@ -23,7 +26,11 @@ app.use(
     origin:
       process.env.NODE_ENV === "production"
         ? ["https://seu-frontend.vercel.app"]
-        : ["http://localhost:5173", "http://localhost:3000"],
+        : [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:3000",
+          ],
     credentials: true,
   })
 );
@@ -40,11 +47,14 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Rotas da API
+// Rotas Públicas da API
 app.use("/api/pets", petsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/candidatos", candidatosRoutes);
 app.use("/api/adocoes", adocoesRoutes);
+
+// Rotas Privadas (Admin) - Protegidas por autenticação
+app.use("/api", privateRoutes);
 
 // Middleware de erro global
 app.use((err, req, res, next) => {
@@ -70,10 +80,23 @@ app.use("*", (req, res) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
-  console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🐕 Pets API: http://localhost:${PORT}/api/pets`);
-  console.log(`👥 Candidatos API: http://localhost:${PORT}/api/candidatos`);
-  console.log(`❤️ Adoções API: http://localhost:${PORT}/api/adocoes`);
-  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+  console.log(`\nROTAS PÚBLICAS:`);
+  console.log(`  Pets: http://localhost:${PORT}/api/pets`);
+  console.log(`  Auth: http://localhost:${PORT}/api/auth`);
+  console.log(`  Candidatos: http://localhost:${PORT}/api/candidatos`);
+  console.log(`  Adoções: http://localhost:${PORT}/api/adocoes`);
+  console.log(`\nROTAS PRIVADAS (Admin):`);
+  console.log(`  Dashboard: http://localhost:${PORT}/api/admin/dashboard`);
+  console.log(
+    `  Cadastrar Pet: http://localhost:${PORT}/api/admin/cadastrar-pet`
+  );
+  console.log(
+    `  Gerenciar Pets: http://localhost:${PORT}/api/admin/gerenciar-pets`
+  );
+  console.log(`  Adotantes: http://localhost:${PORT}/api/admin/adoptants`);
+  console.log(
+    `  Cartão Vacina: http://localhost:${PORT}/api/admin/cartao-vacina`
+  );
 });

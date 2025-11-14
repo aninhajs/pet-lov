@@ -1,52 +1,53 @@
-import { prisma } from '../lib/prisma.js'
-import { validationResult } from 'express-validator'
+import { prisma } from "../lib/prisma.js";
+import { validationResult } from "express-validator";
 
 export const getPets = async (req, res) => {
   try {
-    const { tipo, status, porte, sexo, page = 1, limit = 10 } = req.query
-    
+    const { tipo, status, porte, sexo, page = 1, limit = 10 } = req.query;
+
     // Calcular offset para paginação
-    const offset = (parseInt(page) - 1) * parseInt(limit)
-    
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
     // Construir filtros
-    const where = {}
-    if (tipo) where.tipo = tipo.toLowerCase()
-    if (status) where.status = status.toLowerCase()
-    if (porte) where.porte = porte.toLowerCase()
-    if (sexo) where.sexo = sexo.toLowerCase()
-    
+    const where = {};
+    if (tipo) where.tipo = tipo.toLowerCase();
+    if (status) where.status = status.toLowerCase();
+    if (porte) where.porte = porte.toLowerCase();
+    if (sexo) where.sexo = sexo.toLowerCase();
+
     // Buscar pets com paginação
     const [pets, totalCount] = await Promise.all([
       prisma.pet.findMany({
         where,
         include: {
           imagens: {
-            where: { principal: true },
             select: {
               id: true,
               url_imagem: true,
-              nome_arquivo: true
-            }
+              nome_arquivo: true,
+              principal: true,
+            },
+            orderBy: { principal: "desc" }, // Principal primeiro
           },
           usuario_cadastrou: {
             select: {
               id: true,
-              nome: true
-            }
-          }
+              email: true,
+            },
+          },
         },
-        orderBy: { data_cadastro: 'desc' },
+        orderBy: { data_cadastro: "desc" },
         skip: offset,
-        take: parseInt(limit)
+        take: parseInt(limit),
       }),
-      prisma.pet.count({ where })
-    ])
-    
+      prisma.pet.count({ where }),
+    ]);
+
     // Calcular dados de paginação
-    const totalPages = Math.ceil(totalCount / parseInt(limit))
-    const hasNextPage = parseInt(page) < totalPages
-    const hasPrevPage = parseInt(page) > 1
-    
+    const totalPages = Math.ceil(totalCount / parseInt(limit));
+    const hasNextPage = parseInt(page) < totalPages;
+    const hasPrevPage = parseInt(page) > 1;
+
     res.json({
       success: true,
       data: pets,
@@ -56,24 +57,24 @@ export const getPets = async (req, res) => {
         totalCount,
         hasNextPage,
         hasPrevPage,
-        limit: parseInt(limit)
-      }
-    })
+        limit: parseInt(limit),
+      },
+    });
   } catch (error) {
-    console.error('Erro ao buscar pets:', error)
+    console.error("Erro ao buscar pets:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
 
 export const getPetById = async (req, res) => {
   try {
-    const { id } = req.params
-    
+    const { id } = req.params;
+
     const pet = await prisma.pet.findUnique({
       where: { id },
       include: {
@@ -82,58 +83,57 @@ export const getPetById = async (req, res) => {
             id: true,
             url_imagem: true,
             nome_arquivo: true,
-            principal: true
+            principal: true,
           },
-          orderBy: { principal: 'desc' }
+          orderBy: { principal: "desc" },
         },
         usuario_cadastrou: {
           select: {
             id: true,
-            nome: true,
-            email: true
-          }
-        }
-      }
-    })
-    
+            email: true,
+          },
+        },
+      },
+    });
+
     if (!pet) {
       return res.status(404).json({
         success: false,
         error: {
-          message: 'Pet não encontrado'
-        }
-      })
+          message: "Pet não encontrado",
+        },
+      });
     }
-    
+
     res.json({
       success: true,
-      data: pet
-    })
+      data: pet,
+    });
   } catch (error) {
-    console.error('Erro ao buscar pet:', error)
+    console.error("Erro ao buscar pet:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
 
 export const createPet = async (req, res) => {
   try {
     // Verificar erros de validação
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Dados inválidos',
-          details: errors.array()
-        }
-      })
+          message: "Dados inválidos",
+          details: errors.array(),
+        },
+      });
     }
-    
+
     const {
       nome,
       tipo,
@@ -149,9 +149,23 @@ export const createPet = async (req, res) => {
       vermifugado = false,
       necessidades_especiais,
       historia,
-      imagens = []
-    } = req.body
-    
+      imagens = [],
+    } = req.body;
+
+    // Calcular tamanho aproximado das imagens em base64 (se não fornecido)
+    const processarImagens = imagens.map((img, index) => {
+      const tamanhoBytes = img.url ? Math.ceil((img.url.length * 3) / 4) : null;
+      return {
+        url_imagem: img.url,
+        nome_arquivo:
+          img.nome ||
+          `pet-${nome.replace(/\s+/g, "-")}-${Date.now()}-${index}.jpg`,
+        tamanho: img.tamanho || tamanhoBytes,
+        tipo_mime: img.tipo || "image/jpeg",
+        principal: index === 0, // Primeira imagem é principal
+      };
+    });
+
     // Criar pet no banco
     const novoPet = await prisma.pet.create({
       data: {
@@ -160,102 +174,100 @@ export const createPet = async (req, res) => {
         idade,
         porte: porte.toLowerCase(),
         sexo: sexo.toLowerCase(),
-        cor,
+        cor: cor && cor.trim() !== "" ? cor : "Não informada",
         peso: peso ? parseFloat(peso) : null,
         descricao,
-        temperamento,
+        temperamento: temperamento || null,
         castrado: Boolean(castrado),
         vacinado: Boolean(vacinado),
         vermifugado: Boolean(vermifugado),
-        necessidades_especiais,
-        historia,
-        status: 'disponivel',
+        necessidades_especiais: necessidades_especiais || null,
+        historia: historia || null,
+        status: "disponivel",
         usuario_id: req.user.id, // Vem do middleware de auth
-        
+
         // Criar imagens se fornecidas
-        ...(imagens.length > 0 && {
+        ...(processarImagens.length > 0 && {
           imagens: {
-            create: imagens.map((img, index) => ({
-              url_imagem: img.url,
-              nome_arquivo: img.nome || `pet-${Date.now()}-${index}.jpg`,
-              tamanho: img.tamanho || null,
-              tipo_mime: img.tipo || 'image/jpeg',
-              principal: index === 0 // Primeira imagem é principal
-            }))
-          }
-        })
+            create: processarImagens,
+          },
+        }),
       },
       include: {
         imagens: true,
         usuario_cadastrou: {
           select: {
             id: true,
-            nome: true
-          }
-        }
-      }
-    })
-    
+            email: true,
+          },
+        },
+      },
+    });
+
     res.status(201).json({
       success: true,
       data: novoPet,
-      message: 'Pet cadastrado com sucesso!'
-    })
+      message: "Pet cadastrado com sucesso!",
+    });
   } catch (error) {
-    console.error('Erro ao criar pet:', error)
+    console.error("Erro ao criar pet:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+        details: error.message,
+      },
+    });
   }
-}
+};
 
 export const updatePet = async (req, res) => {
   try {
-    const { id } = req.params
-    
+    const { id } = req.params;
+
     // Verificar se pet existe
     const petExistente = await prisma.pet.findUnique({
-      where: { id }
-    })
-    
+      where: { id },
+    });
+
     if (!petExistente) {
       return res.status(404).json({
         success: false,
         error: {
-          message: 'Pet não encontrado'
-        }
-      })
+          message: "Pet não encontrado",
+        },
+      });
     }
-    
+
     // Verificar erros de validação
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Dados inválidos',
-          details: errors.array()
-        }
-      })
+          message: "Dados inválidos",
+          details: errors.array(),
+        },
+      });
     }
-    
-    const updateData = { ...req.body }
-    
+
+    const updateData = { ...req.body };
+
     // Converter tipos se necessário
-    if (updateData.peso) updateData.peso = parseFloat(updateData.peso)
-    if (updateData.castrado !== undefined) updateData.castrado = Boolean(updateData.castrado)
-    if (updateData.vacinado !== undefined) updateData.vacinado = Boolean(updateData.vacinado)
-    if (updateData.vermifugado !== undefined) updateData.vermifugado = Boolean(updateData.vermifugado)
-    
+    if (updateData.peso) updateData.peso = parseFloat(updateData.peso);
+    if (updateData.castrado !== undefined)
+      updateData.castrado = Boolean(updateData.castrado);
+    if (updateData.vacinado !== undefined)
+      updateData.vacinado = Boolean(updateData.vacinado);
+    if (updateData.vermifugado !== undefined)
+      updateData.vermifugado = Boolean(updateData.vermifugado);
+
     // Converter enums para lowercase
-    if (updateData.tipo) updateData.tipo = updateData.tipo.toLowerCase()
-    if (updateData.porte) updateData.porte = updateData.porte.toLowerCase()
-    if (updateData.sexo) updateData.sexo = updateData.sexo.toLowerCase()
-    if (updateData.status) updateData.status = updateData.status.toLowerCase()
-    
+    if (updateData.tipo) updateData.tipo = updateData.tipo.toLowerCase();
+    if (updateData.porte) updateData.porte = updateData.porte.toLowerCase();
+    if (updateData.sexo) updateData.sexo = updateData.sexo.toLowerCase();
+    if (updateData.status) updateData.status = updateData.status.toLowerCase();
+
     const petAtualizado = await prisma.pet.update({
       where: { id },
       data: updateData,
@@ -264,129 +276,134 @@ export const updatePet = async (req, res) => {
         usuario_cadastrou: {
           select: {
             id: true,
-            nome: true
-          }
-        }
-      }
-    })
-    
+            email: true,
+          },
+        },
+      },
+    });
+
     res.json({
       success: true,
       data: petAtualizado,
-      message: 'Pet atualizado com sucesso!'
-    })
+      message: "Pet atualizado com sucesso!",
+    });
   } catch (error) {
-    console.error('Erro ao atualizar pet:', error)
+    console.error("Erro ao atualizar pet:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
 
 export const updatePetStatus = async (req, res) => {
   try {
-    const { id } = req.params
-    const { status } = req.body
-    
+    const { id } = req.params;
+    const { status } = req.body;
+
     // Validar status
-    const statusValidos = ['disponivel', 'em_processo', 'adotado', 'indisponivel']
+    const statusValidos = [
+      "disponivel",
+      "em_processo",
+      "adotado",
+      "indisponivel",
+    ];
     if (!statusValidos.includes(status)) {
       return res.status(400).json({
         success: false,
         error: {
-          message: 'Status inválido',
-          validOptions: statusValidos
-        }
-      })
+          message: "Status inválido",
+          validOptions: statusValidos,
+        },
+      });
     }
-    
+
     const petAtualizado = await prisma.pet.update({
       where: { id },
       data: { status },
       include: {
         imagens: {
-          where: { principal: true }
-        }
-      }
-    })
-    
+          where: { principal: true },
+        },
+      },
+    });
+
     res.json({
       success: true,
       data: petAtualizado,
-      message: `Status do pet alterado para "${status}"`
-    })
+      message: `Status do pet alterado para "${status}"`,
+    });
   } catch (error) {
-    if (error.code === 'P2025') {
+    if (error.code === "P2025") {
       return res.status(404).json({
         success: false,
         error: {
-          message: 'Pet não encontrado'
-        }
-      })
+          message: "Pet não encontrado",
+        },
+      });
     }
-    
-    console.error('Erro ao atualizar status do pet:', error)
+
+    console.error("Erro ao atualizar status do pet:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
 
 export const deletePet = async (req, res) => {
   try {
-    const { id } = req.params
-    
+    const { id } = req.params;
+
     // Verificar se pet existe
     const pet = await prisma.pet.findUnique({
-      where: { id }
-    })
-    
+      where: { id },
+    });
+
     if (!pet) {
       return res.status(404).json({
         success: false,
         error: {
-          message: 'Pet não encontrado'
-        }
-      })
+          message: "Pet não encontrado",
+        },
+      });
     }
-    
+
     // Deletar pet (cascade vai deletar as imagens)
     await prisma.pet.delete({
-      where: { id }
-    })
-    
+      where: { id },
+    });
+
     res.json({
       success: true,
-      message: 'Pet removido com sucesso!'
-    })
+      message: "Pet removido com sucesso!",
+    });
   } catch (error) {
-    console.error('Erro ao deletar pet:', error)
+    console.error("Erro ao deletar pet:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
 
 export const getPetStats = async (req, res) => {
   try {
     const stats = await Promise.all([
       prisma.pet.count(),
-      prisma.pet.count({ where: { status: 'disponivel' } }),
-      prisma.pet.count({ where: { status: 'em_processo' } }),
-      prisma.pet.count({ where: { status: 'adotado' } }),
-      prisma.pet.count({ where: { tipo: 'cao' } }),
-      prisma.pet.count({ where: { tipo: 'gato' } })
-    ])
-    
+      prisma.pet.count({ where: { status: "disponivel" } }),
+      prisma.pet.count({ where: { status: "em_processo" } }),
+      prisma.pet.count({ where: { status: "adotado" } }),
+      prisma.pet.count({ where: { tipo: "cao" } }),
+      prisma.pet.count({ where: { tipo: "gato" } }),
+    ]);
+
     res.json({
       success: true,
       data: {
@@ -395,16 +412,16 @@ export const getPetStats = async (req, res) => {
         em_processo: stats[2],
         adotados: stats[3],
         caes: stats[4],
-        gatos: stats[5]
-      }
-    })
+        gatos: stats[5],
+      },
+    });
   } catch (error) {
-    console.error('Erro ao buscar estatísticas:', error)
+    console.error("Erro ao buscar estatísticas:", error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Erro interno do servidor'
-      }
-    })
+        message: "Erro interno do servidor",
+      },
+    });
   }
-}
+};
