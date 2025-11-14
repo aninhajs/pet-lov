@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { PetServices } from "../../services/PetServices";
 
 const CadastrarPet = () => {
   const [formData, setFormData] = useState({
@@ -125,35 +126,73 @@ const CadastrarPet = () => {
     setError("");
 
     try {
-      // Preparar dados para envio
+      // Preparar dados para envio ao backend
       const petData = {
-        id: Date.now().toString(),
         nome: formData.nome,
-        tipo: formData.tipo.toLowerCase(),
+        tipo: formData.tipo, // Já está em lowercase
         idade: formData.idade,
-        porte: formData.porte.toLowerCase(),
-        sexo: formData.sexo.toLowerCase(),
-        cor: formData.cor,
+        porte: formData.porte, // Já está em lowercase
+        sexo: formData.sexo, // Já está em lowercase
+        cor:
+          formData.cor && formData.cor.trim() !== ""
+            ? formData.cor
+            : "Não informada",
         peso: formData.peso ? parseFloat(formData.peso) : null,
         descricao: formData.descricao,
+        temperamento: formData.temperamento || null,
         castrado: formData.castrado,
         vacinado: formData.vacinado,
         vermifugado: formData.vermifugado,
-        status: "disponivel",
-        imagens: formData.imagens,
-        dataCadastro: new Date().toISOString(),
+        necessidades_especiais: formData.necessidadesEspeciais || null,
+        historia: formData.historia || null,
+        // Enviar imagens como array de objetos com url base64
+        imagens: formData.imagens.map((img, index) => ({
+          url: img,
+          nome: `pet-${formData.nome.replace(
+            /\s+/g,
+            "-"
+          )}-${Date.now()}-${index}.jpg`,
+          tipo: "image/jpeg",
+        })),
       };
 
-      // Salvar no localStorage
-      const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
-      petsStorage.push(petData);
-      localStorage.setItem("pets", JSON.stringify(petsStorage));
+      console.log("📤 Enviando dados para o backend:", {
+        ...petData,
+        imagens: `${petData.imagens.length} imagem(ns)`, // Não mostrar base64 completo
+      });
 
-      console.log("Pet cadastrado com sucesso:", petData);
-      setShowSuccess(true);
+      // Enviar para o backend
+      const response = await PetServices.createPet(petData);
+
+      console.log("📥 Resposta do backend:", response);
+
+      if (response.success) {
+        console.log("✅ Pet cadastrado com sucesso no backend:", response.data);
+        setShowSuccess(true);
+      } else {
+        // Log detalhado do erro antes de lançar
+        console.error("❌ Falha na resposta:", response);
+        console.error("📋 Dados do erro:", response.error || response.data);
+        throw new Error(response.message || "Erro ao cadastrar pet");
+      }
     } catch (error) {
-      console.error("Erro ao cadastrar pet:", error);
-      setError("Erro ao cadastrar pet. Tente novamente.");
+      console.error("❌ Erro ao cadastrar pet:", error);
+      console.error("📋 Detalhes completos do erro:", error.response?.data);
+
+      // Extrair mensagem de erro mais detalhada
+      let errorMessage = "Erro ao cadastrar pet. Tente novamente.";
+
+      if (error.response?.data?.error?.details) {
+        // Erros de validação
+        const details = error.response.data.error.details;
+        errorMessage = details.map((d) => d.msg).join(", ");
+      } else if (error.response?.data?.error?.message) {
+        errorMessage = error.response.data.error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -285,7 +324,7 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   >
                     <option value="">Selecione...</option>
-                    <option value="cão">Cão</option>
+                    <option value="cao">Cão</option>
                     <option value="gato">Gato</option>
                   </select>
                 </div>
@@ -317,9 +356,9 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   >
                     <option value="">Selecione...</option>
-                    <option value="Pequeno">Pequeno (até 15kg)</option>
-                    <option value="Médio">Médio (15-30kg)</option>
-                    <option value="Grande">Grande (30kg+)</option>
+                    <option value="pequeno">Pequeno (até 15kg)</option>
+                    <option value="medio">Médio (15-30kg)</option>
+                    <option value="grande">Grande (30kg+)</option>
                   </select>
                 </div>
 
@@ -335,8 +374,8 @@ const CadastrarPet = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   >
                     <option value="">Selecione...</option>
-                    <option value="Macho">Macho</option>
-                    <option value="Fêmea">Fêmea</option>
+                    <option value="macho">Macho</option>
+                    <option value="femea">Fêmea</option>
                   </select>
                 </div>
 

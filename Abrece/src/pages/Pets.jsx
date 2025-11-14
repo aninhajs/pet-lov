@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PetServices } from "../services/PetServices";
 
 // Função para otimizar URLs de imagem
 const optimizeImageUrl = (url, width = 400, height = 300) => {
@@ -21,10 +22,44 @@ const Pets = () => {
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
-  // Carregar todos os pets do localStorage
+  // Carregar todos os pets do backend
   useEffect(() => {
-    const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
-    setPets(petsStorage);
+    const carregarPets = async () => {
+      try {
+        const response = await PetServices.getAllPets();
+        if (response.success && response.data?.data) {
+          // Formatar dados do backend para o formato esperado pelo frontend
+          const petsFormatados = response.data.data.map((pet) => ({
+            id: pet.id,
+            nome: pet.nome,
+            tipo: pet.tipo,
+            idade: pet.idade,
+            porte: pet.porte,
+            sexo: pet.sexo,
+            cor: pet.cor,
+            peso: pet.peso,
+            descricao: pet.descricao,
+            castrado: pet.castrado,
+            vacinado: pet.vacinado,
+            vermifugado: pet.vermifugado,
+            status: pet.status,
+            // Extrair URLs das imagens
+            imagens: pet.imagens?.map((img) => img.url_imagem) || [],
+            imagem: pet.imagens?.[0]?.url_imagem || null,
+          }));
+          setPets(petsFormatados);
+          console.log("\u2705 Pets carregados do backend:", petsFormatados);
+          console.log(
+            "\ud83d\udcf8 Exemplo de pet com imagens:",
+            petsFormatados[0]
+          );
+        }
+      } catch (error) {
+        console.error("\u274c Erro ao carregar pets:", error);
+      }
+    };
+
+    carregarPets();
   }, []);
 
   // Funções do modal
@@ -58,9 +93,19 @@ const Pets = () => {
   const filteredPets = pets.filter((pet) => {
     if (selectedFilter === "todos") return true;
 
+    // Normalizar para comparação (remove acentos e converte para minúsculas)
+    const normalizarTexto = (texto) => {
+      return texto
+        ?.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    };
+
     // Filtros por tipo
     if (selectedFilter === "cão" || selectedFilter === "gato") {
-      return pet.tipo?.toLowerCase() === selectedFilter.toLowerCase();
+      const tipoNormalizado = normalizarTexto(pet.tipo);
+      const filtroNormalizado = normalizarTexto(selectedFilter);
+      return tipoNormalizado === filtroNormalizado;
     }
 
     // Filtros por status
@@ -253,12 +298,12 @@ const Pets = () => {
                             !currentImageIndexes[pet.id] ||
                             currentImageIndexes[pet.id] === 0
                           }
-                          className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                          className={`absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all z-10
                             ${
                               !currentImageIndexes[pet.id] ||
                               currentImageIndexes[pet.id] === 0
-                                ? "opacity-40 cursor-not-allowed"
-                                : "hover:scale-110"
+                                ? "opacity-30 cursor-not-allowed"
+                                : "opacity-80 hover:opacity-100 hover:scale-110"
                             }`}
                         >
                           <svg
@@ -284,12 +329,12 @@ const Pets = () => {
                             currentImageIndexes[pet.id] >=
                             pet.imagens.length - 1
                           }
-                          className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                          className={`absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all z-10
                             ${
                               currentImageIndexes[pet.id] >=
                               pet.imagens.length - 1
-                                ? "opacity-40 cursor-not-allowed"
-                                : "hover:scale-110"
+                                ? "opacity-30 cursor-not-allowed"
+                                : "opacity-80 hover:opacity-100 hover:scale-110"
                             }`}
                         >
                           <svg

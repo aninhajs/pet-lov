@@ -1,17 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PetServices } from "../../services/PetServices";
 
 const GerenciarPets = () => {
   const [pets, setPets] = useState([]);
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [petSelecionado, setPetSelecionado] = useState(null);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState({});
 
-  // Carregar pets do localStorage
+  // Carregar pets do backend
   useEffect(() => {
-    console.log("GerenciarPets: Carregando pets do localStorage");
-    const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
-    console.log("GerenciarPets: Pets carregados:", petsStorage);
-    setPets(petsStorage);
+    const carregarPets = async () => {
+      console.log("🔄 Carregando pets do backend...");
+      try {
+        const response = await PetServices.getAllPets();
+        if (response.success && response.data?.data) {
+          // Formatar dados do backend para o formato esperado
+          const petsFormatados = response.data.data.map((pet) => ({
+            id: pet.id,
+            nome: pet.nome,
+            tipo: pet.tipo,
+            idade: pet.idade,
+            porte: pet.porte,
+            sexo: pet.sexo,
+            cor: pet.cor,
+            peso: pet.peso,
+            descricao: pet.descricao,
+            castrado: pet.castrado,
+            vacinado: pet.vacinado,
+            vermifugado: pet.vermifugado,
+            status: pet.status,
+            imagem: pet.imagens?.[0]?.url_imagem || null,
+            imagens: pet.imagens?.map((img) => img.url_imagem) || [],
+          }));
+          setPets(petsFormatados);
+          console.log("\u2705 Pets carregados:", petsFormatados);
+          console.log("\ud83d\udcf8 Pet exemplo:", petsFormatados[0]);
+          if (petsFormatados[0]?.imagens) {
+            console.log(
+              "\ud83d\udcf8 Quantidade de imagens:",
+              petsFormatados[0].imagens.length
+            );
+          }
+        }
+      } catch (error) {
+        console.error("\u274c Erro ao carregar pets:", error);
+      }
+    };
+
+    carregarPets();
   }, []);
 
   const petsFiltrados =
@@ -21,73 +58,106 @@ const GerenciarPets = () => {
           (pet) => pet.status?.toLowerCase() === filtroStatus.toLowerCase()
         );
 
-  const alterarStatusPet = (id, novoStatus) => {
-    const petsAtualizados = pets.map((pet) =>
-      pet.id === id ? { ...pet, status: novoStatus } : pet
-    );
-    setPets(petsAtualizados);
-    localStorage.setItem("pets", JSON.stringify(petsAtualizados));
+  const alterarStatusPet = async (id, novoStatus) => {
+    try {
+      // Atualizar status no backend
+      const response = await PetServices.updatePet(id, { status: novoStatus });
 
-    // Se o pet foi adotado, remover suas vacinas do sistema
-    if (novoStatus === "adotado") {
-      const vacinasStorage = JSON.parse(
-        localStorage.getItem("vacinas") || "[]"
-      );
-      const vacinasAtualizadas = vacinasStorage.filter(
-        (vacina) => vacina.petId.toString() !== id.toString()
-      );
-      localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+      if (response.success) {
+        // Atualizar lista local
+        const petsAtualizados = pets.map((pet) =>
+          pet.id === id ? { ...pet, status: novoStatus } : pet
+        );
+        setPets(petsAtualizados);
+        console.log(`✅ Status do pet ${id} alterado para ${novoStatus}`);
 
-      // Remover atividades de vacina do pet adotado
-      const atividadesStorage = JSON.parse(
-        localStorage.getItem("atividades") || "[]"
-      );
-      const petAdotado = pets.find((p) => p.id === id);
-      const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
-        if (atividade.tipo === "vacina") {
-          return atividade.petNome !== petAdotado?.nome;
+        // Se o pet foi adotado, remover suas vacinas do sistema local
+        if (novoStatus === "adotado") {
+          const vacinasStorage = JSON.parse(
+            localStorage.getItem("vacinas") || "[]"
+          );
+          const vacinasAtualizadas = vacinasStorage.filter(
+            (vacina) => vacina.petId.toString() !== id.toString()
+          );
+          localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+
+          const atividadesStorage = JSON.parse(
+            localStorage.getItem("atividades") || "[]"
+          );
+          const petAdotado = pets.find((p) => p.id === id);
+          const atividadesAtualizadas = atividadesStorage.filter(
+            (atividade) => {
+              if (atividade.tipo === "vacina") {
+                return atividade.petNome !== petAdotado?.nome;
+              }
+              return true;
+            }
+          );
+          localStorage.setItem(
+            "atividades",
+            JSON.stringify(atividadesAtualizadas)
+          );
+
+          console.log(`Pet ${id} adotado - vacinas removidas do sistema`);
         }
-        return true;
-      });
-      localStorage.setItem("atividades", JSON.stringify(atividadesAtualizadas));
-
-      console.log(`Pet ${id} adotado - vacinas removidas do sistema`);
+      } else {
+        alert(`Erro ao alterar status: ${response.message}`);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao alterar status do pet:", error);
+      alert("Erro ao alterar status do pet. Tente novamente.");
     }
   };
 
-  const excluirPet = (id) => {
+  const excluirPet = async (id) => {
     if (window.confirm("Tem certeza que deseja excluir este pet?")) {
-      // Excluir o pet
-      const petsAtualizados = pets.filter((pet) => pet.id !== id);
-      setPets(petsAtualizados);
-      localStorage.setItem("pets", JSON.stringify(petsAtualizados));
+      try {
+        // Excluir do backend
+        const response = await PetServices.deletePet(id);
 
-      // Excluir vacinas do pet
-      const vacinasStorage = JSON.parse(
-        localStorage.getItem("vacinas") || "[]"
-      );
-      const vacinasAtualizadas = vacinasStorage.filter(
-        (vacina) => vacina.petId.toString() !== id.toString()
-      );
-      localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+        if (response.success) {
+          // Atualizar lista local
+          const petsAtualizados = pets.filter((pet) => pet.id !== id);
+          setPets(petsAtualizados);
 
-      // Excluir atividades de vacina do pet
-      const atividadesStorage = JSON.parse(
-        localStorage.getItem("atividades") || "[]"
-      );
-      const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
-        // Remove atividades de vacina deste pet
-        if (atividade.tipo === "vacina") {
-          const petExcluido = pets.find((p) => p.id === id);
-          return atividade.petNome !== petExcluido?.nome;
+          // Excluir vacinas do localStorage
+          const vacinasStorage = JSON.parse(
+            localStorage.getItem("vacinas") || "[]"
+          );
+          const vacinasAtualizadas = vacinasStorage.filter(
+            (vacina) => vacina.petId.toString() !== id.toString()
+          );
+          localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+
+          // Excluir atividades de vacina do pet
+          const atividadesStorage = JSON.parse(
+            localStorage.getItem("atividades") || "[]"
+          );
+          const atividadesAtualizadas = atividadesStorage.filter(
+            (atividade) => {
+              if (atividade.tipo === "vacina") {
+                const petExcluido = pets.find((p) => p.id === id);
+                return atividade.petNome !== petExcluido?.nome;
+              }
+              return true;
+            }
+          );
+          localStorage.setItem(
+            "atividades",
+            JSON.stringify(atividadesAtualizadas)
+          );
+
+          setPetSelecionado(null);
+          console.log(
+            `✅ Pet ${id} excluído junto com suas vacinas e atividades`
+          );
+        } else {
+          alert(`Erro ao excluir pet: ${response.message}`);
         }
-        return true;
-      });
-      localStorage.setItem("atividades", JSON.stringify(atividadesAtualizadas));
-
-      setPetSelecionado(null);
-
-      console.log(`Pet ${id} excluído junto com suas vacinas e atividades`);
+      } catch (error) {
+        console.error("❌ Erro ao excluir pet:", error);
+        alert("Erro ao excluir pet. Tente novamente.");
+      }
     }
   };
 
@@ -244,8 +314,109 @@ const GerenciarPets = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg overflow-hidden shadow-sm flex items-center justify-center">
-                      {pet.imagem ? (
+                    <div className="relative w-20 h-20 bg-gradient-to-br from-sky-50 to-yellow-50 rounded-lg overflow-hidden shadow-sm flex items-center justify-center group">
+                      {pet.imagens && pet.imagens.length > 0 ? (
+                        <>
+                          <img
+                            src={pet.imagens[currentImageIndexes[pet.id] || 0]}
+                            alt={`${pet.nome} - Foto ${
+                              (currentImageIndexes[pet.id] || 0) + 1
+                            }`}
+                            className="w-full h-full object-contain hover:scale-105 transition-transform duration-200"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextElementSibling.style.display =
+                                "flex";
+                            }}
+                          />
+
+                          {/* Setas de navegação - só aparecem se tiver mais de 1 foto */}
+                          {pet.imagens.length > 1 && (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentImageIndexes((prev) => ({
+                                    ...prev,
+                                    [pet.id]: Math.max(
+                                      0,
+                                      (prev[pet.id] || 0) - 1
+                                    ),
+                                  }));
+                                }}
+                                disabled={
+                                  !currentImageIndexes[pet.id] ||
+                                  currentImageIndexes[pet.id] === 0
+                                }
+                                className={`absolute left-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md transition-all opacity-0 group-hover:opacity-100 ${
+                                  !currentImageIndexes[pet.id] ||
+                                  currentImageIndexes[pet.id] === 0
+                                    ? "cursor-not-allowed opacity-40"
+                                    : ""
+                                }`}
+                              >
+                                <svg
+                                  className="w-3 h-3 text-gray-800"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
+                                  />
+                                </svg>
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentImageIndexes((prev) => ({
+                                    ...prev,
+                                    [pet.id]: Math.min(
+                                      pet.imagens.length - 1,
+                                      (prev[pet.id] || 0) + 1
+                                    ),
+                                  }));
+                                }}
+                                disabled={
+                                  currentImageIndexes[pet.id] >=
+                                  pet.imagens.length - 1
+                                }
+                                className={`absolute right-0.5 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1 shadow-md transition-all opacity-0 group-hover:opacity-100 ${
+                                  currentImageIndexes[pet.id] >=
+                                  pet.imagens.length - 1
+                                    ? "cursor-not-allowed opacity-40"
+                                    : ""
+                                }`}
+                              >
+                                <svg
+                                  className="w-3 h-3 text-gray-800"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </button>
+
+                              {/* Indicador de quantidade de fotos */}
+                              <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded-full">
+                                {(currentImageIndexes[pet.id] || 0) + 1}/
+                                {pet.imagens.length}
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : pet.imagem ? (
                         <img
                           src={pet.imagem}
                           alt={pet.nome}
@@ -259,11 +430,13 @@ const GerenciarPets = () => {
                       ) : null}
                       <div
                         className={`absolute inset-0 flex items-center justify-center ${
-                          pet.imagem ? "hidden" : "flex"
+                          pet.imagens?.length > 0 || pet.imagem
+                            ? "hidden"
+                            : "flex"
                         }`}
                       >
                         <span className="text-2xl opacity-60">
-                          {pet.tipo === "cão"
+                          {pet.tipo === "cao"
                             ? "🐕"
                             : pet.tipo === "gato"
                             ? "🐱"
@@ -391,7 +564,127 @@ const GerenciarPets = () => {
             <div className="px-6 py-4 space-y-4">
               <div className="text-center">
                 <div className="relative w-64 h-64 mx-auto overflow-hidden rounded-xl shadow-lg bg-gradient-to-br from-sky-50 to-yellow-50 flex items-center justify-center">
-                  {petSelecionado.imagem ? (
+                  {petSelecionado.imagens &&
+                  petSelecionado.imagens.length > 0 ? (
+                    <>
+                      <img
+                        src={
+                          petSelecionado.imagens[
+                            currentImageIndexes[petSelecionado.id] || 0
+                          ]
+                        }
+                        alt={`${petSelecionado.nome} - Foto ${
+                          (currentImageIndexes[petSelecionado.id] || 0) + 1
+                        }`}
+                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextElementSibling?.style &&
+                            (e.target.nextElementSibling.style.display =
+                              "flex");
+                        }}
+                      />
+
+                      {/* Setas de navegação no modal */}
+                      {petSelecionado.imagens.length > 1 && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setCurrentImageIndexes((prev) => ({
+                                ...prev,
+                                [petSelecionado.id]: Math.max(
+                                  0,
+                                  (prev[petSelecionado.id] || 0) - 1
+                                ),
+                              }));
+                            }}
+                            disabled={
+                              !currentImageIndexes[petSelecionado.id] ||
+                              currentImageIndexes[petSelecionado.id] === 0
+                            }
+                            className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all ${
+                              !currentImageIndexes[petSelecionado.id] ||
+                              currentImageIndexes[petSelecionado.id] === 0
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                          >
+                            <svg
+                              className="w-6 h-6 text-gray-800"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 19l-7-7 7-7"
+                              />
+                            </svg>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setCurrentImageIndexes((prev) => ({
+                                ...prev,
+                                [petSelecionado.id]: Math.min(
+                                  petSelecionado.imagens.length - 1,
+                                  (prev[petSelecionado.id] || 0) + 1
+                                ),
+                              }));
+                            }}
+                            disabled={
+                              currentImageIndexes[petSelecionado.id] >=
+                              petSelecionado.imagens.length - 1
+                            }
+                            className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all ${
+                              currentImageIndexes[petSelecionado.id] >=
+                              petSelecionado.imagens.length - 1
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:scale-110"
+                            }`}
+                          >
+                            <svg
+                              className="w-6 h-6 text-gray-800"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </button>
+
+                          {/* Indicadores */}
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                            {petSelecionado.imagens.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() =>
+                                  setCurrentImageIndexes((prev) => ({
+                                    ...prev,
+                                    [petSelecionado.id]: index,
+                                  }))
+                                }
+                                className={`h-2.5 rounded-full transition-all ${
+                                  index ===
+                                  (currentImageIndexes[petSelecionado.id] || 0)
+                                    ? "bg-white w-8"
+                                    : "bg-white/60 w-2.5 hover:bg-white/80"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : petSelecionado.imagem ? (
                     <img
                       src={petSelecionado.imagem}
                       alt={petSelecionado.nome}
@@ -399,17 +692,21 @@ const GerenciarPets = () => {
                       loading="lazy"
                       onError={(e) => {
                         e.target.style.display = "none";
-                        e.target.nextElementSibling.style.display = "flex";
+                        e.target.nextElementSibling?.style &&
+                          (e.target.nextElementSibling.style.display = "flex");
                       }}
                     />
                   ) : null}
                   <div
                     className={`absolute inset-0 flex items-center justify-center ${
-                      petSelecionado.imagem ? "hidden" : "flex"
+                      petSelecionado.imagens?.length > 0 ||
+                      petSelecionado.imagem
+                        ? "hidden"
+                        : "flex"
                     }`}
                   >
                     <span className="text-8xl opacity-50">
-                      {petSelecionado.tipo === "cão"
+                      {petSelecionado.tipo === "cao"
                         ? "🐕"
                         : petSelecionado.tipo === "gato"
                         ? "🐱"

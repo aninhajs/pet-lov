@@ -8,31 +8,61 @@ export default function ProtectedRoute({ children }) {
 
   useEffect(() => {
     const run = async () => {
-      // Simula delay de verificação
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
       const token = localStorage.getItem("token");
+      console.log(
+        "🔐 ProtectedRoute - Verificando token:",
+        token ? "Token presente" : "Token ausente"
+      );
 
       if (!token) {
+        console.log("❌ ProtectedRoute - Sem token, redirecionando para login");
         setOk(false);
         setChecking(false);
         return;
       }
 
       try {
-        // Decodifica o token mockado
-        const decoded = JSON.parse(atob(token));
+        // Verifica se é um JWT (formato: xxx.yyy.zzz)
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          // É um JWT real do backend
+          console.log("✅ ProtectedRoute - Token JWT válido detectado");
 
-        // Verifica se o token expirou
-        if (decoded.exp && decoded.exp < Date.now()) {
+          // Decodifica o payload (parte central do JWT)
+          // Remove caracteres especiais que podem causar erro no atob
+          const base64Url = parts[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(
+            decodeURIComponent(
+              atob(base64)
+                .split("")
+                .map(
+                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)
+                )
+                .join("")
+            )
+          );
+
+          console.log("📋 ProtectedRoute - Payload do token:", payload);
+
+          // Verifica se o token expirou (exp está em segundos)
+          if (payload.exp && payload.exp * 1000 < Date.now()) {
+            console.log("⏰ ProtectedRoute - Token expirado");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setOk(false);
+          } else {
+            console.log("✅ ProtectedRoute - Token válido, acesso liberado");
+            setOk(true);
+          }
+        } else {
+          console.log("❌ ProtectedRoute - Formato de token inválido");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           setOk(false);
-        } else {
-          setOk(true);
         }
       } catch (error) {
-        console.error("Token inválido:", error);
+        console.error("❌ ProtectedRoute - Erro ao validar token:", error);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setOk(false);
@@ -41,6 +71,7 @@ export default function ProtectedRoute({ children }) {
       }
     };
     run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (checking) {

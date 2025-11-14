@@ -1,25 +1,11 @@
 // src/pages/Login.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-// 🔐 DADOS MOCKADOS PARA LOGIN
-const MOCK_USERS = [
-  {
-    email: "admin@abrace.com",
-    password: "admin123",
-    nome: "Administrador",
-    tipo: "admin",
-  },
-  {
-    email: "teste@teste.com",
-    password: "teste123",
-    nome: "Usuário Teste",
-    tipo: "admin",
-  },
-];
+import api from "../services/api";
 
 const Login = () => {
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const emailRef = useRef();
+  const senhaRef = useRef();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -33,54 +19,58 @@ const Login = () => {
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
-    setCredentials((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setError("");
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Simula delay de rede
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    console.log(" Login - Iniciando processo de login");
+    console.log(" Email:", emailRef.current.value);
 
     try {
-      const emailTrimmed = credentials.email.trim();
-      const user = MOCK_USERS.find(
-        (u) => u.email === emailTrimmed && u.password === credentials.password
-      );
+      // Fazer requisição para o backend
+      console.log(" Enviando requisição para /auth/login");
+      const {
+        data: {
+          data: { token, user },
+        },
+      } = await api.post("/auth/login", {
+        email: emailRef.current.value.trim(),
+        senha: senhaRef.current.value,
+      });
 
-      if (user) {
-        // Gera um token mockado (não é JWT real, apenas para simular)
-        const mockToken = btoa(
-          JSON.stringify({
-            email: user.email,
-            nome: user.nome,
-            tipo: user.tipo,
-            exp: Date.now() + 24 * 60 * 60 * 1000, // 24 horas
-          })
-        );
+      console.log(" Resposta recebida - Login bem-sucedido!");
+      console.log(" Token recebido:", token.substring(0, 20) + "...");
+      console.log(" Dados do usuário:", user);
 
-        // Salva token e dados do usuário
-        localStorage.setItem("token", mockToken);
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: user.email,
-            nome: user.nome,
-            tipo: user.tipo,
-          })
-        );
+      // Salva token e dados do usuário no localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
+      console.log(" Dados salvos no localStorage");
+
+      // Força um pequeno delay antes de redirecionar para garantir que o localStorage foi salvo
+      setTimeout(() => {
+        console.log(" Login - Executando redirecionamento agora");
         navigate("/admin", { replace: true });
-      } else {
-        setError("Email ou senha incorretos");
-      }
+      }, 100);
     } catch (err) {
-      setError("Erro ao fazer login. Tente novamente.");
-      console.error(err);
+      console.error(" Login - Erro capturado:", err);
+      // Tratar erros específicos
+      if (err.response) {
+        // Erro de resposta do servidor
+        const errorMessage =
+          err.response.data?.error?.message || "Credenciais inválidas";
+        setError(errorMessage);
+      } else if (err.request) {
+        // Requisição foi feita mas não houve resposta
+        setError(
+          "Não foi possível conectar ao servidor. Verifique se o backend está rodando."
+        );
+      } else {
+        // Erro ao configurar a requisição
+        setError("Erro ao fazer login. Tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -111,13 +101,12 @@ const Login = () => {
               </label>
               <input
                 type="email"
-                name="email"
-                value={credentials.email}
-                onChange={handleChange}
+                ref={emailRef}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="admin@abrace.org"
+                placeholder="Digite seu email"
                 autoComplete="username"
+                onChange={() => setError("")}
               />
             </div>
 
@@ -127,13 +116,12 @@ const Login = () => {
               </label>
               <input
                 type="password"
-                name="password"
-                value={credentials.password}
-                onChange={handleChange}
+                ref={senhaRef}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
                 placeholder="••••••••"
                 autoComplete="current-password"
+                onChange={() => setError("")}
               />
             </div>
 
@@ -160,12 +148,12 @@ const Login = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <Link
+            {/* <Link
               to="/"
               className="text-orange-600 hover:text-orange-700 text-sm font-medium"
             >
               ← Voltar ao site principal
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

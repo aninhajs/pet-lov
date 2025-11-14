@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import { PetServices } from "../services/PetServices";
 
 // 🔗 Centralize aqui o link do seu Google Forms
 const GOOGLE_FORM_URL = "https://forms.gle/Vs2Arsu5bwi5h3wA9";
@@ -25,8 +26,43 @@ const Home = () => {
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
   useEffect(() => {
-    const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
-    setPets(petsStorage);
+    const carregarPets = async () => {
+      try {
+        const response = await PetServices.getAllPets();
+        if (response.success && response.data?.data) {
+          // Filtrar apenas pets disponíveis e formatar
+          const petsDisponiveis = response.data.data
+            .filter((pet) => pet.status === "disponivel")
+            .map((pet) => ({
+              id: pet.id,
+              nome: pet.nome,
+              tipo: pet.tipo,
+              idade: pet.idade,
+              porte: pet.porte,
+              sexo: pet.sexo,
+              cor: pet.cor,
+              peso: pet.peso,
+              descricao: pet.descricao,
+              castrado: pet.castrado,
+              vacinado: pet.vacinado,
+              vermifugado: pet.vermifugado,
+              status: pet.status,
+              imagens: pet.imagens?.map((img) => img.url_imagem) || [],
+              imagem: pet.imagens?.[0]?.url_imagem || null,
+            }));
+          setPets(petsDisponiveis);
+          console.log(
+            "✅ Pets disponíveis carregados na Home:",
+            petsDisponiveis.length
+          );
+          console.log("📸 Primeiro pet com imagens:", petsDisponiveis[0]);
+        }
+      } catch (error) {
+        console.error("❌ Erro ao carregar pets na Home:", error);
+      }
+    };
+
+    carregarPets();
   }, []);
 
   const openModal = (pet) => {
@@ -152,6 +188,12 @@ const Home = () => {
                   onClick={() => openModal(pet)}
                 >
                   <div className="relative w-full h-56 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden flex items-center justify-center">
+                    {/* Debug - remover depois */}
+                    {pet.imagens &&
+                      console.log(
+                        `🐾 ${pet.nome} tem ${pet.imagens.length} imagem(ns)`
+                      )}
+
                     {pet.imagens && pet.imagens.length > 0 ? (
                       <>
                         <img
@@ -184,12 +226,12 @@ const Home = () => {
                                 !currentImageIndexes[pet.id] ||
                                 currentImageIndexes[pet.id] === 0
                               }
-                              className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                              className={`absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all z-10
                                 ${
                                   !currentImageIndexes[pet.id] ||
                                   currentImageIndexes[pet.id] === 0
-                                    ? "opacity-40 cursor-not-allowed"
-                                    : "hover:scale-110"
+                                    ? "opacity-30 cursor-not-allowed"
+                                    : "opacity-80 hover:opacity-100 hover:scale-110"
                                 }`}
                             >
                               <svg
@@ -216,12 +258,12 @@ const Home = () => {
                                 currentImageIndexes[pet.id] >=
                                 pet.imagens.length - 1
                               }
-                              className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all z-10
+                              className={`absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-1.5 shadow-lg transition-all z-10
                                 ${
                                   currentImageIndexes[pet.id] >=
                                   pet.imagens.length - 1
-                                    ? "opacity-40 cursor-not-allowed"
-                                    : "hover:scale-110"
+                                    ? "opacity-30 cursor-not-allowed"
+                                    : "opacity-80 hover:opacity-100 hover:scale-110"
                                 }`}
                             >
                               <svg

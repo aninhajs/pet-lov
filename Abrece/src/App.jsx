@@ -12,6 +12,7 @@ import CadastrarPet from "./pages/(protegido)/CadastrarPet";
 import GerenciarPets from "./pages/(protegido)/GerenciarPets";
 import CartaoVacina from "./pages/(protegido)/CartaoVacina";
 import TestePage from "./pages/TestePage";
+import TestToken from "./pages/TestToken";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/teste" element={<TestePage />} />
+          <Route path="/test-token" element={<TestToken />} />
 
           {/* Rotas Administrativas (Protegidas) */}
           <Route

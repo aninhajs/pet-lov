@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { PetServices } from "../../services/PetServices";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -14,30 +15,58 @@ const AdminDashboard = () => {
   const [vacinas, setVacinas] = useState([]);
   const [todasVacinas, setTodasVacinas] = useState([]);
   const [buscaPet, setBuscaPet] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar estatísticas reais do localStorage
+  // Carregar estatísticas reais do backend
   useEffect(() => {
-    const pets = JSON.parse(localStorage.getItem("pets") || "[]");
-    const totalPets = pets.length;
-    const petsAdotados = pets.filter((pet) => pet.status === "adotado").length;
+    const loadStats = async () => {
+      try {
+        setIsLoading(true);
 
-    setStats((prevStats) => ({
-      ...prevStats,
-      totalPets,
-      petsAdotados,
-    }));
+        // Buscar pets do backend
+        const response = await PetServices.getAllPets();
 
-    // Carregar vacinas do localStorage
-    const vacinasStorage = JSON.parse(localStorage.getItem("vacinas") || "[]");
-    // Ordenar por data mais recente
-    const vacinasOrdenadas = vacinasStorage.sort((a, b) => {
-      return (
-        new Date(b.dataCadastro || b.dataVacina) -
-        new Date(a.dataCadastro || a.dataVacina)
-      );
-    });
-    setTodasVacinas(vacinasOrdenadas);
-    setVacinas(vacinasOrdenadas.slice(0, 2)); // Mostrar apenas as 2 mais recentes
+        if (response.success) {
+          const pets = response.data.data || response.data || [];
+          const totalPets = pets.length;
+          const petsAdotados = pets.filter(
+            (pet) => pet.status === "adotado"
+          ).length;
+
+          setStats((prevStats) => ({
+            ...prevStats,
+            totalPets,
+            petsAdotados,
+          }));
+
+          console.log("✅ Estatísticas carregadas:", {
+            totalPets,
+            petsAdotados,
+          });
+        } else {
+          console.error("❌ Erro ao carregar pets:", response.message);
+        }
+
+        // Carregar vacinas do localStorage (temporário até ter endpoint)
+        const vacinasStorage = JSON.parse(
+          localStorage.getItem("vacinas") || "[]"
+        );
+        const vacinasOrdenadas = vacinasStorage.sort((a, b) => {
+          return (
+            new Date(b.dataCadastro || b.dataVacina) -
+            new Date(a.dataCadastro || a.dataVacina)
+          );
+        });
+        setTodasVacinas(vacinasOrdenadas);
+        setVacinas(vacinasOrdenadas.slice(0, 2));
+      } catch (error) {
+        console.error("❌ Erro ao carregar estatísticas:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadStats();
   }, []);
 
   // Filtrar vacinas por busca
@@ -63,7 +92,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
       {/* Header */}
-      <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-sm border-b-2 border-sky-200">
+      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-3">
@@ -72,8 +101,8 @@ const AdminDashboard = () => {
                 alt="Abrace Uma Causa Animal"
                 className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
               />
-              <h1 className="text-2xl font-bold text-sky-600">
-                🐾 Central de Gerenciamento
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
+                Central de Gerenciamento
               </h1>
             </div>
             <div className="flex space-x-4">
@@ -113,31 +142,39 @@ const AdminDashboard = () => {
 
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
               <div className="text-3xl mr-3">🐕</div>
               <div>
                 <p className="text-sm font-bold text-gray-800">Total de Pets</p>
                 <p className="text-4xl font-extrabold text-gray-900">
-                  {stats.totalPets}
+                  {isLoading ? (
+                    <span className="text-2xl">⏳</span>
+                  ) : (
+                    stats.totalPets
+                  )}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
               <div className="text-3xl mr-3">❤️</div>
               <div>
                 <p className="text-sm font-bold text-gray-800">Pets Adotados</p>
                 <p className="text-4xl font-extrabold text-green-700">
-                  {stats.petsAdotados}
+                  {isLoading ? (
+                    <span className="text-2xl">⏳</span>
+                  ) : (
+                    stats.petsAdotados
+                  )}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
               <div className="text-3xl mr-3">👥</div>
               <div>
@@ -149,7 +186,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 hover:from-yellow-200 hover:to-yellow-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
               <div className="text-3xl mr-3">⏳</div>
               <div>
@@ -164,8 +201,8 @@ const AdminDashboard = () => {
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Cartão de Vacinas Recentes */}
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg shadow-lg">
-            <div className="p-6 border-b-2 border-yellow-300 bg-gradient-to-r from-yellow-200 to-yellow-300">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-lg">
+            <div className="p-6 border-b-2 border-gray-300 bg-gradient-to-r from-gray-200 to-gray-300">
               <h2 className="text-xl font-bold text-gray-900 flex items-center mb-4">
                 💉 Vacinas Recentes
               </h2>
@@ -251,8 +288,8 @@ const AdminDashboard = () => {
           </div>
 
           {/* Ações Rápidas */}
-          <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg shadow-lg">
-            <div className="p-6 border-b-2 border-yellow-300 bg-gradient-to-r from-yellow-200 to-yellow-300">
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-lg">
+            <div className="p-6 border-b-2 border-gray-300 bg-gradient-to-r from-gray-200 to-gray-300">
               <h2 className="text-xl font-bold text-gray-900">Ações Rápidas</h2>
             </div>
             <div className="p-6">

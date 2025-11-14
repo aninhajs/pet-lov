@@ -52,11 +52,27 @@ export const PetServices = {
       };
     } catch (error) {
       console.error("Erro ao cadastrar pet:", error);
+      console.error("Resposta do servidor:", error.response?.data);
+
+      // Extrair mensagem de erro do backend
+      const backendError = error.response?.data?.error;
+      let errorMessage = "Erro ao cadastrar pet";
+
+      if (backendError?.details && Array.isArray(backendError.details)) {
+        // Erros de validação
+        errorMessage = backendError.details
+          .map((d) => `${d.path}: ${d.msg}`)
+          .join(", ");
+      } else if (backendError?.message) {
+        errorMessage = backendError.message;
+      }
+
       return {
         success: false,
         data: null,
-        message: "Erro ao cadastrar pet",
-        error: error.message,
+        message: errorMessage,
+        error: error.response?.data || error.message,
+        validationErrors: backendError?.details || null,
       };
     }
   },
