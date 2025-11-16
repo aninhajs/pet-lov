@@ -121,9 +121,12 @@ const Pets = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
+    <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
       {/* Header customizado para Pets - sem botão "Ver Pets" */}
-      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
+      <header
+        className="shadow-lg border-b-2 border-yellow-300"
+        style={{ backgroundColor: "#f4f0e4" }}
+      >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center space-x-3">
@@ -265,7 +268,23 @@ const Pets = () => {
           {filteredPets.map((pet) => (
             <div
               key={pet.id}
-              className="bg-yellow-100 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-2 border-gray-600"
+              className="rounded-lg overflow-hidden transition-shadow cursor-pointer"
+              style={{
+                backgroundColor: "#f4f0e4",
+                borderWidth: "3px",
+                borderColor: "#4a4a4a",
+                borderStyle: "solid",
+                boxShadow:
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.boxShadow =
+                  "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(74, 74, 74, 0.2)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)")
+              }
               onClick={() => openModal(pet)}
             >
               {/* Imagem do pet */}
@@ -459,7 +478,17 @@ const Pets = () => {
       {/* Modal de detalhes do pet */}
       {selectedPet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-yellow-50 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div
+            className="rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: "#f4f0e4",
+              borderWidth: "4px",
+              borderColor: "#4a4a4a",
+              borderStyle: "solid",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 4px rgba(74, 74, 74, 0.15)",
+            }}
+          >
             <div className="relative">
               {/* Botão fechar */}
               <button

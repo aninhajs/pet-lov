@@ -129,7 +129,10 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 px-4 py-8">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-8"
+      style={{ backgroundColor: "#f4f0e4" }}
+    >
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full border-2 border-sky-200">
         <div className="text-center mb-6">
           <img

@@ -5,7 +5,7 @@ import {
   Phone,
   Mail,
   Instagram,
-  Facebook,
+  Music,
   MessageCircle,
   Heart,
 } from "lucide-react";
@@ -70,8 +70,7 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">Siga-nos</h4>
             <div className="space-y-3">
               <a
-                href=" https://www.instagram.com/ong.abrace?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==
-"
+                href="https://www.instagram.com/ong.abrace?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"
@@ -80,16 +79,16 @@ const Footer = () => {
                 Instagram
               </a>
               <a
-                href="https://www.facebook.com/AbraceUmaCausaAnimal"
+                href="https://www.tiktok.com/@abraceumacausaanimal?_r=1&_t=ZS-91P5sAichfe"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <Facebook className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
-                Facebook
+                <Music className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
+                TikTok
               </a>
               <a
-                href=" https://wa.me/+558588128654"
+                href="https://wa.me/+558588128654"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"

@@ -200,7 +200,10 @@ const CadastrarPet = () => {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200 flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: "#f4f0e4" }}
+      >
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-xl p-8 text-center border-2 border-sky-200">
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -236,9 +239,12 @@ const CadastrarPet = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
+    <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
       {/* Header */}
-      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
+      <header
+        className="shadow-lg border-b-2 border-yellow-300"
+        style={{ backgroundColor: "#f4f0e4" }}
+      >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/admin" className="flex items-center space-x-3">

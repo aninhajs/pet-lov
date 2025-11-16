@@ -93,9 +93,12 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-200">
+    <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
       {/* Header customizado para Home - sem botão "Ver Pets" */}
-      <header className="bg-gradient-to-r from-yellow-50 to-yellow-100 shadow-lg border-b-2 border-yellow-300">
+      <header
+        className="shadow-lg border-b-2 border-yellow-300"
+        style={{ backgroundColor: "#f4f0e4" }}
+      >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <div className="flex items-center space-x-3">
@@ -184,7 +187,22 @@ const Home = () => {
               {pets.slice(0, 4).map((pet) => (
                 <div
                   key={pet.id}
-                  className="bg-yellow-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:scale-105 group cursor-pointer border-2 border-gray-600"
+                  className="rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-3"
+                  style={{
+                    backgroundColor: "#f4f0e4",
+                    borderWidth: "3px",
+                    borderColor: "#4a4a4a",
+                    boxShadow:
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.boxShadow =
+                      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(74, 74, 74, 0.2)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.boxShadow =
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)")
+                  }
                   onClick={() => openModal(pet)}
                 >
                   <div className="relative w-full h-56 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden flex items-center justify-center">
@@ -366,18 +384,18 @@ const Home = () => {
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
-                <div className="text-center mb-4">
-                  <h3 className="text-2xl font-bold text-green-600 mb-3">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-5 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
+                <div className="text-center mb-3">
+                  <h3 className="text-xl font-bold text-green-600 mb-2">
                     Sua Nota Tem Valor
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
+                <div className="text-gray-700 space-y-2 text-xs">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">1. CADASTRO:</strong>{" "}
-                      <strong>Acesse o app sua nota tem valor ou pelo</strong>{" "}
+                      <strong>Acesse o app ou </strong>
                       <a
                         href="https://suanotatemvalor.sefaz.ce.gov.br/"
                         className="text-green-600 hover:text-green-700 underline"
@@ -386,24 +404,17 @@ const Home = () => {
                       </a>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-yellow-400">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400">
                     <p>
-                      <strong className="text-yellow-600 ">
-                        2. ESCOLHA A ONG ABRAÇE:
-                      </strong>{" "}
-                      <strong>
-                        Na tela de cadastro, escolha a ONG ABRACE para apoiar
-                      </strong>
+                      <strong className="text-yellow-600">2. ESCOLHA:</strong>{" "}
+                      <strong>Na tela de cadastro, escolha a ONG ABRACE</strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
-                      <strong className="text-green-600">
-                        3. PEÇA CPF NA NOTA:
-                      </strong>{" "}
+                      <strong className="text-green-600">3. PEÇA CPF:</strong>{" "}
                       <strong>
-                        A cada R$ 50 solicite o CPF na Nota Fiscal. Você ganha 1
-                        ponto, concorre a prêmios de até R$ 25 mil e tem 5% de
+                        A cada R$ 50 solicite CPF na nota. Ganhe pontos e 5%
                         desconto no IPVA
                       </strong>
                     </p>
@@ -411,74 +422,116 @@ const Home = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
-                <div className="text-center mb-4">
-                  <h3 className="text-2xl font-bold text-green-600 mb-3">
-                    Campanha do Bazar Solidário
+              <div className="p-5 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
+                <div className="text-center mb-3">
+                  <h3 className="text-xl font-bold text-green-600 mb-2">
+                    Bazar Solidário
                   </h3>
-                  <p className="text-gray-900 font-semibold mb-3">
+                  <p className="text-gray-900 font-semibold text-sm mb-2">
                     O que você pode doar?
                   </p>
                 </div>
-                <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
+                <div className="text-gray-700 space-y-2 text-xs">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">01</strong>
                       <strong> roupas e sapatos </strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-yellow-400">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400">
                     <p>
                       <strong className="text-yellow-600">02</strong>
                       <strong> acessórios pet</strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">03</strong>
                       <strong> bijuterias</strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-yellow-400">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400">
                     <p>
                       <strong className="text-yellow-600">04</strong>
-                      <strong> livros, etc.</strong>
+                      <strong> livros e mais</strong>
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
-                <div className="text-center mb-4">
-                  <h3 className="text-2xl font-bold text-green-600 mb-3">
+              <div className="p-5 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
+                <div className="text-center mb-3">
+                  <h3 className="text-xl font-bold text-green-600 mb-2">
                     DOE RAÇÃO
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-3 text-sm">
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500">
+                <div className="text-gray-700 space-y-2 text-xs">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
-                        {" "}
-                        Precisamos muito de ração para cães e gatos adultos e
-                        filhotes, além de misturinha (fígado, miúdos de frango,
-                        sachês, latinhas) para os animais debilitados.
+                        Precisamos de ração para cães e gatos, além de
+                        misturinha para animais debilitados.
                       </strong>
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-yellow-400">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400">
                     <p className="font-semibold text-yellow-600">
-                      Ajude a encher mais de 150 barriguinhas! Doe!
+                      Ajude a encher mais de 150 barriguinhas!
                     </p>
                   </div>
-                  <div className="bg-white/80 p-3 rounded-lg border-l-4 border-green-500 text-center">
-                    <p className="font-semibold text-green-600 mb-1">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500 text-center">
+                    <p className="font-semibold text-green-600 mb-1 text-xs">
                       CHAVE PIX
                     </p>
-                    <p className="font-bold text-lg text-green-700">
+                    <p className="font-bold text-sm text-green-700">
                       ONG ABRACE
                     </p>
-                    <p className="font-mono text-gray-900 font-semibold">
+                    <p className="font-mono text-gray-900 font-semibold text-xs">
                       24287894000100
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 bg-gradient-to-br from-green-50 to-yellow-50 rounded-lg shadow-lg border-2 border-green-300">
+                <div className="text-center mb-3">
+                  <h3 className="text-xl font-bold text-green-600 mb-2">
+                    Campanha Nosso Lar
+                  </h3>
+                  <p className="text-gray-600 text-xs font-medium">
+                    Vaquinha criada em: 22/08/2025
+                  </p>
+                </div>
+                <div className="text-gray-700 space-y-2 text-xs">
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
+                    <p>
+                      <strong>
+                        Há 13 anos resgatamos cães e gatos em situação de
+                        abandono em Fortaleza-CE.
+                      </strong>
+                    </p>
+                  </div>
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400">
+                    <p className="font-semibold text-yellow-600">
+                      Nosso sonho: ter um espaço fixo e seguro para abrigar
+                      todos os resgatados.
+                    </p>
+                  </div>
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
+                    <p>
+                      <strong className="text-green-600">Meta:</strong>{" "}
+                      <strong>
+                        R$ 500 mil para comprar um terreno e construir nosso
+                        lar.
+                      </strong>
+                    </p>
+                  </div>
+                  <div className="bg-white/80 p-2 rounded-lg border-l-4 border-yellow-400 text-center">
+                    <p className="font-semibold text-yellow-600 mb-1 text-xs">
+                      CONTRIBUA
+                    </p>
+                    <p className="font-mono text-gray-900 font-semibold text-xs break-all">
+                      5692750@vakinha.com.br
                     </p>
                   </div>
                 </div>
@@ -491,7 +544,17 @@ const Home = () => {
       {/* Modal flutuante para detalhes do pet */}
       {selectedPet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-yellow-50 rounded-2xl max-w-lg sm:max-w-xl md:max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+          <div
+            className="rounded-2xl max-w-lg sm:max-w-xl md:max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            style={{
+              backgroundColor: "#f4f0e4",
+              borderWidth: "4px",
+              borderColor: "#4a4a4a",
+              borderStyle: "solid",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 4px rgba(74, 74, 74, 0.15)",
+            }}
+          >
             {/* Header do modal */}
             <div className="relative">
               <div className="h-40 sm:h-44 md:h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center">

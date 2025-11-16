@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <header className="bg-gradient-to-r from-sky-50 to-yellow-50 shadow-lg border-b-2 border-sky-200 ">
+    <header
+      className="shadow-lg border-b-2 border-sky-200"
+      style={{ backgroundColor: "#f4f0e4" }}
+    >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex items-center space-x-3">
