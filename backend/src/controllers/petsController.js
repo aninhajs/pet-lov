@@ -149,7 +149,10 @@ export const createPet = async (req, res) => {
       vermifugado = false,
       necessidades_especiais,
       historia,
+<<<<<<< HEAD
       localizacao,
+=======
+>>>>>>> 5f7eb64a545eeb20d9350e369b68b40cfab98917
       imagens = [],
     } = req.body;
 
@@ -184,7 +187,10 @@ export const createPet = async (req, res) => {
         vermifugado: Boolean(vermifugado),
         necessidades_especiais: necessidades_especiais || null,
         historia: historia || null,
+<<<<<<< HEAD
         localizacao: localizacao || null,
+=======
+>>>>>>> 5f7eb64a545eeb20d9350e369b68b40cfab98917
         status: "disponivel",
         usuario_id: req.user.id, // Vem do middleware de auth
 
