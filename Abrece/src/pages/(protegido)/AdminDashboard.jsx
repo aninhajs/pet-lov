@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PetServices } from "../../services/PetServices";
+import { VacinaServices } from "../../services/VacinaServices";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -47,18 +48,34 @@ const AdminDashboard = () => {
           console.error("❌ Erro ao carregar pets:", response.message);
         }
 
-        // Carregar vacinas do localStorage (temporário até ter endpoint)
-        const vacinasStorage = JSON.parse(
-          localStorage.getItem("vacinas") || "[]"
-        );
-        const vacinasOrdenadas = vacinasStorage.sort((a, b) => {
-          return (
-            new Date(b.dataCadastro || b.dataVacina) -
-            new Date(a.dataCadastro || a.dataVacina)
-          );
+        // Carregar vacinas do backend
+        const vacinasResponse = await VacinaServices.getAllVacinas({
+          limit: 10, // Buscar as 10 mais recentes
         });
-        setTodasVacinas(vacinasOrdenadas);
-        setVacinas(vacinasOrdenadas.slice(0, 2));
+
+        if (vacinasResponse.success) {
+          const vacinasData = vacinasResponse.data.data?.vacinas || [];
+
+          // Formatar para o formato esperado pelo componente
+          const vacinasFormatadas = vacinasData.map((vacina) => ({
+            id: vacina.id,
+            petNome: vacina.pet?.nome || "Pet não encontrado",
+            nomeVacina: vacina.nome_vacina,
+            dataVacina: vacina.data_aplicacao,
+            dataRevacina: vacina.data_revacina,
+            dataCadastro: vacina.data_cadastro,
+          }));
+
+          setTodasVacinas(vacinasFormatadas);
+          setVacinas(vacinasFormatadas.slice(0, 2));
+
+          console.log("✅ Vacinas carregadas:", vacinasFormatadas.length);
+        } else {
+          console.error(
+            "❌ Erro ao carregar vacinas:",
+            vacinasResponse.message
+          );
+        }
       } catch (error) {
         console.error("❌ Erro ao carregar estatísticas:", error);
       } finally {

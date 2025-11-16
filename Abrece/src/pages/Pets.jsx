@@ -28,6 +28,8 @@ const Pets = () => {
       try {
         const response = await PetServices.getAllPets();
         if (response.success && response.data?.data) {
+          console.log("📦 Dados brutos do backend:", response.data.data);
+
           // Formatar dados do backend para o formato esperado pelo frontend
           const petsFormatados = response.data.data.map((pet) => ({
             id: pet.id,
@@ -42,6 +44,7 @@ const Pets = () => {
             castrado: pet.castrado,
             vacinado: pet.vacinado,
             vermifugado: pet.vermifugado,
+            localizacao: pet.localizacao,
             status: pet.status,
             // Extrair URLs das imagens
             imagens: pet.imagens?.map((img) => img.url_imagem) || [],
@@ -49,6 +52,10 @@ const Pets = () => {
           }));
           setPets(petsFormatados);
           console.log("\u2705 Pets carregados do backend:", petsFormatados);
+          console.log(
+            "📍 Pet Esmeralda com localização:",
+            petsFormatados.find((p) => p.nome === "Esmeralda")
+          );
           console.log(
             "\ud83d\udcf8 Exemplo de pet com imagens:",
             petsFormatados[0]
@@ -64,6 +71,8 @@ const Pets = () => {
 
   // Funções do modal
   const openModal = (pet) => {
+    console.log("🔍 Pet selecionado:", pet);
+    console.log("📍 Localização do pet:", pet.localizacao);
     setSelectedPet(pet);
     setModalImageIndex(0);
   };
@@ -163,30 +172,47 @@ const Pets = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Todos os Pets ({pets.length})
           </h1>
+          {/* <h2 className="text-2xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-sky-500 via-yellow-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
+              Como posso ajudar?
+            </span>
+          </h2> */}
           <p className="text-gray-600 mb-4">
             Veja todos os pets cadastrados - disponíveis, em processo de adoção
             e já adotados
           </p>
 
           {/* Contador de pets por status */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-green-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {pets.filter((pet) => pet.status === "disponivel").length}
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-green-200 via-green-100 to-green-50 p-6 rounded-2xl text-center shadow-lg border-2 border-green-400">
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-4xl font-extrabold text-green-700 flex items-center gap-2">
+                  🟢 {pets.filter((pet) => pet.status === "disponivel").length}
+                </span>
+                <span className="text-lg font-bold text-green-800 mt-2 tracking-wide">
+                  Disponíveis
+                </span>
               </div>
-              <div className="text-sm text-green-700">Disponíveis</div>
             </div>
-            <div className="bg-yellow-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-yellow-600">
-                {pets.filter((pet) => pet.status === "em_processo").length}
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 p-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-4xl font-extrabold text-yellow-700 flex items-center gap-2">
+                  ⏳ {pets.filter((pet) => pet.status === "em_processo").length}
+                </span>
+                <span className="text-lg font-bold text-yellow-800 mt-2 tracking-wide">
+                  Em Processo
+                </span>
               </div>
-              <div className="text-sm text-yellow-700">Em Processo</div>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-gray-600">
-                {pets.filter((pet) => pet.status === "adotado").length}
+            <div className="bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50 p-6 rounded-2xl text-center shadow-lg border-2 border-gray-400">
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-4xl font-extrabold text-gray-700 flex items-center gap-2">
+                  ❤️ {pets.filter((pet) => pet.status === "adotado").length}
+                </span>
+                <span className="text-lg font-bold text-gray-800 mt-2 tracking-wide">
+                  Adotados
+                </span>
               </div>
-              <div className="text-sm text-gray-700">Adotados</div>
             </div>
           </div>
 
@@ -268,22 +294,20 @@ const Pets = () => {
           {filteredPets.map((pet) => (
             <div
               key={pet.id}
-              className="rounded-lg overflow-hidden transition-shadow cursor-pointer"
+              className="rounded-xl overflow-hidden transition-shadow cursor-pointer border-[3px] bg-[#f4f0e4]"
               style={{
-                backgroundColor: "#f4f0e4",
-                borderWidth: "3px",
-                borderColor: "#4a4a4a",
-                borderStyle: "solid",
+                borderImage:
+                  "linear-gradient(90deg, rgb(102,178,255), rgb(255,255,153), rgb(153,255,204)) 1",
                 boxShadow:
-                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)",
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.boxShadow =
-                  "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(74, 74, 74, 0.2)")
+                  "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.boxShadow =
-                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)")
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")
               }
               onClick={() => openModal(pet)}
             >
@@ -441,6 +465,24 @@ const Pets = () => {
                 <h3 className="font-semibold text-gray-900 text-lg mb-1">
                   {pet.nome}
                 </h3>
+                {pet.localizacao && (
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <svg
+                      className="w-4 h-4 text-green-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="text-green-700 font-medium text-xs">
+                      {pet.localizacao}
+                    </span>
+                  </div>
+                )}
                 <p className="text-gray-600 text-sm">{pet.idade}</p>
                 <div className="mt-3 text-gray-900 text-sm font-medium">
                   Clique para ver mais →
@@ -649,6 +691,28 @@ const Pets = () => {
                       : "⏳ Em Processo de Adoção"}
                   </span>
                 </div>
+
+                {/* Localização em destaque logo após o status */}
+                {selectedPet.localizacao && (
+                  <div className="mb-4 bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-3 text-center max-w-md mx-auto shadow-lg">
+                    <div className="flex items-center justify-center gap-2 text-white">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <span className="font-bold text-base">
+                        📍 {selectedPet.localizacao}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Informações básicas em grid */}
                 <div className="grid grid-cols-3 gap-2 mb-4 max-w-lg mx-auto">

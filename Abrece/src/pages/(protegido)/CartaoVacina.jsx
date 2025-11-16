@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PetServices } from "../../services/PetServices";
+import { VacinaServices } from "../../services/VacinaServices";
 
 const CartaoVacina = () => {
   const [pets, setPets] = useState([]);
@@ -9,10 +11,17 @@ const CartaoVacina = () => {
   ]);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  // Carregar pets do localStorage
+  // Carregar pets do backend
   useEffect(() => {
-    const petsStorage = JSON.parse(localStorage.getItem("pets") || "[]");
-    setPets(petsStorage);
+    const fetchPets = async () => {
+      const result = await PetServices.getAllPets();
+      if (result.success) {
+        setPets(result.data.data || []);
+      } else {
+        setMessage({ type: "error", text: "Erro ao carregar pets" });
+      }
+    };
+    fetchPets();
   }, []);
 
   const handleChange = (index, field, value) => {
@@ -35,7 +44,7 @@ const CartaoVacina = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Rolar para o topo suavemente
@@ -46,79 +55,49 @@ const CartaoVacina = () => {
       return;
     }
 
-    const pet = pets.find((p) => p.id.toString() === selectedPet.toString());
+    // Validar vacinas - só incluir as que têm nome e data
+    const vacinasValidas = vacinas.filter(
+      (vacina) => vacina.nomeVacina.trim() && vacina.dataVacina
+    );
 
-    if (!pet) {
-      setMessage({ type: "error", text: "Pet não encontrado" });
-      console.log(
-        "Pet não encontrado. selectedPet:",
-        selectedPet,
-        "pets:",
-        pets
-      );
-      return;
-    }
-
-    const vacinasStorage = JSON.parse(localStorage.getItem("vacinas") || "[]");
-    const atividades = JSON.parse(localStorage.getItem("atividades") || "[]");
-    const novasVacinas = [];
-
-    // Processar cada vacina
-    vacinas.forEach((vacina, index) => {
-      // Só adiciona se tiver nome e data
-      if (vacina.nomeVacina && vacina.dataVacina) {
-        const novaVacina = {
-          id: Date.now().toString() + `_${index}`,
-          petId: selectedPet,
-          petNome: pet.nome,
-          nomeVacina: vacina.nomeVacina,
-          dataVacina: vacina.dataVacina,
-          dataRevacina: vacina.dataRevacina,
-          dataCadastro: new Date().toISOString(),
-        };
-
-        vacinasStorage.push(novaVacina);
-        novasVacinas.push(novaVacina);
-
-        // Adicionar à atividade
-        const novaAtividade = {
-          id: Date.now().toString() + `_vacina_${index}`,
-          tipo: "vacina",
-          petNome: pet.nome,
-          nomeVacina: vacina.nomeVacina,
-          dataVacina: vacina.dataVacina,
-          dataRevacina: vacina.dataRevacina || "Não informada",
-          data: new Date().toLocaleString("pt-BR"),
-        };
-        atividades.unshift(novaAtividade);
-      }
-    });
-
-    if (novasVacinas.length === 0) {
+    if (vacinasValidas.length === 0) {
       setMessage({ type: "error", text: "Preencha pelo menos uma vacina" });
       return;
     }
 
-    // Salvar no localStorage
-    localStorage.setItem("vacinas", JSON.stringify(vacinasStorage));
-    localStorage.setItem("atividades", JSON.stringify(atividades.slice(0, 20)));
+    // Preparar dados para enviar ao backend
+    const vacinasParaEnviar = vacinasValidas.map((vacina) => ({
+      nome_vacina: vacina.nomeVacina,
+      data_aplicacao: vacina.dataVacina,
+      data_revacina: vacina.dataRevacina || null,
+    }));
 
-    console.log("Vacinas cadastradas:", novasVacinas);
-    console.log(
-      "Atividades adicionadas:",
-      atividades.slice(0, novasVacinas.length)
+    // Enviar para o backend (pet_id é string no banco)
+    const result = await VacinaServices.createVacinasLote(
+      selectedPet,
+      vacinasParaEnviar
     );
 
-    setMessage({
-      type: "success",
-      text: `${novasVacinas.length} vacina(s) cadastrada(s) com sucesso!`,
-    });
-    setVacinas([
-      { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
-    ]);
-    setSelectedPet("");
+    if (result.success) {
+      setMessage({
+        type: "success",
+        text: `${vacinasValidas.length} vacina(s) cadastrada(s) com sucesso!`,
+      });
 
-    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      // Resetar formulário
+      setVacinas([
+        { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
+      ]);
+      setSelectedPet("");
+
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } else {
+      setMessage({
+        type: "error",
+        text: result.message || "Erro ao cadastrar vacinas",
+      });
+      setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+    }
   };
 
   return (

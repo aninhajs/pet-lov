@@ -18,6 +18,7 @@ const CadastrarPet = () => {
     vermifugado: false,
     necessidadesEspeciais: "",
     historia: "",
+    localizacao: "",
     imagens: [],
   });
 
@@ -145,6 +146,7 @@ const CadastrarPet = () => {
         vermifugado: formData.vermifugado,
         necessidades_especiais: formData.necessidadesEspeciais || null,
         historia: formData.historia || null,
+        localizacao: formData.localizacao || null,
         // Enviar imagens como array de objetos com url base64
         imagens: formData.imagens.map((img, index) => ({
           url: img,
@@ -414,19 +416,19 @@ const CadastrarPet = () => {
                   />
                 </div>
 
-                {/* <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Temperamento
+                    Localização
                   </label>
                   <input
                     type="text"
-                    name="temperamento"
-                    value={formData.temperamento}
+                    name="localizacao"
+                    value={formData.localizacao}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                    placeholder="Ex: Dócil, brincalhão, protetor"
+                    placeholder="Ex: São Paulo - SP, Belo Horizonte - MG"
                   />
-                </div> */}
+                </div>
               </div>
             </div>
 

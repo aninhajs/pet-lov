@@ -46,6 +46,7 @@ const Home = () => {
               castrado: pet.castrado,
               vacinado: pet.vacinado,
               vermifugado: pet.vermifugado,
+              localizacao: pet.localizacao,
               status: pet.status,
               imagens: pet.imagens?.map((img) => img.url_imagem) || [],
               imagem: pet.imagens?.[0]?.url_imagem || null,
@@ -175,9 +176,16 @@ const Home = () => {
           {/* Pets em Destaque */}
           <div className="mt-20">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Pets Esperando por Você
-              </h2>
+              <h1 className="text-3xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-sky-500 via-yellow-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
+                  Pets Esperando por Você
+                </span>
+              </h1>
+              {/* <h2 className="text-2xl font-bold mb-6">
+                <span className="bg-gradient-to-r from-sky-500 via-yellow-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
+                  Como posso ajudar?
+                </span>
+              </h2> */}
               <p className="text-gray-600 text-lg font-bold">
                 Conheça alguns dos nossos pets que estão procurando um lar
               </p>
@@ -187,21 +195,21 @@ const Home = () => {
               {pets.slice(0, 4).map((pet) => (
                 <div
                   key={pet.id}
-                  className="rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-3"
+                  className="rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-[3px]"
                   style={{
                     backgroundColor: "#f4f0e4",
-                    borderWidth: "3px",
-                    borderColor: "#4a4a4a",
+                    borderImage:
+                      "linear-gradient(90deg, rgb(102,178,255), rgb(255,255,153), rgb(153,255,204)) 1",
                     boxShadow:
-                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)",
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.boxShadow =
-                      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(74, 74, 74, 0.2)")
+                      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)")
                   }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.boxShadow =
-                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 3px rgba(74, 74, 74, 0.1)")
+                      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)")
                   }
                   onClick={() => openModal(pet)}
                 >
@@ -354,6 +362,24 @@ const Home = () => {
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">
                       {pet.nome}
                     </h3>
+                    {pet.localizacao && (
+                      <div className="flex items-center justify-center gap-1 mb-1">
+                        <svg
+                          className="w-4 h-4 text-green-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-green-700 font-medium text-xs">
+                          {pet.localizacao}
+                        </span>
+                      </div>
+                    )}
                     <p className="text-gray-600 text-sm">{pet.idade}</p>
                     <div className="mt-3 text-gray-900 text-sm font-medium">
                       Clique para ver mais →
@@ -379,8 +405,10 @@ const Home = () => {
           {/* Features */}
           <div className="mt-20">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Como posso ajudar?
+              <h2 className="text-3xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-sky-500 via-yellow-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg">
+                  Como posso ajudar?
+                </span>
               </h2>
             </div>
 

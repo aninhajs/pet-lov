@@ -192,9 +192,12 @@ const GerenciarPets = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f4f0e4' }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
       {/* Header */}
-      <header className="shadow-lg border-b-2 border-yellow-300" style={{ backgroundColor: '#f4f0e4' }}>
+      <header
+        className="shadow-lg border-b-2 border-yellow-300"
+        style={{ backgroundColor: "#f4f0e4" }}
+      >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
             <Link to="/admin" className="flex items-center space-x-3">
