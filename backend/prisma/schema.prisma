@@ -34,17 +34,16 @@ model Pet {
   cor                    String
   peso                   Decimal?
   descricao              String
-  temperamento           String?
   castrado               Boolean       @default(false)
   vacinado               Boolean       @default(false)
   vermifugado            Boolean       @default(false)
   necessidades_especiais String?
   historia               String?
-  localizacao            String?
   status                 StatusPet     @default(disponivel)
   data_cadastro          DateTime      @default(now())
   data_atualizacao       DateTime      @updatedAt
   usuario_id             String
+  localizacao            String?
   adocoes                Adoption[]
   imagens                PetImage[]
   interesses             PetInterest[]
