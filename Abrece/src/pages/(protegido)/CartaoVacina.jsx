@@ -10,6 +10,7 @@ const CartaoVacina = () => {
     { id: Date.now(), nomeVacina: "", dataVacina: "", dataRevacina: "" },
   ]);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [filtroNome, setFiltroNome] = useState("");
 
   // Carregar pets do backend
   useEffect(() => {
@@ -26,6 +27,17 @@ const CartaoVacina = () => {
 
   const handleChange = (index, field, value) => {
     const novasVacinas = [...vacinas];
+    if (field === "dataRevacina") {
+      const dataVacina = novasVacinas[index].dataVacina;
+      if (dataVacina && value) {
+        const dataVacinaDate = new Date(dataVacina);
+        const dataRevacinaDate = new Date(value);
+        if (dataRevacinaDate <= dataVacinaDate) {
+          alert("A data de revacinação deve ser posterior à data da vacina.");
+          return;
+        }
+      }
+    }
     novasVacinas[index][field] = value;
     setVacinas(novasVacinas);
   };
@@ -59,6 +71,21 @@ const CartaoVacina = () => {
     const vacinasValidas = vacinas.filter(
       (vacina) => vacina.nomeVacina.trim() && vacina.dataVacina
     );
+
+    // Validação extra para datas de revacina
+    for (const vacina of vacinasValidas) {
+      if (vacina.dataRevacina) {
+        const dataVacinaDate = new Date(vacina.dataVacina);
+        const dataRevacinaDate = new Date(vacina.dataRevacina);
+        if (dataRevacinaDate <= dataVacinaDate) {
+          setMessage({
+            type: "error",
+            text: "A data de revacinação deve ser posterior à data da vacina.",
+          });
+          return;
+        }
+      }
+    }
 
     if (vacinasValidas.length === 0) {
       setMessage({ type: "error", text: "Preencha pelo menos uma vacina" });
@@ -165,22 +192,47 @@ const CartaoVacina = () => {
           </h1>
 
           {/* Seleção de Pet */}
-          <div className="mb-6">
+          <div className="mb-6 relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Selecione o Pet *
+              Pesquisar Pet pelo nome
             </label>
-            <select
-              value={selectedPet}
-              onChange={(e) => setSelectedPet(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-            >
-              <option value="">Escolha um pet...</option>
-              {pets.map((pet) => (
-                <option key={pet.id} value={pet.id}>
-                  {pet.nome} - {pet.tipo}
-                </option>
-              ))}
-            </select>
+            <input
+              type="text"
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+              placeholder="Digite o nome do pet..."
+              className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+              autoComplete="off"
+            />
+            {filtroNome && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {pets
+                  .filter((pet) =>
+                    pet.nome.toLowerCase().includes(filtroNome.toLowerCase())
+                  )
+                  .map((pet) => (
+                    <li
+                      key={pet.id}
+                      className={`px-4 py-2 cursor-pointer hover:bg-sky-100 ${
+                        selectedPet === pet.id ? "bg-sky-200 font-bold" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedPet(pet.id);
+                        setFiltroNome(pet.nome);
+                      }}
+                    >
+                      {pet.nome} - {pet.tipo}
+                    </li>
+                  ))}
+                {pets.filter((pet) =>
+                  pet.nome.toLowerCase().includes(filtroNome.toLowerCase())
+                ).length === 0 && (
+                  <li className="px-4 py-2 text-gray-400">
+                    Nenhum pet encontrado
+                  </li>
+                )}
+              </ul>
+            )}
           </div>
 
           {/* Formulário de Cadastro */}

@@ -4,6 +4,7 @@ import { PetServices } from "../../services/PetServices";
 import { VacinaServices } from "../../services/VacinaServices";
 
 const AdminDashboard = () => {
+  const [excluindo, setExcluindo] = useState(false); // status de exclusão
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -17,6 +18,7 @@ const AdminDashboard = () => {
   const [todasVacinas, setTodasVacinas] = useState([]);
   const [buscaPet, setBuscaPet] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [petSelecionado, setPetSelecionado] = useState(null); // nome do pet selecionado
 
   // Carregar estatísticas reais do backend
   useEffect(() => {
@@ -89,13 +91,34 @@ const AdminDashboard = () => {
   // Filtrar vacinas por busca
   useEffect(() => {
     if (buscaPet.trim() === "") {
-      setVacinas(todasVacinas.slice(0, 2));
+      // Exibir apenas a vacina mais recente de até 2 pets diferentes
+      const petsUnicos = [];
+      const vacinasPorPet = [];
+      for (const vacina of todasVacinas) {
+        if (!petsUnicos.includes(vacina.petNome)) {
+          petsUnicos.push(vacina.petNome);
+          vacinasPorPet.push(vacina);
+        }
+        if (vacinasPorPet.length === 2) break;
+      }
+      setVacinas(vacinasPorPet);
     } else {
+      // Busca: filtra vacinas pelo nome do pet, mas ainda mostra só 2 pets diferentes
       const vacinasFiltradas = todasVacinas.filter((vacina) =>
         vacina.petNome.toLowerCase().includes(buscaPet.toLowerCase())
       );
-      setVacinas(vacinasFiltradas.slice(0, 2));
+      const petsUnicosBusca = [];
+      const vacinasPorPetBusca = [];
+      for (const vacina of vacinasFiltradas) {
+        if (!petsUnicosBusca.includes(vacina.petNome)) {
+          petsUnicosBusca.push(vacina.petNome);
+          vacinasPorPetBusca.push(vacina);
+        }
+        if (vacinasPorPetBusca.length === 2) break;
+      }
+      setVacinas(vacinasPorPetBusca);
     }
+    setPetSelecionado(null); // limpa seleção ao buscar
   }, [buscaPet, todasVacinas]);
 
   const handleLogout = () => {
@@ -255,7 +278,10 @@ const AdminDashboard = () => {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <p className="text-base font-bold text-gray-900">
+                          <p
+                            className="text-base font-bold text-gray-900 cursor-pointer hover:underline"
+                            onClick={() => setPetSelecionado(vacina.petNome)}
+                          >
                             🐾 {vacina.petNome}
                           </p>
                           <p className="text-sm text-green-700 font-bold mt-1">
@@ -302,6 +328,83 @@ const AdminDashboard = () => {
                       Cadastrar primeira vacina →
                     </Link>
                   )}
+                </div>
+              )}
+              {/* Modal flutuante para vacinas do pet selecionado */}
+              {petSelecionado && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                  <div className="bg-white rounded-lg shadow-2xl border border-green-400 max-w-md w-full p-6 relative animate-fade-in">
+                    <button
+                      className="absolute top-3 right-3 text-red-500 hover:text-red-700 font-bold text-lg"
+                      onClick={() => setPetSelecionado(null)}
+                      aria-label="Fechar"
+                    >
+                      ×
+                    </button>
+                    <h3 className="text-xl font-bold text-green-700 mb-4 text-center">
+                      Vacinas de {petSelecionado}
+                    </h3>
+                    <ul className="space-y-3">
+                      {todasVacinas
+                        .filter((v) => v.petNome === petSelecionado)
+                        .map((vacina) => (
+                          <li
+                            key={vacina.id}
+                            className="border-l-4 border-green-400 pl-3 py-2 bg-gray-50 rounded-r-lg flex items-center justify-between"
+                          >
+                            <div>
+                              <span className="font-bold text-gray-900">
+                                {vacina.nomeVacina}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-700">
+                                Aplicada em:{" "}
+                                {new Date(vacina.dataVacina).toLocaleDateString(
+                                  "pt-BR"
+                                )}
+                              </span>
+                              {vacina.dataRevacina && (
+                                <span className="ml-2 text-xs text-orange-700">
+                                  Revacinar em:{" "}
+                                  {new Date(
+                                    vacina.dataRevacina
+                                  ).toLocaleDateString("pt-BR")}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              className="ml-4 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 border border-red-300"
+                              disabled={excluindo}
+                              onClick={async () => {
+                                setExcluindo(true);
+                                try {
+                                  // Chama o serviço de exclusão
+                                  const resp =
+                                    await VacinaServices.deleteVacina(
+                                      vacina.id
+                                    );
+                                  if (resp.success) {
+                                    // Remove do estado local
+                                    setTodasVacinas((prev) =>
+                                      prev.filter((v) => v.id !== vacina.id)
+                                    );
+                                  } else {
+                                    alert(
+                                      "Erro ao excluir vacina: " +
+                                        (resp.message || "Tente novamente.")
+                                    );
+                                  }
+                                } catch {
+                                  alert("Erro ao excluir vacina.");
+                                }
+                                setExcluindo(false);
+                              }}
+                            >
+                              Excluir
+                            </button>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>

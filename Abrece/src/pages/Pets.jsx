@@ -313,6 +313,10 @@ const Pets = () => {
             >
               {/* Imagem do pet */}
               <div className="relative w-full h-48 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden rounded-t-lg group flex items-center justify-center">
+                <div
+                  className="absolute inset-0 w-full h-full"
+                  style={{ background: "#f4f0e4", zIndex: 0 }}
+                ></div>
                 {pet.imagens && pet.imagens.length > 0 ? (
                   <>
                     <img
@@ -324,8 +328,9 @@ const Pets = () => {
                       alt={`${pet.nome} - Foto ${
                         (currentImageIndexes[pet.id] || 0) + 1
                       }`}
-                      className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
+                      className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105 relative"
                       loading="lazy"
+                      style={{ zIndex: 1 }}
                       onError={(e) => {
                         e.target.style.display = "none";
                         e.target.nextElementSibling.style.display = "flex";
@@ -554,6 +559,10 @@ const Pets = () => {
 
               {/* Imagem do pet */}
               <div className="relative w-full h-80 bg-gradient-to-br from-sky-50 to-yellow-50 overflow-hidden rounded-t-xl flex items-center justify-center">
+                <div
+                  className="absolute inset-0 w-full h-full"
+                  style={{ background: "#f4f0e4", zIndex: 0 }}
+                ></div>
                 {selectedPet.imagens && selectedPet.imagens.length > 0 ? (
                   <>
                     <img
@@ -563,7 +572,8 @@ const Pets = () => {
                         400
                       )}
                       alt={`${selectedPet.nome} - Foto ${modalImageIndex + 1}`}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain relative"
+                      style={{ zIndex: 1 }}
                     />
 
                     {/* Setas de navegação no modal */}

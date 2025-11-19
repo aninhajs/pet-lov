@@ -5,6 +5,7 @@ import { PetServices } from "../../services/PetServices";
 const GerenciarPets = () => {
   const [pets, setPets] = useState([]);
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroNome, setFiltroNome] = useState("");
   const [petSelecionado, setPetSelecionado] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
 
@@ -51,12 +52,17 @@ const GerenciarPets = () => {
     carregarPets();
   }, []);
 
-  const petsFiltrados =
-    filtroStatus === "todos"
-      ? pets
-      : pets.filter(
-          (pet) => pet.status?.toLowerCase() === filtroStatus.toLowerCase()
-        );
+  const petsFiltrados = pets
+    .filter(
+      (pet) =>
+        filtroStatus === "todos" ||
+        pet.status?.toLowerCase() === filtroStatus.toLowerCase()
+    )
+    .filter(
+      (pet) =>
+        !filtroNome ||
+        pet.nome?.toLowerCase().includes(filtroNome.toLowerCase())
+    );
 
   const alterarStatusPet = async (id, novoStatus) => {
     try {
@@ -303,10 +309,17 @@ const GerenciarPets = () => {
 
         {/* Lista de pets */}
         <div className="bg-white shadow-xl rounded-xl overflow-hidden border-2 border-sky-200">
-          <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50">
+          <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex items-center justify-between">
             <h2 className="text-xl font-bold text-sky-700">
               🐾 Pets Cadastrados ({petsFiltrados.length})
             </h2>
+            <input
+              type="text"
+              placeholder="Pesquisar por nome..."
+              className="ml-4 px-4 py-2 rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm w-64"
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+            />
           </div>
 
           <div className="divide-y divide-gray-200">

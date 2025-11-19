@@ -1,4 +1,23 @@
 import React, { useState, useEffect } from "react";
+// CSS para animação das patinhas
+const pawAnimationStyle = `
+@keyframes pawUp {
+  0% { transform: translateY(40px) scale(0.7); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(-10px) scale(1); opacity: 1; }
+}
+.paw-anim {
+  display: inline-block;
+  font-size: 5rem;
+  margin: 0 1.1rem;
+  animation: pawUp 2.4s cubic-bezier(.4,0,.2,1) infinite alternate;
+  color: #b8860b;
+  filter: drop-shadow(0 2px 7px #b8860b88);
+}
+.paw-anim-right {
+  animation-delay: 0.8s;
+}
+`;
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import { PetServices } from "../services/PetServices";
@@ -134,38 +153,60 @@ const Home = () => {
       </header>
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Estilos de animação das patinhas */}
+        <style>{pawAnimationStyle}</style>
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-8">
-            <span className="text-yellow-500">E</span>
-            <span className="text-blue-500">n</span>
-            <span className="text-red-500">c</span>
-            <span className="text-green-500">o</span>
-            <span className="text-yellow-500">n</span>
-            <span className="text-blue-500">t</span>
-            <span className="text-red-500">r</span>
-            <span className="text-green-500">e</span>
-            <span className="text-yellow-500"> </span>
-            <span className="text-blue-500">s</span>
-            <span className="text-red-500">e</span>
-            <span className="text-green-500">u</span>
-            <span className="text-yellow-500"> </span>
-            <span className="text-blue-500">n</span>
-            <span className="text-red-500">o</span>
-            <span className="text-green-500">v</span>
-            <span className="text-yellow-500">o</span>
-            <span className="text-blue-500"> </span>
-            <span className="text-red-500">m</span>
-            <span className="text-green-500">e</span>
-            <span className="text-yellow-500">l</span>
-            <span className="text-blue-500">h</span>
-            <span className="text-red-500">o</span>
-            <span className="text-green-500">r</span>
-            <span className="text-yellow-500"> </span>
-            <span className="text-blue-500">a</span>
-            <span className="text-red-500">m</span>
-            <span className="text-green-500">i</span>
-            <span className="text-yellow-500">g</span>
-            <span className="text-blue-500">o</span>
+          <h1
+            className="text-6xl md:text-8xl font-extrabold mb-8 flex items-center justify-center gap-2"
+            style={{
+              lineHeight: "1.05",
+              fontFamily: "Inter, sans-serif",
+              position: "relative",
+            }}
+          >
+            <span className="paw-anim" role="img" aria-label="patinha">
+              🐾
+            </span>
+            <span>
+              <span className="text-yellow-500">E</span>
+              <span className="text-blue-500">n</span>
+              <span className="text-red-500">c</span>
+              <span className="text-green-500">o</span>
+              <span className="text-yellow-500">n</span>
+              <span className="text-blue-500">t</span>
+              <span className="text-red-500">r</span>
+              <span className="text-green-500">e</span>
+              <span className="text-yellow-500"> </span>
+              <span className="text-blue-500">s</span>
+              <span className="text-red-500">e</span>
+              <span className="text-green-500">u</span>
+              <span className="text-yellow-500"> </span>
+              <span className="text-blue-500">n</span>
+              <span className="text-red-500">o</span>
+              <span className="text-green-500">v</span>
+              <span className="text-yellow-500">o</span>
+              <span className="text-blue-500"> </span>
+              <span className="text-red-500">m</span>
+              <span className="text-green-500">e</span>
+              <span className="text-yellow-500">l</span>
+              <span className="text-blue-500">h</span>
+              <span className="text-red-500">o</span>
+              <span className="text-green-500">r</span>
+              <br className="block md:hidden" />
+              <span className="text-yellow-500"> </span>
+              <span className="text-blue-500">a</span>
+              <span className="text-red-500">m</span>
+              <span className="text-green-500">i</span>
+              <span className="text-yellow-500">g</span>
+              <span className="text-blue-500">o</span>
+            </span>
+            <span
+              className="paw-anim paw-anim-right"
+              role="img"
+              aria-label="patinha"
+            >
+              🐾
+            </span>
           </h1>
           <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto font-bold">
             Conectamos corações e patas! Descubra pets incríveis esperando por
@@ -195,7 +236,7 @@ const Home = () => {
               {pets.slice(0, 4).map((pet) => (
                 <div
                   key={pet.id}
-                  className="rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-[3px]"
+                  className="rounded-md overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-[3px]"
                   style={{
                     backgroundColor: "#f4f0e4",
                     borderImage:
