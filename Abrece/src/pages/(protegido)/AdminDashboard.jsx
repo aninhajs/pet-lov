@@ -131,39 +131,44 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
-      {/* Header */}
+      {/* Header responsivo */}
       <header
         className="shadow-lg border-b-2 border-yellow-300"
         style={{ backgroundColor: "#f4f0e4" }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
-                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
               />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Central de Gerenciamento
+              <h1
+                className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
+                style={{ wordBreak: "break-word" }}
+              >
+                Central de
+                <br className="block sm:hidden" />
+                Gerenciamento
               </h1>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium text-center"
               >
                 Site Principal
               </Link>
               <Link
                 to="/admin/adoptants"
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
                 Ver Candidatos
               </Link>
               <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
               >
                 Sair
               </button>

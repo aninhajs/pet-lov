@@ -120,30 +120,34 @@ const Home = () => {
         style={{ backgroundColor: "#f4f0e4" }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
-                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
               />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Abrace Uma Causa Animal
+              <h1
+                className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
+                style={{ wordBreak: "break-word" }}
+              >
+                Abrace Uma
+                <br className="block sm:hidden" />
+                Causa Animal
               </h1>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
                 to="/pets"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 Ver Pets
               </Link>
-              {/* 🔁 Alterado para <a> externo (Google Forms) */}
               <a
                 href={GOOGLE_FORM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 Adotar Pet
               </a>
@@ -157,7 +161,7 @@ const Home = () => {
         <style>{pawAnimationStyle}</style>
         <div className="text-center">
           <h1
-            className="text-6xl md:text-8xl font-extrabold mb-8 flex items-center justify-center gap-2"
+            className="text-4xl xs:text-5xl sm:text-6xl md:text-8xl font-extrabold mb-8 flex items-center justify-center gap-2"
             style={{
               lineHeight: "1.05",
               fontFamily: "Inter, sans-serif",
@@ -232,8 +236,8 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 auto-rows-fr">
-              {pets.slice(0, 4).map((pet) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-12 auto-rows-fr">
+              {pets.slice(0, 10).map((pet) => (
                 <div
                   key={pet.id}
                   className="rounded-md overflow-hidden transition-all duration-300 hover:scale-105 group cursor-pointer border-[3px]"
@@ -263,25 +267,30 @@ const Home = () => {
 
                     {pet.imagens && pet.imagens.length > 0 ? (
                       <>
-                        <img
-                          src={optimizeImageUrl(
-                            pet.imagens[currentImageIndexes[pet.id] || 0],
-                            400,
-                            320
-                          )}
-                          alt={`${pet.nome} - Foto ${
-                            (currentImageIndexes[pet.id] || 0) + 1
-                          }`}
-                          className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            if (e.currentTarget.nextElementSibling) {
-                              e.currentTarget.nextElementSibling.style.display =
-                                "flex";
-                            }
-                          }}
-                        />
+                        <div
+                          style={{ backgroundColor: "#f4f0e4" }}
+                          className="w-full h-full flex items-center justify-center"
+                        >
+                          <img
+                            src={optimizeImageUrl(
+                              pet.imagens[currentImageIndexes[pet.id] || 0],
+                              400,
+                              320
+                            )}
+                            alt={`${pet.nome} - Foto ${
+                              (currentImageIndexes[pet.id] || 0) + 1
+                            }`}
+                            className="w-full h-full object-contain transition-all duration-300 group-hover:scale-105"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              if (e.currentTarget.nextElementSibling) {
+                                e.currentTarget.nextElementSibling.style.display =
+                                  "flex";
+                              }
+                            }}
+                          />
+                        </div>
 
                         {/* Setas de navegação - aparecem apenas se houver mais de 1 foto */}
                         {pet.imagens.length > 1 && (
@@ -629,19 +638,26 @@ const Home = () => {
               <div className="h-40 sm:h-44 md:h-48 overflow-hidden rounded-t-2xl bg-gray-100 flex items-center justify-center">
                 {selectedPet.imagens && selectedPet.imagens.length > 0 ? (
                   <>
-                    <img
-                      src={optimizeImageUrl(
-                        selectedPet.imagens[modalImageIndex],
-                        600,
-                        400
-                      )}
-                      alt={`${selectedPet.nome} - Foto ${modalImageIndex + 1}`}
-                      className="max-w-full max-h-full object-contain"
-                      style={{
-                        objectFit: "contain",
-                        objectPosition: "center center",
-                      }}
-                    />
+                    <div
+                      style={{ backgroundColor: "#f4f0e4" }}
+                      className="w-full h-full flex items-center justify-center"
+                    >
+                      <img
+                        src={optimizeImageUrl(
+                          selectedPet.imagens[modalImageIndex],
+                          600,
+                          400
+                        )}
+                        alt={`${selectedPet.nome} - Foto ${
+                          modalImageIndex + 1
+                        }`}
+                        className="max-w-full max-h-full object-contain"
+                        style={{
+                          objectFit: "contain",
+                          objectPosition: "center center",
+                        }}
+                      />
+                    </div>
 
                     {/* Setas de navegação no modal */}
                     {selectedPet.imagens.length > 1 && (

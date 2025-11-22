@@ -244,9 +244,7 @@ const CartaoVacina = () => {
                 className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative"
               >
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-semibold text-gray-900">
-                    Vacina {index + 1}
-                  </h3>
+                  <h3 className="font-semibold text-gray-900">Vacina</h3>
                   {vacinas.length > 1 && (
                     <button
                       type="button"

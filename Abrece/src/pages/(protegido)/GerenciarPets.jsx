@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ModalEditarPet from "../../components/ModalEditarPet";
 import { Link } from "react-router-dom";
 import { PetServices } from "../../services/PetServices";
 
@@ -8,6 +9,45 @@ const GerenciarPets = () => {
   const [filtroNome, setFiltroNome] = useState("");
   const [petSelecionado, setPetSelecionado] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
+  const [petEditando, setPetEditando] = useState(null);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  // Função para abrir modal de edição
+  const abrirModalEditar = (pet) => {
+    setPetEditando(pet);
+  };
+
+  // Função para fechar modal de edição
+  const fecharModalEditar = () => {
+    setPetEditando(null);
+  };
+
+  // Função para salvar edição
+  const salvarEdicaoPet = async (dadosEditados) => {
+    setIsEditSubmitting(true);
+    try {
+      // Remover campos 'imagem' e 'imagens' se existirem
+      const { imagem, imagens, ...dadosParaEnviar } = dadosEditados;
+      const response = await PetServices.updatePet(
+        dadosEditados.id,
+        dadosParaEnviar
+      );
+      if (response.success) {
+        // Atualizar lista local
+        setPets((prev) =>
+          prev.map((pet) =>
+            pet.id === dadosEditados.id ? { ...pet, ...dadosEditados } : pet
+          )
+        );
+        fecharModalEditar();
+      } else {
+        alert(response.message || "Erro ao atualizar pet.");
+      }
+    } catch (error) {
+      alert("Erro ao atualizar pet.");
+    } finally {
+      setIsEditSubmitting(false);
+    }
+  };
 
   // Carregar pets do backend
   useEffect(() => {
@@ -205,32 +245,40 @@ const GerenciarPets = () => {
         style={{ backgroundColor: "#f4f0e4" }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <Link to="/admin" className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
+            <Link
+              to="/admin"
+              className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0"
+            >
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
-                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
               />
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                  Abrace Uma Causa Animal
+              <div className="min-w-0">
+                <h1
+                  className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
+                  style={{ wordBreak: "break-word" }}
+                >
+                  Abrace Uma
+                  <br className="block sm:hidden" />
+                  Causa Animal
                 </h1>
-                <p className="text-xs text-sky-600 font-medium">
+                <p className="text-xs text-sky-600 font-medium truncate">
                   Gerenciar Pets
                 </p>
               </div>
             </Link>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
                 🏠 Dashboard
               </Link>
               <Link
                 to="/admin/cadastrar-pet"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 ➕ Novo Pet
               </Link>
@@ -240,7 +288,7 @@ const GerenciarPets = () => {
                   localStorage.removeItem("user");
                   window.location.href = "/login";
                 }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 🚪 Sair
               </button>
@@ -491,6 +539,21 @@ const GerenciarPets = () => {
                     >
                       Detalhes
                     </button>
+                    <button
+                      onClick={() => abrirModalEditar(pet)}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                    >
+                      ✏️ Editar
+                    </button>
+                    {/* Modal de edição de pet */}
+                    {petEditando && (
+                      <ModalEditarPet
+                        pet={petEditando}
+                        onClose={fecharModalEditar}
+                        onSave={salvarEdicaoPet}
+                        isSubmitting={isEditSubmitting}
+                      />
+                    )}
 
                     {pet.status === "disponivel" && (
                       <button

@@ -126,6 +126,23 @@ const CadastrarPet = () => {
     setIsSubmitting(true);
     setError("");
 
+    // Validação do peso conforme o porte
+    const peso = formData.peso ? parseFloat(formData.peso) : null;
+    if (formData.porte && peso !== null) {
+      if (
+        (formData.porte === "pequeno" && peso > 15) ||
+        (formData.porte === "medio" && (peso <= 15 || peso > 30)) ||
+        (formData.porte === "grande" && peso <= 30)
+      ) {
+        setIsSubmitting(false);
+        setError(
+          "O peso informado não corresponde ao porte selecionado.\n" +
+            "Pequeno: até 15kg | Médio: 15-30kg | Grande: acima de 30kg."
+        );
+        return;
+      }
+    }
+
     try {
       // Preparar dados para envio ao backend
       const petData = {

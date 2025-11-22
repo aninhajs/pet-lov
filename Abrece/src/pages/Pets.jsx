@@ -126,6 +126,20 @@ const Pets = () => {
       return pet.status === selectedFilter;
     }
 
+    // Filtros por cidade
+    if (selectedFilter === "fortaleza-ce") {
+      return (
+        normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
+        normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")
+      );
+    }
+    if (selectedFilter === "aquiraz-ce") {
+      return (
+        normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
+        normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")
+      );
+    }
+
     return true;
   });
 
@@ -137,27 +151,32 @@ const Pets = () => {
         style={{ backgroundColor: "#f4f0e4" }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
-                className="w-14 h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
               />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Abrace Uma Causa Animal
+              <h1
+                className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
+                style={{ wordBreak: "break-word" }}
+              >
+                Abrace Uma
+                <br className="block sm:hidden" />
+                Causa Animal
               </h1>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
                 Início
               </Link>
               <Link
                 to="/questionnaire"
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 Adotar Pet
               </Link>
@@ -184,32 +203,32 @@ const Pets = () => {
 
           {/* Contador de pets por status */}
           <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-green-200 via-green-100 to-green-50 p-6 rounded-2xl text-center shadow-lg border-2 border-green-400">
+            <div className="bg-gradient-to-br from-green-200 via-green-100 to-green-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-green-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-4xl font-extrabold text-green-700 flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-green-700 flex items-center gap-2">
                   🟢 {pets.filter((pet) => pet.status === "disponivel").length}
                 </span>
-                <span className="text-lg font-bold text-green-800 mt-2 tracking-wide">
+                <span className="text-base sm:text-lg font-bold text-green-800 mt-1 tracking-wide">
                   Disponíveis
                 </span>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 p-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-yellow-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-4xl font-extrabold text-yellow-700 flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-yellow-700 flex items-center gap-2">
                   ⏳ {pets.filter((pet) => pet.status === "em_processo").length}
                 </span>
-                <span className="text-lg font-bold text-yellow-800 mt-2 tracking-wide">
+                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-1 tracking-wide">
                   Em Processo
                 </span>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50 p-6 rounded-2xl text-center shadow-lg border-2 border-gray-400">
+            <div className="bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-gray-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-4xl font-extrabold text-gray-700 flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-gray-700 flex items-center gap-2">
                   ❤️ {pets.filter((pet) => pet.status === "adotado").length}
                 </span>
-                <span className="text-lg font-bold text-gray-800 mt-2 tracking-wide">
+                <span className="text-base sm:text-lg font-bold text-gray-800 mt-1 tracking-wide">
                   Adotados
                 </span>
               </div>
@@ -238,7 +257,7 @@ const Pets = () => {
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              🐕 Cães
+              Cães
             </button>
             <button
               onClick={() => setSelectedFilter("gato")}
@@ -248,7 +267,28 @@ const Pets = () => {
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
             >
-              🐱 Gatos
+              Gatos
+            </button>
+            {/* Filtros por cidade */}
+            <button
+              onClick={() => setSelectedFilter("fortaleza-ce")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedFilter === "fortaleza-ce"
+                  ? "bg-blue-700 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              Pets Fortaleza-CE
+            </button>
+            <button
+              onClick={() => setSelectedFilter("aquiraz-ce")}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedFilter === "aquiraz-ce"
+                  ? "bg-blue-700 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              Pets Aquiraz-CE
             </button>
           </div>
 
@@ -290,7 +330,7 @@ const Pets = () => {
         </div>
 
         {/* Grid de pets */}
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredPets.map((pet) => (
             <div
               key={pet.id}
@@ -446,15 +486,16 @@ const Pets = () => {
                 </div>
 
                 {/* Badge de status no canto da imagem */}
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-4 z-20 flex justify-end w-full pointer-events-none">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium shadow-sm ${
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shadow-sm pointer-events-auto ${
                       pet.status === "disponivel"
                         ? "bg-green-500 text-white"
                         : pet.status === "adotado"
                         ? "bg-gray-500 text-white"
                         : "bg-yellow-500 text-white"
                     }`}
+                    style={{ minWidth: 70, textAlign: "center" }}
                   >
                     {pet.status === "disponivel"
                       ? "🟢 Disponível"
