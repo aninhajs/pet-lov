@@ -50,3 +50,6 @@ temp/
 # Test files
 server-test.js
 test-server.js
+
+# Ignorar script de criação de admin
+create-admin.js

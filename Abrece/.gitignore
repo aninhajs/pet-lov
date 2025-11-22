@@ -22,7 +22,7 @@ dist-ssr
 
 test.html
 informacoes
-backend
+
 .github
 .vite
 # Configurações do vs code
@@ -35,3 +35,8 @@ backend
 *.njsproj
 *.sln
 *.sw?
+
+# Ignorar arquivos de teste temporários
+src/pages/TestToken.jsx
+src/pages/TestePage.jsx
+teste.js
