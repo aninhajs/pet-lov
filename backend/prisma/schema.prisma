@@ -68,20 +68,82 @@ model PetImage {
 }
 
 model AdoptionCandidate {
-  id               String        @id @default(cuid())
-  nome             String
-  email            String
-  telefone         String
-  endereco         String
-  tipo_moradia     String
-  tempo_disponivel String
-  experiencia_pets String
-  motivacao        String
-  ativo            Boolean       @default(true)
-  data_cadastro    DateTime      @default(now())
-  data_atualizacao DateTime      @updatedAt
-  adocoes          Adoption[]
-  interesses       PetInterest[]
+  cpf               String        @id @default(cuid())
+  nome              String
+  endereco          String
+  celular_01        String
+  celular_02        String?
+  data_nascimento   DateTime
+  trabalha          Boolean
+  profissao         String?
+  perfil_social     String?
+
+  mora_em                       String?
+  tipo_residencia               String?
+  proprietario_aceita_animais   Boolean?
+  normas_condominio_animais     String?
+  tipo_portao                   String?
+  possui_na_residencia          String?
+  tipo_quintal_varanda          String?
+  reside_com_quantas_pessoas    String?
+  quem_sao                      String?
+  todos_aceitam_adocao          Boolean?
+  responsavel_financeiro        String?
+  reacao_mordida_arranho        String?
+  reacao_bagunca                String?
+  possui_veiculo                Boolean?
+  tipo_veiculo                  String?
+  como_levara_veterinario       String?
+  pode_levar_imediato           Boolean?
+  moradores_trabalham           Boolean?
+  profissao_moradores           String?
+  alguem_alergico               Boolean?
+  tem_criancas                  Boolean?
+  idade_criancas                String?
+  ja_teve_tem_animais           Boolean?
+  qtd_animais                   String?
+  especie_animais               String?
+  idade_animais                 String?
+  ja_perdeu_animal              Boolean?
+  motivo_perda_animais          String?
+  perdeu_mais_de_um             String?
+  vacinados_quais               String?
+  marca_racao                   String?
+  castrados_motivo              String?
+  teve_filhotes                 Boolean?
+  qtd_filhotes                  String?
+  destino_filhotess             String?
+  passeios                      String?
+  quantia_mensal_cuidados       String?
+  tempo_sozinho                 String?
+  frequencia_passeios           String?
+  devolveria_se_mudar           Boolean?
+  como_organizaria_mudanca      String?
+  finalidade_animal             String?
+  comodo_dia                    String?
+  local_dormir                  String?
+  ficara_preso                  Boolean?
+  motivo_preso                  String?
+  tempo_preso                   String?
+  providencia_crescimento       String?
+  responsavel_viagem            String?
+  pretende_mudar_5_anos         Boolean?
+  destino_animal_mudanca        String?
+  reacao_choro_latido           String?
+  vacinas_que_dara              String?
+  marca_racao_adotado           String?
+  criterios_alimentacao         String?
+  filhotes_ou_castrar           String?
+  preparado_responsabilidade    Boolean?
+  disposto_adaptacao            Boolean?
+  clinica_veterinario           String?
+  reacao_doenca                 String?
+  conhece_doencas               Boolean?
+  frequencia_remedio_verme      String?
+  frequencia_veterinario        String?
+
+  cep               Adoption[]
+  cidade            PetInterest[]
 
   @@map("adoption_candidates")
 }
@@ -94,11 +156,12 @@ model PetInterest {
   data_interesse    DateTime          @default(now())
   data_avaliacao    DateTime?
   observacoes_admin String?
-  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
+  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [cpf], onDelete: Cascade)
   pet               Pet               @relation(fields: [pet_id], references: [id], onDelete: Cascade)
 
   @@unique([candidato_id, pet_id])
   @@map("pet_interests")
+
 }
 
 model Adoption {
@@ -110,7 +173,7 @@ model Adoption {
   taxa_adocao      Decimal?
   status           StatusAdocao      @default(ativa)
   data_atualizacao DateTime          @updatedAt
-  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [id])
+  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [cpf])
   pet              Pet               @relation(fields: [pet_id], references: [id])
 
   @@map("adoptions")
