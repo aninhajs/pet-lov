@@ -10,8 +10,8 @@ async function createAdmin() {
   try {
     console.log("  Criando usuário admin...");
 
-    const email = "admin@abrace.com";
-    const senha = "admin123";
+    const email = "ongabrace63@gmail.com";
+    const senha = "Ongabrace25#";
 
     // Verificar se usuário já existe
     const existingUser = await prisma.user.findUnique({
@@ -39,6 +39,7 @@ async function createAdmin() {
         telefone: "85988887777",
         endereco: "Fortaleza - CE",
         ativo: true,
+        data_atualizacao: new Date(),
       },
     });
 
