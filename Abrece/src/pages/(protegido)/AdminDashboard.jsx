@@ -380,6 +380,10 @@ const AdminDashboard = () => {
                               className="ml-4 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 border border-red-300"
                               disabled={excluindo}
                               onClick={async () => {
+                                const confirm = window.confirm(
+                                  `Tem certeza que deseja excluir a vacina "${vacina.nomeVacina}" de ${petSelecionado}?`
+                                );
+                                if (!confirm) return;
                                 setExcluindo(true);
                                 try {
                                   // Chama o serviço de exclusão

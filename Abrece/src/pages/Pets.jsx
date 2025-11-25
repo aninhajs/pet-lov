@@ -17,6 +17,7 @@ const optimizeImageUrl = (url, width = 400, height = 300) => {
 
 const Pets = () => {
   const [selectedFilter, setSelectedFilter] = useState("todos");
+  const [cityMenu, setCityMenu] = useState(null); // null | "fortaleza-ce" | "aquiraz-ce"
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
@@ -100,8 +101,6 @@ const Pets = () => {
   };
 
   const filteredPets = pets.filter((pet) => {
-    if (selectedFilter === "todos") return true;
-
     // Normalizar para comparação (remove acentos e converte para minúsculas)
     const normalizarTexto = (texto) => {
       return texto
@@ -110,11 +109,44 @@ const Pets = () => {
         .replace(/[\u0300-\u036f]/g, "");
     };
 
-    // Filtros por tipo
-    if (selectedFilter === "cão" || selectedFilter === "gato") {
+    // Filtros combinados de cidade + tipo (aceita "cao" ou "cão")
+    if (selectedFilter === "fortaleza-ce-cão") {
+      return (
+        (normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
+          normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")) &&
+        ["cao", "cão"].includes(normalizarTexto(pet.tipo))
+      );
+    }
+    if (selectedFilter === "fortaleza-ce-gato") {
+      return (
+        (normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
+          normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")) &&
+        normalizarTexto(pet.tipo) === "gato"
+      );
+    }
+    if (selectedFilter === "aquiraz-ce-cão") {
+      return (
+        (normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
+          normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")) &&
+        ["cao", "cão"].includes(normalizarTexto(pet.tipo))
+      );
+    }
+    if (selectedFilter === "aquiraz-ce-gato") {
+      return (
+        (normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
+          normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")) &&
+        normalizarTexto(pet.tipo) === "gato"
+      );
+    }
+
+    // Filtros por tipo (aceita "cao" ou "cão")
+    if (selectedFilter === "cão") {
       const tipoNormalizado = normalizarTexto(pet.tipo);
-      const filtroNormalizado = normalizarTexto(selectedFilter);
-      return tipoNormalizado === filtroNormalizado;
+      return ["cao", "cão"].includes(tipoNormalizado);
+    }
+    if (selectedFilter === "gato") {
+      const tipoNormalizado = normalizarTexto(pet.tipo);
+      return tipoNormalizado === "gato";
     }
 
     // Filtros por status
@@ -126,7 +158,7 @@ const Pets = () => {
       return pet.status === selectedFilter;
     }
 
-    // Filtros por cidade
+    // Filtros por cidade simples
     if (selectedFilter === "fortaleza-ce") {
       return (
         normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
@@ -140,6 +172,8 @@ const Pets = () => {
       );
     }
 
+    // Todos
+    if (selectedFilter === "todos") return true;
     return true;
   });
 
@@ -269,27 +303,97 @@ const Pets = () => {
             >
               Gatos
             </button>
-            {/* Filtros por cidade */}
-            <button
-              onClick={() => setSelectedFilter("fortaleza-ce")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "fortaleza-ce"
-                  ? "bg-blue-700 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Pets Fortaleza-CE
-            </button>
-            <button
-              onClick={() => setSelectedFilter("aquiraz-ce")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "aquiraz-ce"
-                  ? "bg-blue-700 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Pets Aquiraz-CE
-            </button>
+            {/* Filtros por cidade com submenu */}
+            <div className="relative inline-block">
+              <button
+                onClick={() =>
+                  setCityMenu(
+                    cityMenu === "fortaleza-ce" ? null : "fortaleza-ce"
+                  )
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedFilter.startsWith("fortaleza-ce")
+                    ? "bg-blue-700 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Pets Fortaleza-CE
+              </button>
+              {cityMenu === "fortaleza-ce" && (
+                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg z-20 min-w-[140px]">
+                  <button
+                    onClick={() => {
+                      setSelectedFilter("fortaleza-ce-cão");
+                      setCityMenu(null);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm rounded-t-lg ${
+                      selectedFilter === "fortaleza-ce-cão"
+                        ? "bg-blue-100 text-blue-800"
+                        : "hover:bg-blue-50"
+                    }`}
+                  >
+                    Cães
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedFilter("fortaleza-ce-gato");
+                      setCityMenu(null);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm rounded-b-lg ${
+                      selectedFilter === "fortaleza-ce-gato"
+                        ? "bg-blue-100 text-blue-800"
+                        : "hover:bg-blue-50"
+                    }`}
+                  >
+                    Gatos
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="relative inline-block">
+              <button
+                onClick={() =>
+                  setCityMenu(cityMenu === "aquiraz-ce" ? null : "aquiraz-ce")
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedFilter.startsWith("aquiraz-ce")
+                    ? "bg-blue-700 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Pets Aquiraz-CE
+              </button>
+              {cityMenu === "aquiraz-ce" && (
+                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg z-20 min-w-[140px]">
+                  <button
+                    onClick={() => {
+                      setSelectedFilter("aquiraz-ce-cão");
+                      setCityMenu(null);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm rounded-t-lg ${
+                      selectedFilter === "aquiraz-ce-cão"
+                        ? "bg-blue-100 text-blue-800"
+                        : "hover:bg-blue-50"
+                    }`}
+                  >
+                    Cães
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedFilter("aquiraz-ce-gato");
+                      setCityMenu(null);
+                    }}
+                    className={`block w-full text-left px-4 py-2 text-sm rounded-b-lg ${
+                      selectedFilter === "aquiraz-ce-gato"
+                        ? "bg-blue-100 text-blue-800"
+                        : "hover:bg-blue-50"
+                    }`}
+                  >
+                    Gatos
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">

@@ -1,9 +1,9 @@
 // src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/publica/Home";
-import Pets from "./pages/publica/Pets";
-import Login from "./pages/publica/Login";
+import Home from "./pages/Home";
+import Pets from "./pages/Pets";
+import Login from "./pages/Login";
 import AdminDashboard from "./pages/(protegido)/AdminDashboard";
 import AdminAdoptants from "./pages/(protegido)/AdminAdoptants";
 import CadastrarPet from "./pages/(protegido)/CadastrarPet";
@@ -19,9 +19,7 @@ function App() {
           {/* Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/pets" element={<Pets />} />
-          {/* <Route path="/questionnaire" element={<Questionnaire />} /> */}
           <Route path="/login" element={<Login />} />
-          {/* <Route path="/register" element={<Register />} /> */}
 
           {/* Rotas Administrativas (Protegidas) */}
           <Route
