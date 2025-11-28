@@ -19,14 +19,27 @@ export const authenticateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Buscar usuário no banco
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        tipo: true,
-      },
-    });
+    const userId = decoded.userId || decoded.id;
+    const userEmail = decoded.email;
+    if (!userId && !userEmail) {
+      return res.status(401).json({
+        success: false,
+        error: { message: "ID ou email do usuário não encontrado no token." },
+      });
+    }
+
+    let user;
+    if (userId) {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, email: true, tipo: true },
+      });
+    } else if (userEmail) {
+      user = await prisma.user.findUnique({
+        where: { email: userEmail },
+        select: { id: true, email: true, tipo: true },
+      });
+    }
 
     if (!user) {
       return res.status(401).json({

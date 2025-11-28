@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../lib/api";
 import ModalEditarPet from "../../components/ModalEditarPet";
 import { Link } from "react-router-dom";
 import { PetServices } from "../../services/PetServices";
@@ -11,6 +12,35 @@ const GerenciarPets = () => {
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [petEditando, setPetEditando] = useState(null);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  // Estados para histórico
+  const [historicoAdocoes, setHistoricoAdocoes] = useState([]);
+  const [historicoInteresses, setHistoricoInteresses] = useState([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+  // Buscar histórico ao abrir modal de detalhes
+  useEffect(() => {
+    const fetchHistoricos = async () => {
+      if (!petSelecionado) return;
+      setLoadingHistorico(true);
+      try {
+        // Histórico de adoções
+        const adocoesResp = await api.get(`/adocoes/pet/${petSelecionado.id}`);
+        setHistoricoAdocoes(adocoesResp.data?.data || []);
+      } catch {
+        setHistoricoAdocoes([]);
+      }
+      try {
+        // Histórico de interesses
+        const interessesResp = await api.get(
+          `/pet-interests/pet/${petSelecionado.id}`
+        );
+        setHistoricoInteresses(interessesResp.data?.data || []);
+      } catch {
+        setHistoricoInteresses([]);
+      }
+      setLoadingHistorico(false);
+    };
+    fetchHistoricos();
+  }, [petSelecionado]);
   // Função para abrir modal de edição
   const abrirModalEditar = (pet) => {
     setPetEditando(pet);
@@ -26,10 +56,10 @@ const GerenciarPets = () => {
     setIsEditSubmitting(true);
     try {
       // Remover campos 'imagem' e 'imagens' se existirem
-      const { imagem, imagens, ...dadosParaEnviar } = dadosEditados;
+      // const { imagem, imagens, ...dadosParaEnviar } = dadosEditados;
       const response = await PetServices.updatePet(
         dadosEditados.id,
-        dadosParaEnviar
+        dadosEditados
       );
       if (response.success) {
         // Atualizar lista local
@@ -543,7 +573,7 @@ const GerenciarPets = () => {
                       onClick={() => abrirModalEditar(pet)}
                       className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
                     >
-                      ✏️ Editar
+                      Editar
                     </button>
                     {/* Modal de edição de pet */}
                     {petEditando && (
@@ -560,7 +590,7 @@ const GerenciarPets = () => {
                         onClick={() => alterarStatusPet(pet.id, "em_processo")}
                         className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
                       >
-                        ⏳ Em Processo
+                        Em Processo
                       </button>
                     )}
 
@@ -632,12 +662,27 @@ const GerenciarPets = () => {
               <h2 className="text-2xl font-bold text-sky-700 flex items-center">
                 🐾 Detalhes do Pet
               </h2>
-              <button
-                onClick={() => setPetSelecionado(null)}
-                className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-4">
+                {/* Status Atual */}
+                <div className="flex items-center">
+                  <span className="text-base mr-2 text-sky-700 ">
+                    📊 Status Atual:
+                  </span>
+                  <span
+                    className={`px-3 py-1 text-sm rounded-full font-semibold shadow-sm ${getStatusColor(
+                      petSelecionado.status
+                    )}`}
+                  >
+                    {getStatusText(petSelecionado.status)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setPetSelecionado(null)}
+                  className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className="px-6 py-4 space-y-4">
@@ -795,8 +840,8 @@ const GerenciarPets = () => {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1 min-w-[260px]">
                   <h3 className="font-semibold text-sky-700 mb-3 text-base flex items-center">
                     ℹ️ Informações Básicas
                   </h3>
@@ -848,49 +893,49 @@ const GerenciarPets = () => {
                       </p>
                     )}
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-sky-700 mb-3 text-base flex items-center">
-                    💊 Status de Saúde
-                  </h3>
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg space-y-2 text-sm border border-green-100">
-                    <p className="flex justify-between items-center">
-                      <span className="text-gray-600">Castrado:</span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          petSelecionado.castrado
-                            ? "bg-green-200 text-green-800"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {petSelecionado.castrado ? "✓ Sim" : "✗ Não"}
-                      </span>
-                    </p>
-                    <p className="flex justify-between items-center">
-                      <span className="text-gray-600">Vacinado:</span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          petSelecionado.vacinado
-                            ? "bg-green-200 text-green-800"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {petSelecionado.vacinado ? "✓ Sim" : "✗ Não"}
-                      </span>
-                    </p>
-                    <p className="flex justify-between items-center">
-                      <span className="text-gray-600">Vermifugado:</span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          petSelecionado.vermifugado
-                            ? "bg-green-200 text-green-800"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {petSelecionado.vermifugado ? "✓ Sim" : "✗ Não"}
-                      </span>
-                    </p>
+                  {/* Status de Saúde logo abaixo das informações básicas */}
+                  <div className="mt-6">
+                    <h3 className="font-semibold text-sky-700 mb-3 text-base flex items-center">
+                      💊 Status de Saúde
+                    </h3>
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg space-y-2 text-sm border border-green-100">
+                      <p className="flex justify-between items-center">
+                        <span className="text-gray-600">Castrado:</span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            petSelecionado.castrado
+                              ? "bg-green-200 text-green-800"
+                              : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {petSelecionado.castrado ? "✓ Sim" : "✗ Não"}
+                        </span>
+                      </p>
+                      <p className="flex justify-between items-center">
+                        <span className="text-gray-600">Vacinado:</span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            petSelecionado.vacinado
+                              ? "bg-green-200 text-green-800"
+                              : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {petSelecionado.vacinado ? "✓ Sim" : "✗ Não"}
+                        </span>
+                      </p>
+                      <p className="flex justify-between items-center">
+                        <span className="text-gray-600">Vermifugado:</span>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            petSelecionado.vermifugado
+                              ? "bg-green-200 text-green-800"
+                              : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {petSelecionado.vermifugado ? "✓ Sim" : "✗ Não"}
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -906,17 +951,97 @@ const GerenciarPets = () => {
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold text-sky-700 mb-2 text-base">
-                  📊 Status Atual
+              {/* Histórico */}
+              <div className="mt-8">
+                <h3 className="font-semibold text-sky-700 mb-2 text-base flex items-center gap-2">
+                  📜 Histórico
                 </h3>
-                <span
-                  className={`px-4 py-2 text-sm rounded-full font-semibold shadow-sm ${getStatusColor(
-                    petSelecionado.status
-                  )}`}
-                >
-                  {getStatusText(petSelecionado.status)}
-                </span>
+                {loadingHistorico ? (
+                  <div className="text-gray-500 text-sm">
+                    Carregando histórico...
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-bold text-blue-700 mb-1 text-sm">
+                        Adoções
+                      </h4>
+                      {historicoAdocoes.length === 0 ? (
+                        <div className="text-xs text-gray-500">
+                          Nenhuma tentativa de adoção registrada.
+                        </div>
+                      ) : (
+                        <ul className="space-y-2">
+                          {historicoAdocoes.map((adocao) => (
+                            <li
+                              key={adocao.id}
+                              className="bg-blue-50 border-l-4 border-blue-400 p-2 rounded"
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-blue-900 text-xs">
+                                  {adocao.status}
+                                </span>
+                                <span className="text-xs text-gray-700">
+                                  {new Date(
+                                    adocao.data_adocao
+                                  ).toLocaleDateString("pt-BR")}
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-800 mt-1">
+                                Candidato:{" "}
+                                <b>{adocao.candidato?.nome || "-"}</b>
+                              </div>
+                              {adocao.motivo_rejeicao && (
+                                <div className="text-xs text-red-700 mt-1">
+                                  Motivo rejeição: {adocao.motivo_rejeicao}
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-green-700 mb-1 text-sm">
+                        Interesses
+                      </h4>
+                      {historicoInteresses.length === 0 ? (
+                        <div className="text-xs text-gray-500">
+                          Nenhum interesse registrado.
+                        </div>
+                      ) : (
+                        <ul className="space-y-2">
+                          {historicoInteresses.map((interesse) => (
+                            <li
+                              key={interesse.id}
+                              className="bg-green-50 border-l-4 border-green-400 p-2 rounded"
+                            >
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-green-900 text-xs">
+                                  {interesse.status}
+                                </span>
+                                <span className="text-xs text-gray-700">
+                                  {new Date(
+                                    interesse.data_interesse
+                                  ).toLocaleDateString("pt-BR")}
+                                </span>
+                              </div>
+                              <div className="text-xs text-gray-800 mt-1">
+                                Candidato:{" "}
+                                <b>{interesse.candidato?.nome || "-"}</b>
+                              </div>
+                              {interesse.observacoes_admin && (
+                                <div className="text-xs text-orange-700 mt-1">
+                                  Obs: {interesse.observacoes_admin}
+                                </div>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex space-x-3 pt-4">
