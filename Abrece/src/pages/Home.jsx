@@ -131,9 +131,8 @@ const Home = () => {
                 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                 style={{ wordBreak: "break-word" }}
               >
-                Abrace Uma
+                Abrace Uma Causa Animal
                 <br className="block sm:hidden" />
-                Causa Animal
               </h1>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
