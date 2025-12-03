@@ -242,6 +242,8 @@ export const validateUpdateCandidatoStatus = [
     .isIn(["pendente", "aprovado", "rejeitado"])
     .withMessage("Status deve ser: pendente, aprovado ou rejeitado"),
 
+  body("pet_id").notEmpty().withMessage("pet_id é obrigatório"),
+
   body("observacoes")
     .optional()
     .isLength({ max: 500 })

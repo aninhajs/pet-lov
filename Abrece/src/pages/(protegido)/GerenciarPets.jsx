@@ -3,6 +3,7 @@ import api from "../../lib/api";
 import ModalEditarPet from "../../components/ModalEditarPet";
 import { Link } from "react-router-dom";
 import { PetServices } from "../../services/PetServices";
+import { AdoptionServices } from "../../services/AdoptionServices";
 
 const GerenciarPets = () => {
   const [pets, setPets] = useState([]);
@@ -72,7 +73,7 @@ const GerenciarPets = () => {
       } else {
         alert(response.message || "Erro ao atualizar pet.");
       }
-    } catch (error) {
+    } catch {
       alert("Erro ao atualizar pet.");
     } finally {
       setIsEditSubmitting(false);
@@ -136,6 +137,41 @@ const GerenciarPets = () => {
 
   const alterarStatusPet = async (id, novoStatus) => {
     try {
+      // Se for adoção, buscar candidato aprovado/interessado para o pet
+      if (novoStatus === "adotado") {
+        // Buscar interesses do pet para encontrar o candidato aprovado/interessado
+        const interessesResp = await api.get(`/pet-interests/pet/${id}`);
+        const interesses = interessesResp.data?.data || [];
+        // Prioriza status aprovado, depois interessado
+        const interesseAprovado = interesses.find(
+          (i) => i.status === "aprovado"
+        );
+        const interesseInteressado = interesses.find(
+          (i) => i.status === "interessado"
+        );
+        const interesse = interesseAprovado || interesseInteressado;
+        if (!interesse || !interesse.candidato_id) {
+          alert(
+            "Não foi possível encontrar um candidato aprovado/interessado para este pet."
+          );
+          return;
+        }
+        // Chama o endpoint de adoção
+        try {
+          await AdoptionServices.createAdoption({
+            pet_id: id,
+            candidato_id: interesse.candidato_id,
+            observacoes: "Adoção realizada via painel admin",
+          });
+        } catch (err) {
+          alert(
+            "Erro ao registrar adoção: " +
+              (err?.response?.data?.error?.message || err.message)
+          );
+          return;
+        }
+      }
+
       // Atualizar status no backend
       const response = await PetServices.updatePet(id, { status: novoStatus });
 
@@ -290,13 +326,8 @@ const GerenciarPets = () => {
                   className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                   style={{ wordBreak: "break-word" }}
                 >
-                  Abrace Uma
-                  <br className="block sm:hidden" />
-                  Causa Animal
+                  Abrace Uma Causa Animal
                 </h1>
-                <p className="text-xs text-sky-600 font-medium truncate">
-                  Gerenciar Pets
-                </p>
               </div>
             </Link>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">

@@ -1,120 +1,186 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+// Mapeamento campo -> pergunta
+const adoptionCandidateQuestions = [
+  { field: "nome", label: "Nome Completo" },
+  { field: "endereco", label: "Endereço (Rua e Bairro)" },
+  { field: "CEP", label: "CEP" },
+  { field: "cidade", label: "Cidade" },
+  { field: "cpf", label: "CPF" },
+  // ...existing code...
+  { field: "local_dormir", label: "Onde o animalzinho irá dormir:" },
+  // ...existing code...
+  // (coloque o bloco de renderização dentro do return principal, substituindo a lista antiga de candidatos)
+  {
+    field: "tempo_preso",
+    label:
+      "O animal ficará amarrado/preso em algum lugar? Caso sim, por quais razões? Ele passaria quantas horas amarrado/preso?",
+  },
+  {
+    field: "providencia_crescimento",
+    label:
+      "Caso o animal cresça mais que o esperado, qual serão as providências:",
+  },
+  {
+    field: "responsavel_viagem",
+    label: "Em caso de viagem, quem ficará com o animal?",
+  },
+  {
+    field: "pretende_mudar_5_anos",
+    label:
+      "Pretende se mudar em um espaço de 5 anos? Caso sim, como ficará o animal?",
+  },
+  {
+    field: "reacao_choro_latido",
+    label:
+      "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
+  },
+  {
+    field: "vacinas_que_dara",
+    label: "Quais vacinas irá dar ao animal adotado?",
+  },
+  {
+    field: "marca_racao_adotado",
+    label: "Qual a marca de ração pretende dar ao adotado?",
+  },
+  {
+    field: "criterios_alimentacao",
+    label: "Quais são os seus critérios ao escolher essa alimentação?",
+  },
+  {
+    field: "filhotes_ou_castrar",
+    label:
+      "Pretende por o animalzinho para ter filhotes ou irá castrar? O que pensa a respeito?",
+  },
+  {
+    field: "preparado_responsabilidade",
+    label:
+      "O seu adotado pode viver de 10 a 15 anos. Já pensou sobre essa responsabilidade e está preparado?",
+  },
+  {
+    field: "disposto_adaptacao",
+    label:
+      "A adaptação do animal pode levar de 1 semana a 1 mês, tanto com o ambiente como com os outros moradores da casa (contando outros animais também). Está disposto a esperar esse tempo com paciência?",
+  },
+  {
+    field: "clinica_veterinario",
+    label:
+      "Qual clínica e veterinário levará ou leva os seus animais? Por favor coloque nome do estabelecimento, endereço e nome do veterinário responsável.",
+  },
+  {
+    field: "reacao_doenca",
+    label:
+      "O que faria se o animalzinho fosse diagnosticado com as devidas doenças (Calazar/Cinomose/Parvovirose/Erliquiose):",
+  },
+  {
+    field: "conhece_doencas",
+    label:
+      "Conhece essas doenças citadas acima? Sabe as formas de precaução e tratamento?",
+  },
+  {
+    field: "frequencia_remedio_verme",
+    label:
+      "Seus animais, tomam/tomavam/tomará o remédio de verme/carrapato/pulga com qual frequência?",
+  },
+  {
+    field: "frequencia_veterinario",
+    label:
+      "Com qual frequência leva/levava/levará seus animais para o veterinário?",
+  },
+];
 import { Link } from "react-router-dom";
+import { AdoptantServices } from "../../services/AdoptantServices";
+import { AdoptionServices } from "../../services/AdoptionServices";
 
 const AdminAdoptants = () => {
   const [selectedStatus, setSelectedStatus] = useState("todos");
-
-  // Dados mockados dos candidatos com histórico de tentativas
-  const [candidatos, setCandidatos] = useState([
-    {
-      id: 1,
-      nome: "Maria Silva",
-      email: "maria.silva@email.com",
-      telefone: "(11) 99999-9999",
-      tentativas: [
-        {
-          tentativaId: 1,
-          petPreferido: "Luna",
-          status: "rejeitado",
-          motivoRejeicao: "Casa pequena",
-          dataEnvio: "2024-09-10",
-          tipoMoradia: "Apartamento pequeno",
-          experiencia: "Já tive cães antes",
-          motivacao: "Quero dar amor e carinho para um pet resgatado",
-        },
-        {
-          tentativaId: 2,
-          petPreferido: "Luna",
-          status: "pendente",
-          dataEnvio: "2024-09-20",
-          tipoMoradia: "Casa com quintal",
-          experiencia: "Já tive cães antes",
-          motivacao: "Quero dar amor e carinho para um pet resgatado",
-        },
-      ],
-    },
-    {
-      id: 2,
-      nome: "João Santos",
-      email: "joao.santos@email.com",
-      telefone: "(11) 88888-8888",
-      tentativas: [
-        {
-          tentativaId: 1,
-          petPreferido: "Milo",
-          status: "aprovado",
-          dataEnvio: "2024-09-18",
-          tipoMoradia: "Apartamento",
-          experiencia: "Primeira vez com pets",
-          motivacao: "Sempre quis ter um gato de estimação",
-        },
-      ],
-    },
-    {
-      id: 3,
-      nome: "Ana Costa",
-      email: "ana.costa@email.com",
-      telefone: "(11) 77777-7777",
-      tentativas: [
-        {
-          tentativaId: 1,
-          petPreferido: "Thor",
-          status: "rejeitado",
-          motivoRejeicao: "Casa sem quintal",
-          dataEnvio: "2024-09-15",
-          tipoMoradia: "Casa sem quintal",
-          experiencia: "Tive vários pets",
-          motivacao: "Quero um cão grande para proteção",
-        },
-      ],
-    },
-    {
-      id: 4,
-      nome: "Pedro Lima",
-      email: "pedro.lima@email.com",
-      telefone: "(11) 66666-6666",
-      tentativas: [
-        {
-          tentativaId: 1,
-          petPreferido: "Qualquer um",
-          status: "pendente",
-          dataEnvio: "2024-09-22",
-          tipoMoradia: "Sítio/Chácara",
-          experiencia: "Criador de animais há 10 anos",
-          motivacao: "Tenho espaço e amor para oferecer",
-        },
-      ],
-    },
-  ]);
-
+  const [candidatos, setCandidatos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [candidatoSelecionado, setCandidatoSelecionado] = useState(null);
+  const [detalhesCandidato, setDetalhesCandidato] = useState(null);
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
+  const [showInteresses, setShowInteresses] = useState(false);
+  const [interessesSelecionados, setInteressesSelecionados] = useState([]);
+  const [historicoIndex, setHistoricoIndex] = useState(0);
 
-  // O status do candidato é o status da última tentativa
-  const filteredCandidatos = candidatos.filter((candidato) => {
-    const ultimaTentativa =
-      candidato.tentativas[candidato.tentativas.length - 1];
-    if (selectedStatus === "todos") return true;
-    return ultimaTentativa.status === selectedStatus;
+  useEffect(() => {
+    const fetchCandidatos = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await AdoptantServices.getAllAdoptants({ limit: 100 });
+        setCandidatos(res.data || []);
+      } catch {
+        setError("Erro ao buscar candidatos");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCandidatos();
+  }, []);
+
+  // Ordenar interesses de todos os candidatos antes de filtrar/exibir
+  function ordenarInteresses(interesses) {
+    return [...(interesses || [])].sort((a, b) => {
+      const dataA = a.data_interesse ? new Date(a.data_interesse).getTime() : 0;
+      const dataB = b.data_interesse ? new Date(b.data_interesse).getTime() : 0;
+      return dataB - dataA;
+    });
+  }
+
+  const candidatosOrdenados = candidatos.map((c) => ({
+    ...c,
+    cidade: ordenarInteresses(c.cidade),
+  }));
+
+  const filteredCandidatos = candidatosOrdenados.filter((candidato) => {
+    const interesses = candidato.cidade || [];
+    const ultimaTentativa = interesses[0];
+    console.log(
+      "DEBUG - Candidato:",
+      candidato.nome,
+      "Interesses:",
+      interesses
+    );
+    if (ultimaTentativa) {
+      console.log("DEBUG - Última tentativa pet_id:", ultimaTentativa.pet_id);
+    }
+    if (selectedStatus === "todos") return true; // mostra todos cadastrados
+    if (!ultimaTentativa) return false; // só mostra nos outros filtros quem já tentou adotar
+    if (selectedStatus === "aprovado") {
+      return ultimaTentativa.status === "aprovado";
+    }
+    if (selectedStatus === "rejeitado") {
+      return ultimaTentativa.status === "rejeitado";
+    }
+    if (selectedStatus === "pendente") {
+      return ultimaTentativa.status === "pendente";
+    }
+    return true;
   });
 
-  // Atualiza o status da última tentativa
-  const updateStatus = (id, newStatus, motivoRejeicao = "") => {
-    setCandidatos(
-      candidatos.map((candidato) => {
-        if (candidato.id === id) {
-          const tentativas = [...candidato.tentativas];
-          const ultima = { ...tentativas[tentativas.length - 1] };
-          ultima.status = newStatus;
-          if (newStatus === "rejeitado") {
-            ultima.motivoRejeicao = motivoRejeicao || "Motivo não informado";
-          }
-          tentativas[tentativas.length - 1] = ultima;
-          return { ...candidato, tentativas };
-        }
-        return candidato;
-      })
-    );
+  // Atualizado para exigir pet_id
+  const updateStatus = async (id, newStatus, observacoes = "", pet_id) => {
+    if (!pet_id) {
+      alert(
+        "pet_id não encontrado. Não é possível aprovar/rejeitar sem o pet."
+      );
+      return;
+    }
+    try {
+      await AdoptantServices.updateAdoptantStatus(
+        id,
+        newStatus,
+        observacoes,
+        pet_id
+      );
+      const res = await AdoptantServices.getAllAdoptants({ limit: 100 });
+      setCandidatos(res.data || []);
+    } catch {
+      alert("Erro ao atualizar status do candidato");
+    }
   };
 
   const getStatusColor = (status) => {
@@ -166,9 +232,7 @@ const AdminAdoptants = () => {
                   className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                   style={{ wordBreak: "break-word" }}
                 >
-                  Gerenciar
-                  <br className="block sm:hidden" />
-                  Candidatos
+                  Gerenciar Candidatos
                 </h1>
               </div>
             </Link>
@@ -208,7 +272,6 @@ const AdminAdoptants = () => {
           <p className="text-gray-600 mb-6">
             Analise e aprove formulários de adoção
           </p>
-
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedStatus("todos")}
@@ -229,7 +292,11 @@ const AdminAdoptants = () => {
               }`}
             >
               Pendentes (
-              {candidatos.filter((c) => c.status === "pendente").length})
+              {
+                candidatos.filter((c) => c.cidade?.[0]?.status === "pendente")
+                  .length
+              }
+              )
             </button>
             <button
               onClick={() => setSelectedStatus("aprovado")}
@@ -240,7 +307,11 @@ const AdminAdoptants = () => {
               }`}
             >
               Aprovados (
-              {candidatos.filter((c) => c.status === "aprovado").length})
+              {
+                candidatos.filter((c) => c.cidade?.[0]?.status === "aprovado")
+                  .length
+              }
+              )
             </button>
             <button
               onClick={() => setSelectedStatus("rejeitado")}
@@ -251,7 +322,11 @@ const AdminAdoptants = () => {
               }`}
             >
               Rejeitados (
-              {candidatos.filter((c) => c.status === "rejeitado").length})
+              {
+                candidatos.filter((c) => c.cidade?.[0]?.status === "rejeitado")
+                  .length
+              }
+              )
             </button>
           </div>
         </div>
@@ -263,78 +338,233 @@ const AdminAdoptants = () => {
               Candidatos ({filteredCandidatos.length})
             </h2>
           </div>
-
-          <div className="divide-y divide-gray-200">
-            {filteredCandidatos.map((candidato) => {
-              const ultimaTentativa =
-                candidato.tentativas[candidato.tentativas.length - 1];
-              return (
-                <div key={candidato.id} className="px-6 py-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {candidato.nome}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                            ultimaTentativa.status
-                          )}`}
-                        >
-                          {getStatusText(ultimaTentativa.status)}
-                        </span>
+          {loading ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-gray-500">Carregando candidatos...</p>
+            </div>
+          ) : error ? (
+            <div className="px-6 py-8 text-center">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {filteredCandidatos.map((candidato) => {
+                const interesses = candidato.cidade || [];
+                const ultimaTentativa = interesses[0];
+                return (
+                  <div
+                    key={candidato.id || candidato.cpf}
+                    className="px-6 py-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="text-lg font-medium text-gray-900">
+                            {candidato.nome}
+                          </h3>
+                          {ultimaTentativa && (
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                                ultimaTentativa.status
+                              )}`}
+                            >
+                              {getStatusText(ultimaTentativa.status)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-600">
+                          <p>
+                            📧 {candidato.email} • 📞{" "}
+                            {candidato.telefone || candidato.celular_01}
+                          </p>
+                          {ultimaTentativa && (
+                            <p>
+                              🐾 Interesse em:{" "}
+                              {ultimaTentativa.pet?.nome || "-"} • 📅{" "}
+                              {ultimaTentativa.data_interesse
+                                ? new Date(
+                                    ultimaTentativa.data_interesse
+                                  ).toLocaleDateString("pt-BR")
+                                : "-"}
+                            </p>
+                          )}
+                        </div>
                       </div>
-
-                      <div className="mt-1 text-sm text-gray-600">
-                        <p>
-                          📧 {candidato.email} • 📞 {candidato.telefone}
-                        </p>
-                        <p>
-                          🐾 Interesse em: {ultimaTentativa.petPreferido} • 📅{" "}
-                          {new Date(
-                            ultimaTentativa.dataEnvio
-                          ).toLocaleDateString("pt-BR")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setCandidatoSelecionado(candidato)}
-                        className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                      >
-                        Ver Detalhes
-                      </button>
-
-                      {ultimaTentativa.status === "pendente" && (
-                        <>
-                          <button
-                            onClick={() =>
-                              updateStatus(candidato.id, "aprovado")
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={async () => {
+                            setLoadingDetalhes(true);
+                            setCandidatoSelecionado(candidato);
+                            try {
+                              if (candidato.cpf) {
+                                const res =
+                                  await AdoptantServices.getAdoptantById(
+                                    candidato.cpf
+                                  );
+                                setDetalhesCandidato(res.data);
+                              } else {
+                                alert(
+                                  "CPF do candidato não encontrado. Não é possível exibir detalhes."
+                                );
+                                setDetalhesCandidato(null);
+                              }
+                            } catch {
+                              setDetalhesCandidato(null);
                             }
-                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                          >
-                            Aprovar
-                          </button>
-                          <button
-                            onClick={() => {
-                              const motivo = prompt("Motivo da rejeição:", "");
-                              updateStatus(candidato.id, "rejeitado", motivo);
-                            }}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                          >
-                            Rejeitar
-                          </button>
-                        </>
-                      )}
+                            setLoadingDetalhes(false);
+                          }}
+                          className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
+                        >
+                          Ver Detalhes
+                        </button>
+                        <button
+                          onClick={() => {
+                            setInteressesSelecionados(candidato.cidade || []);
+                            setShowInteresses(true);
+                          }}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
+                        >
+                          Ver Interesses
+                        </button>
+                        {/* Modal de Interesses */}
+                        {showInteresses && (
+                          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border-2 border-yellow-400 p-6">
+                              <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-yellow-700">
+                                  Interesses do Candidato
+                                </h2>
+                                <button
+                                  onClick={() => setShowInteresses(false)}
+                                  className="text-gray-400 hover:text-yellow-600 text-2xl font-bold"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                              {interessesSelecionados.length === 0 ? (
+                                <p className="text-gray-500">
+                                  Nenhum interesse encontrado.
+                                </p>
+                              ) : (
+                                <ul className="divide-y divide-gray-200">
+                                  {interessesSelecionados.map(
+                                    (interesse, idx) => (
+                                      <li key={idx} className="py-2">
+                                        <div>
+                                          <strong>Pet:</strong>{" "}
+                                          {interesse.pet?.nome || "-"}
+                                        </div>
+                                        <div>
+                                          <strong>Status:</strong>{" "}
+                                          {getStatusText(interesse.status)}
+                                        </div>
+                                        <div>
+                                          <strong>Data:</strong>{" "}
+                                          {interesse.data_interesse
+                                            ? new Date(
+                                                interesse.data_interesse
+                                              ).toLocaleDateString("pt-BR")
+                                            : "-"}
+                                        </div>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {ultimaTentativa &&
+                          ultimaTentativa.status === "pendente" && (
+                            <>
+                              <button
+                                onClick={async () => {
+                                  console.log(
+                                    "DEBUG - Dados do candidato:",
+                                    candidato
+                                  );
+                                  console.log(
+                                    "DEBUG - Última tentativa:",
+                                    ultimaTentativa
+                                  );
+                                  console.log("DEBUG - CPF:", candidato.cpf);
+                                  console.log(
+                                    "DEBUG - Pet ID:",
+                                    ultimaTentativa?.pet_id
+                                  );
+
+                                  if (
+                                    candidato.cpf &&
+                                    ultimaTentativa?.pet_id
+                                  ) {
+                                    // 1. Aprova o interesse normalmente
+                                    await updateStatus(
+                                      candidato.cpf,
+                                      "aprovado",
+                                      "",
+                                      ultimaTentativa.pet_id
+                                    );
+                                    // 2. Registra a adoção automaticamente
+                                    try {
+                                      await AdoptionServices.createAdoption({
+                                        pet_id: ultimaTentativa.pet_id,
+                                        candidato_id: candidato.cpf,
+                                        observacoes:
+                                          "Aprovação automática pelo admin.",
+                                      });
+                                      alert(
+                                        "Adoção registrada e pet marcado como adotado!"
+                                      );
+                                    } catch (err) {
+                                      alert(
+                                        "Interesse aprovado, mas houve erro ao registrar adoção: " +
+                                          (err?.response?.data?.error
+                                            ?.message || err.message)
+                                      );
+                                    }
+                                  } else {
+                                    alert(
+                                      "CPF ou pet_id não encontrado. Não é possível aprovar e registrar adoção."
+                                    );
+                                  }
+                                }}
+                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
+                              >
+                                Aprovar
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const motivo = prompt(
+                                    "Motivo da rejeição:",
+                                    ""
+                                  );
+                                  if (candidato.cpf) {
+                                    updateStatus(
+                                      candidato.cpf,
+                                      "rejeitado",
+                                      motivo,
+                                      ultimaTentativa?.pet_id
+                                    );
+                                  } else {
+                                    alert(
+                                      "CPF do candidato não encontrado. Não é possível rejeitar."
+                                    );
+                                  }
+                                }}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
+                              >
+                                Rejeitar
+                              </button>
+                            </>
+                          )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {filteredCandidatos.length === 0 && (
+                );
+              })}
+            </div>
+          )}
+          {!loading && !error && filteredCandidatos.length === 0 && (
             <div className="px-6 py-8 text-center">
               <p className="text-gray-500">
                 Nenhum candidato encontrado com os filtros selecionados.
@@ -342,160 +572,303 @@ const AdminAdoptants = () => {
             </div>
           )}
         </div>
-      </main>
 
-      {/* Modal de detalhes */}
-      {candidatoSelecionado && (
-        <>
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-sky-200">
-              <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-sky-700">
-                  Detalhes do Candidato
-                </h2>
-                <button
-                  onClick={() => setCandidatoSelecionado(null)}
-                  className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="px-6 py-4 space-y-6">
-                <div>
-                  <h3 className="font-medium text-gray-900 mb-2">
-                    Informações Pessoais
-                  </h3>
-                  <div className="bg-gray-50 p-3 rounded">
-                    <p>
-                      <strong>Nome:</strong> {candidatoSelecionado.nome}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {candidatoSelecionado.email}
-                    </p>
-                    <p>
-                      <strong>Telefone:</strong> {candidatoSelecionado.telefone}
-                    </p>
-                  </div>
+        {/* Modal de detalhes */}
+        {candidatoSelecionado && (
+          <div>
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-sky-200">
+                <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-sky-700">
+                    Detalhes do Candidato
+                  </h2>
+                  <button
+                    onClick={() => setCandidatoSelecionado(null)}
+                    className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
+                  >
+                    ✕
+                  </button>
                 </div>
-
-                {candidatoSelecionado.tentativas.length > 1 && (
-                  <div>
+                <div className="px-6 py-4 space-y-6">
+                  {(() => {
+                    if (detalhesCandidato) {
+                      console.log(
+                        "DEBUG - detalhesCandidato:",
+                        detalhesCandidato
+                      );
+                    }
+                    return null;
+                  })()}
+                  {loadingDetalhes ? (
+                    <div className="text-center py-8 text-sky-700 font-semibold">
+                      Carregando detalhes...
+                    </div>
+                  ) : detalhesCandidato ? (
+                    <>
+                      <div>
+                        <h3 className="font-medium text-gray-900 mb-2">
+                          Informações Pessoais
+                        </h3>
+                        <div className="bg-gray-50 p-3 rounded">
+                          <p>
+                            <strong>Nome:</strong> {detalhesCandidato.nome}
+                          </p>
+                          <p>
+                            <strong>Email:</strong> {detalhesCandidato.email}
+                          </p>
+                          <p>
+                            <strong>Telefone:</strong>{" "}
+                            {detalhesCandidato.telefone ||
+                              detalhesCandidato.celular_01}
+                          </p>
+                          <p>
+                            <strong>Endereço:</strong>{" "}
+                            {detalhesCandidato.endereco}
+                          </p>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900 mt-4 mb-2">
+                          Respostas do Formulário
+                        </h3>
+                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto text-xs md:text-sm">
+                          {adoptionCandidateQuestions.map(
+                            ({ field, label }) => {
+                              const valor = detalhesCandidato[field];
+                              if (
+                                Array.isArray(valor) ||
+                                (typeof valor === "object" && valor !== null)
+                              ) {
+                                return null;
+                              }
+                              return (
+                                <p
+                                  key={field}
+                                  style={{ whiteSpace: "pre-line" }}
+                                >
+                                  <strong>{label}:</strong>{" "}
+                                  {field === "data_nascimento"
+                                    ? valor
+                                      ? new Date(valor).toLocaleDateString(
+                                          "pt-BR"
+                                        )
+                                      : "-"
+                                    : valor || "-"}
+                                  <br />
+                                </p>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                      {detalhesCandidato.cidade &&
+                        detalhesCandidato.cidade.length > 1 && (
+                          <div>
+                            <button
+                              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
+                              onClick={() => setShowHistorico(true)}
+                            >
+                              Histórico de Tentativas de Adoção
+                            </button>
+                          </div>
+                        )}
+                      {/* Aprovação/Rejeição da última tentativa (forçado para teste) */}
+                      {detalhesCandidato && (
+                        <div className="flex space-x-3 pt-4">
+                          <button
+                            onClick={() => {
+                              if (detalhesCandidato.cpf) {
+                                // Busca o pet_id da última tentativa do candidato nos detalhes
+                                const petIdAprovar =
+                                  detalhesCandidato?.cidade?.[0]?.pet_id;
+                                updateStatus(
+                                  detalhesCandidato.cpf,
+                                  "aprovado",
+                                  "",
+                                  petIdAprovar
+                                );
+                                setCandidatoSelecionado(null);
+                                setDetalhesCandidato(null);
+                              } else {
+                                alert(
+                                  "CPF do candidato não encontrado. Não é possível aprovar."
+                                );
+                              }
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                          >
+                            Aprovar Candidato
+                          </button>
+                          <button
+                            onClick={() => {
+                              const motivo = prompt("Motivo da rejeição:", "");
+                              if (detalhesCandidato.cpf) {
+                                const petIdRejeitar =
+                                  detalhesCandidato?.cidade?.[0]?.pet_id;
+                                updateStatus(
+                                  detalhesCandidato.cpf,
+                                  "rejeitado",
+                                  motivo,
+                                  petIdRejeitar
+                                );
+                                setCandidatoSelecionado(null);
+                                setDetalhesCandidato(null);
+                              } else {
+                                alert(
+                                  "CPF do candidato não encontrado. Não é possível rejeitar."
+                                );
+                              }
+                            }}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                          >
+                            Rejeitar Candidato
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-red-700 font-semibold">
+                      Não foi possível carregar os detalhes do candidato.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Modal flutuante do histórico */}
+            {showHistorico && candidatoSelecionado && (
+              <div
+                style={{ zIndex: 9999 }}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+              >
+                <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200 animate-fade-in">
+                  <button
+                    className="absolute top-3 right-3 text-red-500 hover:text-red-700 font-bold text-lg"
+                    onClick={() => setShowHistorico(false)}
+                    aria-label="Fechar"
+                  >
+                    ×
+                  </button>
+                  <h3 className="text-xl font-bold text-sky-700 mb-4 text-center">
+                    Histórico de Tentativas de Adoção
+                  </h3>
+                  <div className="flex justify-between items-center mb-4">
                     <button
-                      className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
-                      onClick={() => setShowHistorico(true)}
+                      onClick={() =>
+                        setHistoricoIndex((prev) => Math.max(prev - 1, 0))
+                      }
+                      disabled={historicoIndex === 0}
+                      className={`text-2xl px-2 ${
+                        historicoIndex === 0
+                          ? "text-gray-300"
+                          : "text-sky-700 hover:text-sky-900"
+                      }`}
+                      aria-label="Anterior"
                     >
-                      Histórico de Tentativas de Adoção
+                      &#8592;
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {historicoIndex + 1} de{" "}
+                      {Array.isArray(candidatoSelecionado.cidade)
+                        ? candidatoSelecionado.cidade.length
+                        : 0}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setHistoricoIndex((prev) =>
+                          Math.min(
+                            prev + 1,
+                            (Array.isArray(candidatoSelecionado.cidade)
+                              ? candidatoSelecionado.cidade.length
+                              : 1) - 1
+                          )
+                        )
+                      }
+                      disabled={
+                        historicoIndex ===
+                        (Array.isArray(candidatoSelecionado.cidade)
+                          ? candidatoSelecionado.cidade.length
+                          : 1) -
+                          1
+                      }
+                      className={`text-2xl px-2 ${
+                        historicoIndex ===
+                        (Array.isArray(candidatoSelecionado.cidade)
+                          ? candidatoSelecionado.cidade.length
+                          : 1) -
+                          1
+                          ? "text-gray-300"
+                          : "text-sky-700 hover:text-sky-900"
+                      }`}
+                      aria-label="Próximo"
+                    >
+                      &#8594;
                     </button>
                   </div>
-                )}
-
-                {/* Aprovação/Rejeição da última tentativa */}
-                {(() => {
-                  const ultima =
-                    candidatoSelecionado.tentativas[
-                      candidatoSelecionado.tentativas.length - 1
-                    ];
-                  if (ultima.status === "pendente") {
-                    return (
-                      <div className="flex space-x-3 pt-4">
-                        <button
-                          onClick={() => {
-                            updateStatus(candidatoSelecionado.id, "aprovado");
-                            setCandidatoSelecionado(null);
-                          }}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
-                        >
-                          Aprovar Candidato
-                        </button>
-                        <button
-                          onClick={() => {
-                            const motivo = prompt("Motivo da rejeição:", "");
-                            updateStatus(
-                              candidatoSelecionado.id,
-                              "rejeitado",
-                              motivo
-                            );
-                            setCandidatoSelecionado(null);
-                          }}
-                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
-                        >
-                          Rejeitar Candidato
-                        </button>
+                  {Array.isArray(candidatoSelecionado.cidade) &&
+                    candidatoSelecionado.cidade.length > 0 && (
+                      <div className="bg-gray-50 p-3 rounded border border-sky-100">
+                        {(() => {
+                          const interesse =
+                            candidatoSelecionado.cidade[historicoIndex];
+                          return (
+                            <>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span
+                                  className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                                    interesse.status
+                                  )}`}
+                                >
+                                  {getStatusText(interesse.status)}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {interesse.data_interesse
+                                    ? new Date(
+                                        interesse.data_interesse
+                                      ).toLocaleDateString("pt-BR")
+                                    : "-"}
+                                </span>
+                              </div>
+                              <p>
+                                <strong>Pet:</strong>{" "}
+                                {interesse.pet?.nome || "-"}
+                              </p>
+                              <p>
+                                <strong>Tipo de Moradia:</strong>{" "}
+                                {candidatoSelecionado.tipo_moradia ||
+                                  candidatoSelecionado.mora_em ||
+                                  "-"}
+                              </p>
+                              <p>
+                                <strong>Experiência:</strong>{" "}
+                                {candidatoSelecionado.experiencia_pets ||
+                                  candidatoSelecionado.ja_teve_tem_animais ||
+                                  "-"}
+                              </p>
+                              <p>
+                                <strong>Motivação:</strong>{" "}
+                                {candidatoSelecionado.motivacao ||
+                                  candidatoSelecionado.finalidade_animal ||
+                                  "-"}
+                              </p>
+                              {interesse.status === "rejeitado" &&
+                                interesse.observacoes_admin && (
+                                  <p className="text-red-700 mt-1">
+                                    <strong>Motivo da Rejeição:</strong>{" "}
+                                    {interesse.observacoes_admin}
+                                  </p>
+                                )}
+                            </>
+                          );
+                        })()}
                       </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-            </div>
-          </div>
-
-          {/* Modal flutuante do histórico */}
-          {showHistorico && (
-            <div
-              style={{ zIndex: 9999 }}
-              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
-            >
-              <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200 animate-fade-in">
-                <button
-                  className="absolute top-3 right-3 text-red-500 hover:text-red-700 font-bold text-lg"
-                  onClick={() => setShowHistorico(false)}
-                  aria-label="Fechar"
-                >
-                  ×
-                </button>
-                <h3 className="text-xl font-bold text-sky-700 mb-4 text-center">
-                  Histórico de Tentativas de Adoção
-                </h3>
-                <div className="space-y-4">
-                  {candidatoSelecionado.tentativas.map((tentativa) => (
-                    <div
-                      key={tentativa.tentativaId}
-                      className="bg-gray-50 p-3 rounded border border-sky-100"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                            tentativa.status
-                          )}`}
-                        >
-                          {getStatusText(tentativa.status)}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(tentativa.dataEnvio).toLocaleDateString(
-                            "pt-BR"
-                          )}
-                        </span>
-                      </div>
-                      <p>
-                        <strong>Pet Preferido:</strong> {tentativa.petPreferido}
-                      </p>
-                      <p>
-                        <strong>Tipo de Moradia:</strong>{" "}
-                        {tentativa.tipoMoradia}
-                      </p>
-                      <p>
-                        <strong>Experiência:</strong> {tentativa.experiencia}
-                      </p>
-                      <p>
-                        <strong>Motivação:</strong> {tentativa.motivacao}
-                      </p>
-                      {tentativa.status === "rejeitado" &&
-                        tentativa.motivoRejeicao && (
-                          <p className="text-red-700 mt-1">
-                            <strong>Motivo da Rejeição:</strong>{" "}
-                            {tentativa.motivoRejeicao}
-                          </p>
-                        )}
-                    </div>
-                  ))}
+                    )}
                 </div>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </div>
+        )}
+      </main>
+      {/* Fim do main */}
     </div>
   );
 };

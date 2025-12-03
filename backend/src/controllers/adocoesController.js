@@ -140,7 +140,7 @@ export const createAdocao = async (req, res) => {
     // Verificar se pet e candidato existem
     const [pet, candidato] = await Promise.all([
       prisma.pet.findUnique({ where: { id: pet_id } }),
-      prisma.adoptionCandidate.findUnique({ where: { id: candidato_id } }),
+      prisma.adoptionCandidate.findUnique({ where: { cpf: candidato_id } }),
     ]);
 
     if (!pet) {

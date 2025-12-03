@@ -17,7 +17,7 @@ export const getCandidatos = async (req, res) => {
       prisma.adoptionCandidate.findMany({
         where,
         include: {
-          interesses: {
+          cidade: {
             include: {
               pet: {
                 select: {
@@ -30,19 +30,8 @@ export const getCandidatos = async (req, res) => {
             },
             orderBy: { data_interesse: "desc" },
           },
-          adocoes: {
-            include: {
-              pet: {
-                select: {
-                  id: true,
-                  nome: true,
-                  tipo: true,
-                },
-              },
-            },
-          },
         },
-        orderBy: { data_cadastro: "desc" },
+        orderBy: { cpf: "desc" },
         skip: offset,
         take: parseInt(limit),
       }),
@@ -53,6 +42,31 @@ export const getCandidatos = async (req, res) => {
     const totalPages = Math.ceil(totalCount / parseInt(limit));
     const hasNextPage = parseInt(page) < totalPages;
     const hasPrevPage = parseInt(page) > 1;
+
+    // DEBUG: Exibir interesses e pets de cada candidato
+    candidatos.forEach((c) => {
+      console.log(`Candidato: ${c.nome} (${c.cpf})`);
+      if (Array.isArray(c.cidade)) {
+        c.cidade.forEach((interesse, idx) => {
+          console.log(
+            `  Interesse #${idx + 1}: pet_id=${interesse.pet_id}, pet_nome=${
+              interesse.pet?.nome
+            }, status=${interesse.status}`
+          );
+        });
+      } else {
+        console.log(
+          "  AVISO: c.cidade não é um array:",
+          typeof c.cidade,
+          c.cidade
+        );
+      }
+    });
+
+    console.log(
+      "DEBUG - Estrutura completa do primeiro candidato:",
+      JSON.stringify(candidatos[0], null, 2)
+    );
 
     res.json({
       success: true,
@@ -82,9 +96,9 @@ export const getCandidatoById = async (req, res) => {
     const { id } = req.params;
 
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { cpf: id },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -102,7 +116,7 @@ export const getCandidatoById = async (req, res) => {
           },
           orderBy: { data_interesse: "desc" },
         },
-        adocoes: {
+        cep: {
           include: {
             pet: {
               select: {
@@ -196,7 +210,7 @@ export const createCandidato = async (req, res) => {
 
         // Se especificou interesse em pet específico, criar o interesse
         ...(pet_id && {
-          interesses: {
+          cidade: {
             create: {
               pet_id: pet_id,
               status: "interessado",
@@ -205,7 +219,7 @@ export const createCandidato = async (req, res) => {
         }),
       },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -238,12 +252,26 @@ export const createCandidato = async (req, res) => {
 
 export const updateCandidatoStatus = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status, observacoes } = req.body;
+    const { id } = req.params; // Aqui 'id' é o CPF
+    const { status, observacoes, pet_id } = req.body;
 
     // Verificar se candidato existe
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { cpf: id },
+      include: {
+        cidade: {
+          include: {
+            pet: {
+              select: {
+                id: true,
+                nome: true,
+                tipo: true,
+              },
+            },
+          },
+          orderBy: { data_interesse: "desc" },
+        },
+      },
     });
 
     if (!candidato) {
@@ -255,9 +283,17 @@ export const updateCandidatoStatus = async (req, res) => {
       });
     }
 
-    // Atualizar todos os interesses do candidato com mesmo status
+    // Atualizar apenas o interesse do candidato para o pet específico
+    if (!pet_id) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: "pet_id é obrigatório para aprovar/rejeitar interesse.",
+        },
+      });
+    }
     await prisma.petInterest.updateMany({
-      where: { candidato_id: id },
+      where: { candidato_id: id, pet_id },
       data: {
         status: status.toLowerCase(),
         data_avaliacao: new Date(),
@@ -266,9 +302,9 @@ export const updateCandidatoStatus = async (req, res) => {
     });
 
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { cpf: id },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -278,6 +314,7 @@ export const updateCandidatoStatus = async (req, res) => {
               },
             },
           },
+          orderBy: { data_interesse: "desc" },
         },
       },
     });
