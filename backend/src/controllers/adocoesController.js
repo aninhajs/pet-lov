@@ -385,6 +385,41 @@ export const getAdocoesByCandidato = async (req, res) => {
   }
 };
 
+export const getAdocoesByPet = async (req, res) => {
+  try {
+    const { pet_id } = req.params;
+
+    const adocoes = await prisma.adoption.findMany({
+      where: { pet_id },
+      include: {
+        candidato: {
+          select: {
+            id: true,
+            cpf: true,
+            nome: true,
+            email: true,
+            telefone: true,
+          },
+        },
+      },
+      orderBy: { data_adocao: "desc" },
+    });
+
+    res.json({
+      success: true,
+      data: adocoes,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar adoções do pet:", error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Erro interno do servidor",
+      },
+    });
+  }
+};
+
 export const getAdocoesStats = async (req, res) => {
   try {
     const stats = await Promise.all([

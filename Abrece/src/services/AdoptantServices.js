@@ -17,4 +17,8 @@ export const AdoptantServices = {
     const res = await api.get(`/admin/adoptants/${id}`);
     return res.data;
   },
+  async getStats() {
+    const res = await api.get("/candidatos/stats");
+    return res.data;
+  },
 };

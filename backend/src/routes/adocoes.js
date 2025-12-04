@@ -5,6 +5,7 @@ import {
   createAdocao,
   updateAdocaoStatus,
   getAdocoesByCandidato,
+  getAdocoesByPet,
   getAdocoesStats,
 } from "../controllers/adocoesController.js";
 import {
@@ -55,6 +56,13 @@ router.get(
   requireAdmin,
   getAdocoesByCandidato
 );
+
+/**
+ * @route GET /api/adocoes/pet/:pet_id
+ * @desc Buscar adoções de um pet específico
+ * @access Admin
+ */
+router.get("/pet/:pet_id", getAdocoesByPet);
 
 /**
  * @route POST /api/adocoes

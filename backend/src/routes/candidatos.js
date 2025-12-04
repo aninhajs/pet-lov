@@ -6,6 +6,7 @@ import {
   updateCandidatoStatus,
   createInteresse,
   getCandidatoStats,
+  getInteressesByPet,
 } from "../controllers/candidatosController.js";
 import {
   validateCreateCandidato,
@@ -30,7 +31,7 @@ router.get("/", authenticateToken, requireAdmin, getCandidatos);
  * @desc Obter estatísticas dos candidatos (Admin)
  * @access Admin
  */
-router.get("/stats", authenticateToken, requireAdmin, getCandidatoStats);
+router.get("/stats", getCandidatoStats);
 
 /**
  * @route GET /api/candidatos/:id
@@ -71,5 +72,12 @@ router.patch(
  * @access Public/Admin
  */
 router.post("/interesse", validateCreateInteresse, createInteresse);
+
+/**
+ * @route GET /api/candidatos/pet-interests/:pet_id
+ * @desc Buscar interesses de um pet específico
+ * @access Admin
+ */
+router.get("/pet-interests/:pet_id", getInteressesByPet);
 
 export default router;

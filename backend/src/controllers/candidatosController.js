@@ -43,31 +43,6 @@ export const getCandidatos = async (req, res) => {
     const hasNextPage = parseInt(page) < totalPages;
     const hasPrevPage = parseInt(page) > 1;
 
-    // DEBUG: Exibir interesses e pets de cada candidato
-    candidatos.forEach((c) => {
-      console.log(`Candidato: ${c.nome} (${c.cpf})`);
-      if (Array.isArray(c.cidade)) {
-        c.cidade.forEach((interesse, idx) => {
-          console.log(
-            `  Interesse #${idx + 1}: pet_id=${interesse.pet_id}, pet_nome=${
-              interesse.pet?.nome
-            }, status=${interesse.status}`
-          );
-        });
-      } else {
-        console.log(
-          "  AVISO: c.cidade não é um array:",
-          typeof c.cidade,
-          c.cidade
-        );
-      }
-    });
-
-    console.log(
-      "DEBUG - Estrutura completa do primeiro candidato:",
-      JSON.stringify(candidatos[0], null, 2)
-    );
-
     res.json({
       success: true,
       data: candidatos,
@@ -131,6 +106,30 @@ export const getCandidatoById = async (req, res) => {
         },
       },
     });
+
+    // Se candidato existe, buscar histórico de rejeições
+    if (candidato) {
+      const historicoRejeicoes = await prisma.petInterest.findMany({
+        where: {
+          candidato_id: id,
+          status: "rejeitado",
+          observacoes_admin: { not: null },
+        },
+        include: {
+          pet: {
+            select: {
+              id: true,
+              nome: true,
+              tipo: true,
+            },
+          },
+        },
+        orderBy: { data_avaliacao: "desc" },
+      });
+
+      // Adicionar histórico ao candidato
+      candidato.historico_rejeicoes = historicoRejeicoes;
+    }
 
     if (!candidato) {
       return res.status(404).json({
@@ -255,6 +254,12 @@ export const updateCandidatoStatus = async (req, res) => {
     const { id } = req.params; // Aqui 'id' é o CPF
     const { status, observacoes, pet_id } = req.body;
 
+    console.log("🔍 DEBUG - updateCandidatoStatus:");
+    console.log("  - ID (CPF):", id);
+    console.log("  - Status:", status);
+    console.log("  - Pet ID:", pet_id);
+    console.log("  - Observações:", observacoes);
+
     // Verificar se candidato existe
     const candidato = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
@@ -274,7 +279,10 @@ export const updateCandidatoStatus = async (req, res) => {
       },
     });
 
+    console.log("📋 Candidato encontrado:", candidato ? "SIM" : "NÃO");
+
     if (!candidato) {
+      console.log("❌ Candidato não encontrado para CPF:", id);
       return res.status(404).json({
         success: false,
         error: {
@@ -285,6 +293,7 @@ export const updateCandidatoStatus = async (req, res) => {
 
     // Atualizar apenas o interesse do candidato para o pet específico
     if (!pet_id) {
+      console.log("❌ pet_id não fornecido");
       return res.status(400).json({
         success: false,
         error: {
@@ -292,14 +301,129 @@ export const updateCandidatoStatus = async (req, res) => {
         },
       });
     }
-    await prisma.petInterest.updateMany({
-      where: { candidato_id: id, pet_id },
-      data: {
-        status: status.toLowerCase(),
-        data_avaliacao: new Date(),
-        observacoes_admin: observacoes,
-      },
-    });
+
+    // Se estiver aprovando, verificar se o pet ainda está disponível
+    if (status.toLowerCase() === "aprovado") {
+      console.log("🐕 Buscando pet com ID:", pet_id);
+
+      const pet = await prisma.pet.findUnique({
+        where: { id: pet_id },
+        select: { id: true, status: true, nome: true },
+      });
+
+      console.log("🐕 Pet encontrado:", pet);
+
+      if (!pet) {
+        console.log("❌ Pet não encontrado com ID:", pet_id);
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: "Pet não encontrado",
+          },
+        });
+      }
+
+      if (pet.status === "adotado") {
+        console.log("❌ Pet já está adotado:", pet.nome);
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "Pet já foi adotado por outro candidato",
+          },
+        });
+      }
+
+      // Verificar se já existe adoção ativa para este pet
+      console.log("🔍 Verificando adoções ativas para pet:", pet_id);
+
+      const adocaoExistente = await prisma.adoption.findFirst({
+        where: {
+          pet_id,
+          status: "ativa",
+        },
+      });
+
+      console.log("📋 Adoção existente encontrada:", adocaoExistente);
+
+      if (adocaoExistente) {
+        console.log("❌ Pet já possui adoção ativa");
+
+        // Verificar se é o mesmo candidato tentando aprovar novamente
+        const isMesmoCandidato = adocaoExistente.candidato_id === id;
+
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: isMesmoCandidato
+              ? `Candidato já foi aprovado para este pet em ${new Date(
+                  adocaoExistente.data_adocao
+                ).toLocaleDateString("pt-BR")}. A adoção já está ativa.`
+              : "Pet já possui uma adoção ativa com outro candidato",
+          },
+        });
+      }
+
+      // Usar transação para aprovar interesse + criar adoção automaticamente
+      const result = await prisma.$transaction(async (prisma) => {
+        // 1. Atualizar interesse para aprovado
+        await prisma.petInterest.updateMany({
+          where: { candidato_id: id, pet_id },
+          data: {
+            status: "aprovado",
+            data_avaliacao: new Date(),
+            observacoes_admin: observacoes,
+          },
+        });
+
+        // 2. Criar adoção automaticamente
+        const novaAdocao = await prisma.adoption.create({
+          data: {
+            pet_id,
+            candidato_id: id,
+            observacoes:
+              observacoes ||
+              "Adoção registrada automaticamente na aprovação do interesse",
+            status: "ativa",
+          },
+        });
+
+        // 3. Atualizar status do pet para adotado
+        await prisma.pet.update({
+          where: { id: pet_id },
+          data: { status: "adotado" },
+        });
+
+        // 4. Rejeitar outros interesses no mesmo pet
+        await prisma.petInterest.updateMany({
+          where: {
+            pet_id,
+            candidato_id: { not: id },
+            status: "interessado",
+          },
+          data: {
+            status: "rejeitado",
+            data_avaliacao: new Date(),
+            observacoes_admin: "Pet foi adotado por outro candidato",
+          },
+        });
+
+        return novaAdocao;
+      });
+
+      console.log(
+        `✅ Adoção automática criada: Pet ${pet_id} → Candidato ${id}`
+      );
+    } else {
+      // Para rejeição, apenas atualizar o interesse
+      await prisma.petInterest.updateMany({
+        where: { candidato_id: id, pet_id },
+        data: {
+          status: status.toLowerCase(),
+          data_avaliacao: new Date(),
+          observacoes_admin: observacoes,
+        },
+      });
+    }
 
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
@@ -322,9 +446,10 @@ export const updateCandidatoStatus = async (req, res) => {
     res.json({
       success: true,
       data: candidatoAtualizado,
-      message: `Candidato ${
-        status === "aprovado" ? "aprovado" : "rejeitado"
-      } com sucesso!`,
+      message:
+        status.toLowerCase() === "aprovado"
+          ? "Candidato aprovado e adoção registrada automaticamente! Pet marcado como adotado."
+          : "Candidato rejeitado com sucesso!",
     });
   } catch (error) {
     console.error("Erro ao atualizar status do candidato:", error);
@@ -446,6 +571,41 @@ export const getCandidatoStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao buscar estatísticas de candidatos:", error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "Erro interno do servidor",
+      },
+    });
+  }
+};
+
+export const getInteressesByPet = async (req, res) => {
+  try {
+    const { pet_id } = req.params;
+
+    const interesses = await prisma.petInterest.findMany({
+      where: { pet_id },
+      include: {
+        candidato: {
+          select: {
+            id: true,
+            cpf: true,
+            nome: true,
+            email: true,
+            telefone: true,
+          },
+        },
+      },
+      orderBy: { data_interesse: "desc" },
+    });
+
+    res.json({
+      success: true,
+      data: interesses,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar interesses do pet:", error);
     res.status(500).json({
       success: false,
       error: {

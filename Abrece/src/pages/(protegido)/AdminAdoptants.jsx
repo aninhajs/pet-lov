@@ -90,7 +90,6 @@ const adoptionCandidateQuestions = [
 ];
 import { Link } from "react-router-dom";
 import { AdoptantServices } from "../../services/AdoptantServices";
-import { AdoptionServices } from "../../services/AdoptionServices";
 
 const AdminAdoptants = () => {
   const [selectedStatus, setSelectedStatus] = useState("todos");
@@ -101,8 +100,7 @@ const AdminAdoptants = () => {
   const [detalhesCandidato, setDetalhesCandidato] = useState(null);
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
-  const [showInteresses, setShowInteresses] = useState(false);
-  const [interessesSelecionados, setInteressesSelecionados] = useState([]);
+
   const [historicoIndex, setHistoricoIndex] = useState(0);
 
   useEffect(() => {
@@ -138,15 +136,7 @@ const AdminAdoptants = () => {
   const filteredCandidatos = candidatosOrdenados.filter((candidato) => {
     const interesses = candidato.cidade || [];
     const ultimaTentativa = interesses[0];
-    console.log(
-      "DEBUG - Candidato:",
-      candidato.nome,
-      "Interesses:",
-      interesses
-    );
-    if (ultimaTentativa) {
-      console.log("DEBUG - Última tentativa pet_id:", ultimaTentativa.pet_id);
-    }
+
     if (selectedStatus === "todos") return true; // mostra todos cadastrados
     if (!ultimaTentativa) return false; // só mostra nos outros filtros quem já tentou adotar
     if (selectedStatus === "aprovado") {
@@ -178,8 +168,11 @@ const AdminAdoptants = () => {
       );
       const res = await AdoptantServices.getAllAdoptants({ limit: 100 });
       setCandidatos(res.data || []);
-    } catch {
-      alert("Erro ao atualizar status do candidato");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error?.message ||
+        "Erro ao atualizar status do candidato";
+      alert(errorMessage);
     }
   };
 
@@ -241,13 +234,13 @@ const AdminAdoptants = () => {
                 to="/admin"
                 className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
-                🏠 Dashboard
+                Dashboard
               </Link>
               <Link
                 to="/"
                 className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
-                🌐 Site Principal
+                Site Principal
               </Link>
               <button
                 onClick={() => {
@@ -374,18 +367,13 @@ const AdminAdoptants = () => {
                         </div>
                         <div className="mt-1 text-sm text-gray-600">
                           <p>
-                            📧 {candidato.email} • 📞{" "}
+                            {candidato.email} • Tel:{" "}
                             {candidato.telefone || candidato.celular_01}
                           </p>
                           {ultimaTentativa && (
                             <p>
-                              🐾 Interesse em:{" "}
-                              {ultimaTentativa.pet?.nome || "-"} • 📅{" "}
-                              {ultimaTentativa.data_interesse
-                                ? new Date(
-                                    ultimaTentativa.data_interesse
-                                  ).toLocaleDateString("pt-BR")
-                                : "-"}
+                              Interesse em: {ultimaTentativa.pet?.nome || "-"} •
+                              Data: {new Date().toLocaleDateString("pt-BR")}
                             </p>
                           )}
                         </div>
@@ -417,114 +405,47 @@ const AdminAdoptants = () => {
                         >
                           Ver Detalhes
                         </button>
-                        <button
-                          onClick={() => {
-                            setInteressesSelecionados(candidato.cidade || []);
-                            setShowInteresses(true);
-                          }}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                        >
-                          Ver Interesses
-                        </button>
-                        {/* Modal de Interesses */}
-                        {showInteresses && (
-                          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border-2 border-yellow-400 p-6">
-                              <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-semibold text-yellow-700">
-                                  Interesses do Candidato
-                                </h2>
-                                <button
-                                  onClick={() => setShowInteresses(false)}
-                                  className="text-gray-400 hover:text-yellow-600 text-2xl font-bold"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                              {interessesSelecionados.length === 0 ? (
-                                <p className="text-gray-500">
-                                  Nenhum interesse encontrado.
-                                </p>
-                              ) : (
-                                <ul className="divide-y divide-gray-200">
-                                  {interessesSelecionados.map(
-                                    (interesse, idx) => (
-                                      <li key={idx} className="py-2">
-                                        <div>
-                                          <strong>Pet:</strong>{" "}
-                                          {interesse.pet?.nome || "-"}
-                                        </div>
-                                        <div>
-                                          <strong>Status:</strong>{" "}
-                                          {getStatusText(interesse.status)}
-                                        </div>
-                                        <div>
-                                          <strong>Data:</strong>{" "}
-                                          {interesse.data_interesse
-                                            ? new Date(
-                                                interesse.data_interesse
-                                              ).toLocaleDateString("pt-BR")
-                                            : "-"}
-                                        </div>
-                                      </li>
-                                    )
-                                  )}
-                                </ul>
-                              )}
+
+                        {ultimaTentativa &&
+                          ultimaTentativa.status === "aprovado" && (
+                            <div className="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
+                              ✓ Já aprovado - Adoção ativa
                             </div>
-                          </div>
-                        )}
+                          )}
+                        {ultimaTentativa &&
+                          ultimaTentativa.status === "rejeitado" && (
+                            <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
+                              ✗ Rejeitado anteriormente
+                            </div>
+                          )}
                         {ultimaTentativa &&
                           ultimaTentativa.status === "pendente" && (
                             <>
                               <button
                                 onClick={async () => {
-                                  console.log(
-                                    "DEBUG - Dados do candidato:",
-                                    candidato
-                                  );
-                                  console.log(
-                                    "DEBUG - Última tentativa:",
-                                    ultimaTentativa
-                                  );
-                                  console.log("DEBUG - CPF:", candidato.cpf);
-                                  console.log(
-                                    "DEBUG - Pet ID:",
-                                    ultimaTentativa?.pet_id
-                                  );
-
                                   if (
                                     candidato.cpf &&
                                     ultimaTentativa?.pet_id
                                   ) {
-                                    // 1. Aprova o interesse normalmente
-                                    await updateStatus(
-                                      candidato.cpf,
-                                      "aprovado",
-                                      "",
-                                      ultimaTentativa.pet_id
+                                    const confirmar = window.confirm(
+                                      `Tem certeza que deseja APROVAR o candidato "${
+                                        candidato.nome
+                                      }" para o pet "${
+                                        ultimaTentativa.pet?.nome || "Pet"
+                                      }"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
                                     );
-                                    // 2. Registra a adoção automaticamente
-                                    try {
-                                      await AdoptionServices.createAdoption({
-                                        pet_id: ultimaTentativa.pet_id,
-                                        candidato_id: candidato.cpf,
-                                        observacoes:
-                                          "Aprovação automática pelo admin.",
-                                      });
-                                      alert(
-                                        "Adoção registrada e pet marcado como adotado!"
-                                      );
-                                    } catch (err) {
-                                      alert(
-                                        "Interesse aprovado, mas houve erro ao registrar adoção: " +
-                                          (err?.response?.data?.error
-                                            ?.message || err.message)
+
+                                    if (confirmar) {
+                                      await updateStatus(
+                                        candidato.cpf,
+                                        "aprovado",
+                                        "",
+                                        ultimaTentativa.pet_id
                                       );
                                     }
                                   } else {
                                     alert(
-                                      "CPF ou pet_id não encontrado. Não é possível aprovar e registrar adoção."
+                                      "CPF ou pet_id não encontrado. Não é possível aprovar."
                                     );
                                   }
                                 }}
@@ -534,17 +455,30 @@ const AdminAdoptants = () => {
                               </button>
                               <button
                                 onClick={() => {
-                                  const motivo = prompt(
-                                    "Motivo da rejeição:",
-                                    ""
-                                  );
                                   if (candidato.cpf) {
-                                    updateStatus(
-                                      candidato.cpf,
-                                      "rejeitado",
-                                      motivo,
-                                      ultimaTentativa?.pet_id
+                                    const confirmar = window.confirm(
+                                      `Tem certeza que deseja REJEITAR o candidato "${
+                                        candidato.nome
+                                      }" para o pet "${
+                                        ultimaTentativa.pet?.nome || "Pet"
+                                      }"?`
                                     );
+
+                                    if (confirmar) {
+                                      const motivo = prompt(
+                                        "Motivo da rejeição:",
+                                        ""
+                                      );
+                                      if (motivo !== null) {
+                                        // Usuario não cancelou o prompt
+                                        updateStatus(
+                                          candidato.cpf,
+                                          "rejeitado",
+                                          motivo,
+                                          ultimaTentativa?.pet_id
+                                        );
+                                      }
+                                    }
                                   } else {
                                     alert(
                                       "CPF do candidato não encontrado. Não é possível rejeitar."
@@ -586,7 +520,7 @@ const AdminAdoptants = () => {
                     onClick={() => setCandidatoSelecionado(null)}
                     className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
                   >
-                    ✕
+                    ×
                   </button>
                 </div>
                 <div className="px-6 py-4 space-y-6">
@@ -661,6 +595,49 @@ const AdminAdoptants = () => {
                           )}
                         </div>
                       </div>
+
+                      {/* Histórico de Rejeições */}
+                      {detalhesCandidato.historico_rejeicoes &&
+                        detalhesCandidato.historico_rejeicoes.length > 0 && (
+                          <div>
+                            <h3 className="font-medium text-red-700 mt-4 mb-2 flex items-center">
+                              Histórico de Rejeições (
+                              {detalhesCandidato.historico_rejeicoes.length})
+                            </h3>
+                            <div className="bg-red-50 border border-red-200 p-3 rounded max-h-[200px] overflow-y-auto">
+                              {detalhesCandidato.historico_rejeicoes.map(
+                                (rejeicao, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="mb-3 pb-2 border-b border-red-100 last:border-b-0"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-medium text-red-800 text-sm">
+                                        Pet:{" "}
+                                        {rejeicao.pet?.nome || "Pet removido"}
+                                      </p>
+                                      <span className="text-xs text-red-600">
+                                        {rejeicao.data_avaliacao &&
+                                          new Date(
+                                            rejeicao.data_avaliacao
+                                          ).toLocaleDateString("pt-BR")}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-red-700 mt-1">
+                                      <strong>Motivo:</strong>{" "}
+                                      {rejeicao.observacoes_admin}
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                              <p className="text-xs text-red-600 italic mt-2">
+                                Considere esses motivos ao avaliar nova
+                                solicitação
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
                       {detalhesCandidato.cidade &&
                         detalhesCandidato.cidade.length > 1 && (
                           <div>
@@ -678,17 +655,26 @@ const AdminAdoptants = () => {
                           <button
                             onClick={() => {
                               if (detalhesCandidato.cpf) {
-                                // Busca o pet_id da última tentativa do candidato nos detalhes
-                                const petIdAprovar =
-                                  detalhesCandidato?.cidade?.[0]?.pet_id;
-                                updateStatus(
-                                  detalhesCandidato.cpf,
-                                  "aprovado",
-                                  "",
-                                  petIdAprovar
+                                const petNome =
+                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
+                                  "Pet";
+                                const confirmar = window.confirm(
+                                  `Tem certeza que deseja APROVAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
                                 );
-                                setCandidatoSelecionado(null);
-                                setDetalhesCandidato(null);
+
+                                if (confirmar) {
+                                  // Busca o pet_id da última tentativa do candidato nos detalhes
+                                  const petIdAprovar =
+                                    detalhesCandidato?.cidade?.[0]?.pet_id;
+                                  updateStatus(
+                                    detalhesCandidato.cpf,
+                                    "aprovado",
+                                    "",
+                                    petIdAprovar
+                                  );
+                                  setCandidatoSelecionado(null);
+                                  setDetalhesCandidato(null);
+                                }
                               } else {
                                 alert(
                                   "CPF do candidato não encontrado. Não é possível aprovar."
@@ -701,18 +687,33 @@ const AdminAdoptants = () => {
                           </button>
                           <button
                             onClick={() => {
-                              const motivo = prompt("Motivo da rejeição:", "");
                               if (detalhesCandidato.cpf) {
-                                const petIdRejeitar =
-                                  detalhesCandidato?.cidade?.[0]?.pet_id;
-                                updateStatus(
-                                  detalhesCandidato.cpf,
-                                  "rejeitado",
-                                  motivo,
-                                  petIdRejeitar
+                                const petNome =
+                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
+                                  "Pet";
+                                const confirmar = window.confirm(
+                                  `Tem certeza que deseja REJEITAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?`
                                 );
-                                setCandidatoSelecionado(null);
-                                setDetalhesCandidato(null);
+
+                                if (confirmar) {
+                                  const motivo = prompt(
+                                    "Motivo da rejeição:",
+                                    ""
+                                  );
+                                  if (motivo !== null) {
+                                    // Usuario não cancelou o prompt
+                                    const petIdRejeitar =
+                                      detalhesCandidato?.cidade?.[0]?.pet_id;
+                                    updateStatus(
+                                      detalhesCandidato.cpf,
+                                      "rejeitado",
+                                      motivo,
+                                      petIdRejeitar
+                                    );
+                                    setCandidatoSelecionado(null);
+                                    setDetalhesCandidato(null);
+                                  }
+                                }
                               } else {
                                 alert(
                                   "CPF do candidato não encontrado. Não é possível rejeitar."

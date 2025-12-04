@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PetServices } from "../../services/PetServices";
 import { VacinaServices } from "../../services/VacinaServices";
+import { AdoptantServices } from "../../services/AdoptantServices";
 
 const AdminDashboard = () => {
   const [excluindo, setExcluindo] = useState(false); // status de exclusão
@@ -10,7 +11,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState({
     totalPets: 0,
     petsAdotados: 0,
-    candidatos: 12,
+    candidatos: 0,
     processosPendentes: 5,
   });
 
@@ -48,6 +49,25 @@ const AdminDashboard = () => {
           });
         } else {
           console.error("❌ Erro ao carregar pets:", response.message);
+        }
+
+        // Buscar estatísticas de candidatos do backend
+        try {
+          const candidatosResponse = await AdoptantServices.getStats();
+          if (candidatosResponse.success) {
+            const totalCandidatos =
+              candidatosResponse.data.total_candidatos || 0;
+            setStats((prevStats) => ({
+              ...prevStats,
+              candidatos: totalCandidatos,
+            }));
+            console.log("✅ Candidatos carregados:", totalCandidatos);
+          }
+        } catch (error) {
+          console.error(
+            "❌ Erro ao carregar estatísticas de candidatos:",
+            error
+          );
         }
 
         // Carregar vacinas do backend
