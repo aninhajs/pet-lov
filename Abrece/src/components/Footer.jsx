@@ -5,10 +5,10 @@ import {
   Phone,
   Mail,
   Instagram,
-  Music,
   MessageCircle,
   Heart,
 } from "lucide-react";
+import { FaTiktok } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -56,7 +56,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center">
                 <Phone className="w-5 h-5 mr-2 text-yellow-400" />
-                <p>(11) 98812-8654</p>
+                <p>(85) 98812-8654</p>
               </div>
               <div className="flex items-center">
                 <Mail className="w-5 h-5 mr-2 text-sky-400" />
@@ -84,7 +84,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <Music className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
+                <FaTiktok className="w-5 h-5 mr-3 text-sky-400 group-hover:text-sky-300" />
                 TikTok
               </a>
               <a
