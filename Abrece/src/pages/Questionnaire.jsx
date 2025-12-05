@@ -10,15 +10,15 @@ const sections = [
     accent: "sky",
     items: [
       { field: "nome", label: "Nome completo", type: "text", required: true },
-      { field: "endereco", label: "Endereço completo", type: "text", required: true, fullWidth: true },
-      { field: "bairro", label: "Bairro", type: "text" },
-      { field: "cep", label: "CEP", type: "text" },
-      { field: "celular_01", label: "Celular 01", type: "text", required: true },
-      { field: "celular_02", label: "Celular 02", type: "text" },
-      { field: "idade", label: "Idade", type: "text" },
-      { field: "profissao", label: "Profissão", type: "text" },
-      { field: "instagram", label: "Instagram", type: "text" },
-      { field: "facebook", label: "Facebook", type: "text" },
+      { field: "cpf", label: "CPF", type: "text", required: true, placeholder: "000.000.000-00" },
+      { field: "endereco", label: "Rua e Bairro", type: "text", required: true, fullWidth: true },
+      { field: "cidade", label: "Cidade", type: "text", required: true, placeholder: "Fortaleza-CE" },
+      { field: "cep", label: "CEP", type: "text", required: true, placeholder: "12345-00" },
+      { field: "celular_01", label: "Celular 01", type: "text", required: true, placeholder: "(00) 9 0000-0000" },
+      { field: "celular_02", label: "Celular 02", type: "text", placeholder: "(00) 9 0000-0000" },
+      { field: "dt_nacimento", label: "Data de Nascimento", required: true, type: "text", placeholder: "DD/MM/AAAA" },
+      { field: "profissao", label: "Você trabalha no momento? Qual sua profissão/emprego?", required: true, type: "text" },
+      { field: "redes_sociais", label: "Redes Sociais", type: "text", placeholder: "Informe seu perfil de rede social ou coloque o link" },
     ],
   },
   {
@@ -31,18 +31,21 @@ const sections = [
         label: "Mora em",
         type: "radio",
         options: ["Casa", "Apartamento", "Sítio", "Chácara"],
+        required: true,
       },
       {
         field: "residencia_tipo",
         label: "Sua residência é",
         type: "radio",
         options: ["Alugada", "Própria", "De um parente"],
+        required: true,
       },
       {
         field: "proprietarios_aceitam",
         label: "Se alugada os proprietários aceitam animais?",
         type: "text",
         fullWidth: true,
+        placeholder: " ",
       },
       {
         field: "normas_condominio_animais",
@@ -50,6 +53,7 @@ const sections = [
           "Em caso de residir em condomínio, quais são as normas a respeito da criação de animais?",
         type: "text",
         fullWidth: true,
+        placeholder: " ",
       },
       {
         field: "tipo_portao",
@@ -61,9 +65,9 @@ const sections = [
           "Totalmente fechado",
           "Telado",
           "Não tem portão",
-          "Outro:",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "residencia_possui",
@@ -79,6 +83,7 @@ const sections = [
           "Tem as janelas teladas",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "area_tipo",
@@ -93,6 +98,7 @@ const sections = [
           "Tem proteção contra a chuva",
         ],
         fullWidth: true,
+        required: true,
       },
     ],
   },
@@ -104,56 +110,72 @@ const sections = [
       {
         field: "reside_com_quantas_pessoas",
         label:
-          "Reside com quantas pessoas? Quem são? Estão de acordo com a adoção?",
+          "Reside com quantas pessoas? Quem são?",
         type: "textarea",
         fullWidth: true,
+        required: true,
+        placeholder: " ",
+      },
+      {
+        field: "cientes_adocao",
+        label: "Estão de acordo com a adoção?",
+        type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "responsavel_financeiro",
         label: "Quem será o responsável financeiro pelo animal?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "reacao_mordida_arranho",
         label:
           "Se o animal mordesse/arranhasse você/seu filho/outro membro da família, como seria a reação?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "possui_veiculo",
         label:
           "Possui veículo para o transporte do animal? Caso sim, qual? Caso não, como levará o animal para o veterinário?",
         type: "textarea",
-      },
-      {
-        field: "trabalha",
-        label: "Você trabalha no momento? Qual sua profissão/emprego?",
-        type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "profissao_moradores",
         label: "As pessoas que moram com você trabalham? Qual a profissão delas?",
         type: "text",
+        placeholder: " ",
       },
       {
         field: "alguem_alergico",
         label: "Algum morador da residência é alérgico?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "tem_criancas",
         label: "Tem crianças em casa? Caso tenha, qual a idade?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "alguem_dirige",
         label:
           "Alguém da casa dirige? Teria como levar o animalzinho imediatamente ao veterinário em caso de acidentes?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
     ],
   },
-  // A partir daqui as perguntas NÃO são obrigatórias!
   {
     id: "animais",
     title: "Informações quanto aos outros animais da casa/animais que criou no passado",
@@ -164,6 +186,8 @@ const sections = [
         label: "Já teve/tem outros animais? Quantos, qual a espécie, e idade.",
         type: "textarea",
         fullWidth: true,
+        required: true,
+        placeholder: " ",
       },
       {
         field: "motivo_perda_animais",
@@ -177,7 +201,7 @@ const sections = [
           "Doei para alguém de confiança",
           "Doei para um estranho",
           "Vendi",
-          "Outro:",
+          "Ainda moram comigo",
         ],
         fullWidth: true,
       },
@@ -200,7 +224,6 @@ const sections = [
       },
     ],
   },
-  // Aqui elas já voltam a ser obrigatórias!
   {
     id: "cuidados",
     title: "Cuidados com o futuro animalzinho",
@@ -217,6 +240,7 @@ const sections = [
           "Só passeará na rua na minha presença, e somente com a guia",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "quantia_mensal",
@@ -231,29 +255,37 @@ const sections = [
           "Mais que 200 reais",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "tempo_sozinho",
         label: "Quanto tempo o animal ficará sozinho?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "frequencia_passeios",
         label: "Conseguem passear com o animal quantas vezes ao dia/semana?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "devolveria_se_mudar",
         label:
           "Devolveria o animal caso precise mudar de casa ou de cidade? Como faria para se organizar nessa situação?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "destino_animal",
         label: "Para qual destino seria o animal?",
         type: "radio",
-        options: ["Guarda", "Companhia", "Presente", "Outros:"],
+        options: ["Guarda", "Companhia", "Presente"],
         fullWidth: true,
+        required: true,
       },
       {
         field: "comodo_dia",
@@ -267,6 +299,7 @@ const sections = [
           "Dentro de casa com acesso ao quintal",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "local_dormir",
@@ -281,18 +314,23 @@ const sections = [
           "Amarrado",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "tempo_preso",
         label:
           "O animal ficará amarrado/preso em algum lugar? Caso sim, por quais razões? Ele passaria quantas horas amarrado/preso?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "reacao_bagunca",
         label:
           "Caso o animal faça bagunça ou destrua algo de valor, qual será sua atitude diante de tal ato?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "providencia_crescimento",
@@ -306,21 +344,28 @@ const sections = [
           "Continuar com ele",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "responsavel_viagem",
         label: "Em caso de viagem, quem ficará com o animal?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "pretende_mudar_5_anos",
         label: "Pretende se mudar em um espaço de 5 anos? Caso sim, como ficará o animal?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "reacao_choro_latido",
         label: "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
         type: "textarea",
+        required: true, 
+        placeholder: " ",
       },
     ],
   },
@@ -333,49 +378,66 @@ const sections = [
         field: "vacinas_que_dara",
         label: "Quais vacinas irá dar ao animal adotado?",
         type: "textarea",
+        required: true,
+        placeholder: "Antirrábica, Gripe canina, etc",
       },
       {
         field: "marca_racao_adotado",
         label: "Qual a marca de ração pretende dar ao adotado?",
         type: "text",
+        required: true,
+        placeholder: "Wiskas, Pedigree, etc",
       },
       {
         field: "criterios_alimentacao",
         label: "Quais são os seus critérios ao escolher essa alimentação?",
         type: "textarea",
+        placeholder: " ",
       },
       {
         field: "filhotes_ou_castrar",
         label: "Pretende por o animalzinho para ter filhotes ou irá castrar? O que pensa a respeito?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "preparado_responsabilidade",
         label: "O seu adotado pode viver de 10 a 15 anos. Já pensou sobre essa responsabilidade e está preparado?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "disposto_adaptacao",
         label:
           "A adaptação do animal pode levar de 1 semana a 1 mês, tanto com o ambiente como com os outros moradores da casa (contando outros animais também). Está disposto a esperar esse tempo com paciência?",
         type: "text",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "clinica_veterinario",
         label:
           "Qual clínica e veterinário levará ou leva os seus animais? Por favor, coloque nome do estabelecimento, endereço e nome do veterinário responsável.",
         type: "textarea",
+        required: true,
+        placeholder: "Clínica ABC, rua xxx, nº 000, Dr(a) fulano",
       },
       {
         field: "reacao_doenca",
         label:
           "O que faria se o animalzinho fosse diagnosticado com as devidas doenças: Calazar/Cinomose/Parvovirose/Erliquiose:",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "conhece_doencas",
         label: "Conhece essas doenças citadas acima? Sabe as formas de precaução e tratamento?",
         type: "textarea",
+        required: true,
+        placeholder: " ",
       },
       {
         field: "frequencia_remedio_verme",
@@ -390,6 +452,7 @@ const sections = [
           "Só quando tem necessidade",
         ],
         fullWidth: true,
+        required: true,
       },
       {
         field: "frequencia_veterinario",
@@ -404,6 +467,7 @@ const sections = [
           "Só quando tem necessidade",
         ],
         fullWidth: true,
+        required: true,
       },
     ],
   },
@@ -502,6 +566,7 @@ const Questionnaire = () => {
             value={formData[item.field]}
             onChange={handleChange}
             required={item.required}
+            placeholder={item.placeholder || `Digite ${item.label.toLowerCase()}`}
             aria-required={item.required}
             aria-invalid={showError}
             className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
@@ -660,25 +725,13 @@ const Questionnaire = () => {
                 As informações ajudam a garantir uma adoção responsável e o
                 bem-estar do animal.
               </p>
-              {petName && (
-                <p className="mt-2 text-sm font-semibold text-yellow-200">
-                  Pet de interesse: {petName}
-                </p>
-              )}
-            </div>
-            <div className="bg-white/15 backdrop-blur-lg px-4 py-3 rounded-xl border border-white/30 text-sm max-w-sm">
-              <p className="font-semibold">Importante</p>
-              <p className="text-sky-50">
-                O envio ainda não grava no sistema. Integraremos ao backend na
-                próxima etapa.
-              </p>
             </div>
           </div>
         </div>
 
         {submitted && (
           <div className="mb-6 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-800 shadow">
-            Dados prontos! Em breve entraremos em contato com você.
+            A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs,  daremos o feedback!
           </div>
         )}
 

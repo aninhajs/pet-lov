@@ -25,7 +25,7 @@ model User {
 }
 
 model Pet {
-  id                     String        @id @default(cuid())
+  id                     String              @id @default(cuid())
   nome                   String
   tipo                   TipoPet
   idade                  String
@@ -34,20 +34,21 @@ model Pet {
   cor                    String
   peso                   Decimal?
   descricao              String
-  castrado               Boolean       @default(false)
-  vacinado               Boolean       @default(false)
-  vermifugado            Boolean       @default(false)
+  castrado               Boolean             @default(false)
+  vacinado               Boolean             @default(false)
+  vermifugado            Boolean             @default(false)
   necessidades_especiais String?
   historia               String?
-  status                 StatusPet     @default(disponivel)
-  data_cadastro          DateTime      @default(now())
-  data_atualizacao       DateTime      @updatedAt
+  status                 StatusPet           @default(disponivel)
+  data_cadastro          DateTime            @default(now())
+  data_atualizacao       DateTime            @updatedAt
   usuario_id             String
   localizacao            String?
+  adoption_candidates    AdoptionCandidate[]
   adocoes                Adoption[]
   imagens                PetImage[]
   interesses             PetInterest[]
-  usuario_cadastrou      User          @relation(fields: [usuario_id], references: [id])
+  usuario_cadastrou      User                @relation(fields: [usuario_id], references: [id])
   vacinas                Vaccine[]
 
   @@map("pets")
@@ -76,7 +77,6 @@ model AdoptionCandidate {
   data_nascimento             DateTime?
   perfil_social               String?
   profissao                   String?
-  trabalha                    String?
   alguem_alergico             String?
   castrados_motivo            String?
   clinica_veterinario         String?
@@ -87,14 +87,11 @@ model AdoptionCandidate {
   criterios_alimentacao       String?
   devolveria_se_mudar         String?
   disposto_adaptacao          String?
-  especie_animais             String?
   filhotes_ou_castrar         String?
   finalidade_animal           String?
   frequencia_passeios         String?
   frequencia_remedio_verme    String?
   frequencia_veterinario      String?
-  idade_animais               String?
-  ja_perdeu_animal            String?
   ja_teve_tem_animais         String?
   local_dormir                String?
   marca_racao                 String?
@@ -110,8 +107,6 @@ model AdoptionCandidate {
   pretende_mudar_5_anos       String?
   proprietario_aceita_animais String?
   providencia_crescimento     String?
-  qtd_animais                 String?
-  qtd_filhotes                String?
   quantia_mensal_cuidados     String?
   reacao_bagunca              String?
   reacao_choro_latido         String?
@@ -132,6 +127,8 @@ model AdoptionCandidate {
   vacinas_que_dara            String?
   CEP                         String?
   Cidade                      String?
+  Pet_ID                      String?
+  pets                        Pet?          @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
   cep                         Adoption[]
   cidade                      PetInterest[]
 
