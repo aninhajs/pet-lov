@@ -2,6 +2,7 @@
 import { useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import QuestionnaireService from "../services/QuestionnaireService";
 
 const sections = [
   {
@@ -16,7 +17,7 @@ const sections = [
       { field: "cep", label: "CEP", type: "text", required: true, placeholder: "12345-00" },
       { field: "celular_01", label: "Celular 01", type: "text", required: true, placeholder: "(00) 9 0000-0000" },
       { field: "celular_02", label: "Celular 02", type: "text", placeholder: "(00) 9 0000-0000" },
-      { field: "dt_nacimento", label: "Data de Nascimento", required: true, type: "text", placeholder: "DD/MM/AAAA" },
+      { field: "dt_nacimento", label: "Data de Nascimento", required: true, type: "date", placeholder: "DD/MM/AAAA" },
       { field: "profissao", label: "Você trabalha no momento? Qual sua profissão/emprego?", required: true, type: "text" },
       { field: "redes_sociais", label: "Redes Sociais", type: "text", placeholder: "Informe seu perfil de rede social ou coloque o link" },
     ],
@@ -491,13 +492,24 @@ const Questionnaire = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [submitted, setSubmitted] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitMessage, setSubmitMessage] = useState("");
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const totalSections = sections.length;
+
+  const numericFields = useMemo(
+    () => ["cpf", "cep", "celular_01", "celular_02"],
+    []
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSubmitted(false);
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const nextValue = numericFields.includes(name)
+      ? value.replace(/\D/g, "")
+      : value;
+    setFormData((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleCheckboxArray = (field, option) => {
@@ -541,21 +553,90 @@ const Questionnaire = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setShowErrors(true);
+    setSubmitError(null);
+    setSubmitMessage("");
+    setSubmitted(false);
 
     const hasMissing = sections.some((_, index) => !isSectionValid(index));
-    if (hasMissing) return;
+    if (hasMissing) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
-    setSubmitted(true);
-    setShowErrors(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    // Integracao com backend sera adicionada na proxima etapa.
-    console.log("Formulário de adoção (pre-envio):", { petId, ...formData });
+    setLoading(true);
+    try {
+      const formatDate = (val) => {
+        if (!val) return "";
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+        const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(val);
+        if (match) {
+          const [, dd, mm, yyyy] = match;
+          return `${yyyy}-${mm}-${dd}`;
+        }
+        return val;
+      };
+
+      const payload = {
+        petId,
+        ...formData,
+        cpf: formData.cpf?.replace(/\D/g, "") || formData.cpf,
+        cep: formData.cep?.replace(/\D/g, "") || formData.cep,
+        celular_01:
+          formData.celular_01?.replace(/\D/g, "") || formData.celular_01,
+        celular_02:
+          formData.celular_02?.replace(/\D/g, "") || formData.celular_02,
+        dt_nacimento: formatDate(formData.dt_nacimento),
+        data_nascimento: formatDate(formData.dt_nacimento),
+      };
+
+      const response = await QuestionnaireService.submit(payload);
+
+      setSubmitted(true);
+      setShowErrors(false);
+      setCurrentSectionIndex(totalSections - 1);
+      setSubmitMessage(
+        response?.message ||
+          "Formulario enviado com sucesso! Entraremos em contato em breve."
+      );
+    } catch (error) {
+      const message =
+        error?.response?.data?.error?.message ||
+        "Erro ao enviar o formulario. Tente novamente.";
+      setSubmitError(message);
+    } finally {
+      setLoading(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
   const renderField = (item) => {
     const showError = (showErrors || submitted) && isFieldMissing(item);
+
+    if (item.type === "date") {
+      return (
+        <div className="space-y-1">
+          <input
+            type="date"
+            name={item.field}
+            value={formData[item.field]}
+            onChange={handleChange}
+            required={item.required}
+            aria-required={item.required}
+            aria-invalid={showError}
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
+            }`}
+          />
+          {showError && (
+            <p className="text-xs text-red-600">Campo obrigatório.</p>
+          )}
+        </div>
+      );
+    }
 
     if (item.type === "text") {
       return (
@@ -731,7 +812,14 @@ const Questionnaire = () => {
 
         {submitted && (
           <div className="mb-6 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-800 shadow">
-            A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs,  daremos o feedback!
+            {submitMessage ||
+              "A ONG ABRACE agradece a sua aten??o em responder o question?rio e em breve daremos o feedback!"}
+          </div>
+        )}
+
+        {submitError && (
+          <div className="mb-6 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-800 shadow">
+            {submitError}
           </div>
         )}
 
@@ -820,9 +908,10 @@ const Questionnaire = () => {
               ) : (
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:from-sky-600 hover:to-sky-700 transition"
+                  disabled={loading}
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:from-sky-600 hover:to-sky-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Salvar respostas
+                  {loading ? "Enviando..." : "Salvar respostas"}
                 </button>
               )}
             </div>

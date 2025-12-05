@@ -142,12 +142,6 @@ const Home = () => {
               >
                 Ver Pets
               </Link>
-              <Link
-                to={GOOGLE_FORM_URL}
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
-              >
-                Adotar Pet
-              </Link>
             </div>
           </div>
         </nav>

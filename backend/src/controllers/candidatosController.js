@@ -157,13 +157,12 @@ export const getCandidatoById = async (req, res) => {
 
 export const createCandidato = async (req, res) => {
   try {
-    // Verificar erros de validação
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
         error: {
-          message: "Dados inválidos",
+          message: "Dados invalidos",
           details: errors.array(),
         },
       });
@@ -171,47 +170,187 @@ export const createCandidato = async (req, res) => {
 
     const {
       nome,
-      email,
-      telefone,
+      cpf,
       endereco,
-      tipo_moradia,
-      tempo_disponivel,
-      experiencia_pets,
-      motivacao,
-      pet_id, // Pet específico de interesse (opcional)
+      cidade,
+      cep,
+      celular_01,
+      celular_02,
+      dt_nacimento,
+      data_nascimento,
+      redes_sociais,
+      profissao,
+      mora_em,
+      residencia_tipo,
+      proprietarios_aceitam,
+      normas_condominio_animais,
+      tipo_portao,
+      residencia_possui,
+      area_tipo,
+      reside_com_quantas_pessoas,
+      cientes_adocao,
+      responsavel_financeiro,
+      reacao_mordida_arranho,
+      possui_veiculo,
+      profissao_moradores,
+      alguem_alergico,
+      tem_criancas,
+      alguem_dirige,
+      ja_teve_tem_animais,
+      motivo_perda_animais,
+      vacinados_quais,
+      marca_racao,
+      castrados_motivo,
+      teve_filhotes,
+      passeios,
+      quantia_mensal,
+      quantia_mensal_cuidados,
+      tempo_sozinho,
+      frequencia_passeios,
+      devolveria_se_mudar,
+      destino_animal,
+      comodo_dia,
+      local_dormir,
+      tempo_preso,
+      reacao_bagunca,
+      providencia_crescimento,
+      responsavel_viagem,
+      pretende_mudar_5_anos,
+      reacao_choro_latido,
+      vacinas_que_dara,
+      marca_racao_adotado,
+      criterios_alimentacao,
+      filhotes_ou_castrar,
+      preparado_responsabilidade,
+      disposto_adaptacao,
+      clinica_veterinario,
+      reacao_doenca,
+      conhece_doencas,
+      frequencia_remedio_verme,
+      frequencia_veterinario,
+      petId,
+      pet_id,
     } = req.body;
 
-    // Verificar se já existe candidato com mesmo email
-    const candidatoExistente = await prisma.adoptionCandidate.findFirst({
-      where: { email },
-    });
+    const petIdValue = petId || pet_id || req.body.Pet_ID;
 
-    if (candidatoExistente) {
-      return res.status(409).json({
+    const parseDate = (value) => {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+
+      if (typeof value === "string") {
+        const normalized = value.trim();
+
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(normalized)) {
+          const [dia, mes, ano] = normalized.split("/").map(Number);
+          const parsed = new Date(ano, mes - 1, dia);
+          if (!isNaN(parsed)) return parsed;
+        }
+
+        const isoDate = new Date(normalized);
+        if (!isNaN(isoDate)) return isoDate;
+      }
+
+      return null;
+    };
+
+    const normalizeToText = (value) => {
+      if (Array.isArray(value)) return value.join(', ');
+      return value || null;
+    };
+
+    const dataNascimento = parseDate(data_nascimento || dt_nacimento);
+
+    if ((data_nascimento || dt_nacimento) && !dataNascimento) {
+      return res.status(400).json({
         success: false,
         error: {
-          message: "Já existe um cadastro com este email",
+          message: "Data de nascimento em formato invalido. Utilize DD/MM/AAAA.",
         },
       });
     }
 
-    // Criar candidato
+    if (cpf) {
+      const candidatoExistente = await prisma.adoptionCandidate.findUnique({
+        where: { cpf },
+      });
+
+      if (candidatoExistente) {
+        return res.status(409).json({
+          success: false,
+          error: {
+            message: "Ja existe um cadastro com este CPF",
+          },
+        });
+      }
+    }
+
     const novoCandidato = await prisma.adoptionCandidate.create({
       data: {
         nome,
-        email,
-        telefone,
+        cpf,
         endereco,
-        tipo_moradia,
-        tempo_disponivel,
-        experiencia_pets,
-        motivacao,
+        celular_01,
+        celular_02,
+        data_nascimento: dataNascimento,
+        perfil_social: redes_sociais,
+        profissao,
+        mora_em,
+        tipo_residencia: residencia_tipo,
+        proprietario_aceita_animais: proprietarios_aceitam,
+        normas_condominio_animais,
+        tipo_portao,
+        possui_na_residencia: normalizeToText(residencia_possui),
+        tipo_quintal_varanda: normalizeToText(area_tipo),
+        reside_com_quantas_pessoas,
+        todos_aceitam_adocao: cientes_adocao,
+        responsavel_financeiro,
+        reacao_mordida_arranho,
+        possui_veiculo,
+        moradores_trabalham: profissao_moradores,
+        alguem_alergico,
+        tem_criancas,
+        como_levara_veterinario: alguem_dirige,
+        ja_teve_tem_animais,
+        motivo_perda_animais: normalizeToText(motivo_perda_animais),
+        vacinados_quais,
+        marca_racao,
+        castrados_motivo,
+        teve_filhotes,
+        passeios,
+        quantia_mensal_cuidados: quantia_mensal_cuidados || quantia_mensal,
+        tempo_sozinho,
+        frequencia_passeios,
+        devolveria_se_mudar,
+        finalidade_animal: destino_animal,
+        comodo_dia,
+        local_dormir,
+        tempo_preso,
+        reacao_bagunca,
+        providencia_crescimento,
+        responsavel_viagem,
+        pretende_mudar_5_anos,
+        reacao_choro_latido,
+        vacinas_que_dara,
+        marca_racao_adotado,
+        criterios_alimentacao,
+        filhotes_ou_castrar,
+        preparado_responsabilidade,
+        disposto_adaptacao,
+        clinica_veterinario,
+        reacao_doenca,
+        conhece_doencas,
+        frequencia_remedio_verme,
+        frequencia_veterinario,
+        CEP: cep,
+        Cidade: cidade,
+        Pet_ID: petIdValue,
+        como_organizaria_mudanca: devolveria_se_mudar,
 
-        // Se especificou interesse em pet específico, criar o interesse
-        ...(pet_id && {
+        ...(petIdValue && {
           cidade: {
             create: {
-              pet_id: pet_id,
+              pet_id: petIdValue,
               status: "interessado",
             },
           },
@@ -236,7 +375,7 @@ export const createCandidato = async (req, res) => {
       success: true,
       data: novoCandidato,
       message:
-        "Formulário de adoção enviado com sucesso! Entraremos em contato em breve.",
+        "Formulario de adocao enviado com sucesso! Entraremos em contato em breve.",
     });
   } catch (error) {
     console.error("Erro ao criar candidato:", error);

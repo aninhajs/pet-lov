@@ -184,52 +184,72 @@ export const validateUpdateStatus = [
 export const validateCreateCandidato = [
   body("nome")
     .notEmpty()
-    .withMessage("Nome é obrigatório")
-    .isLength({ min: 2, max: 100 })
-    .withMessage("Nome deve ter entre 2 e 100 caracteres"),
+    .withMessage("Nome ? obrigat?rio")
+    .isLength({ min: 2, max: 120 })
+    .withMessage("Nome deve ter entre 2 e 120 caracteres"),
 
-  body("email").isEmail().withMessage("Email inválido").normalizeEmail(),
-
-  body("telefone")
+  body("cpf")
     .notEmpty()
-    .withMessage("Telefone é obrigatório")
-    .isMobilePhone("pt-BR")
-    .withMessage("Telefone deve estar no formato brasileiro"),
+    .withMessage("CPF ? obrigat?rio")
+    .isString()
+    .withMessage("CPF deve ser uma string"),
+
+  body("celular_01")
+    .notEmpty()
+    .withMessage("Celular principal ? obrigat?rio")
+    .isString()
+    .withMessage("Celular deve ser uma string"),
 
   body("endereco")
     .notEmpty()
-    .withMessage("Endereço é obrigatório")
-    .isLength({ min: 10, max: 200 })
-    .withMessage("Endereço deve ter entre 10 e 200 caracteres"),
+    .withMessage("Endere?o ? obrigat?rio")
+    .isLength({ min: 1, max: 200 })
+    .withMessage("Endere?o deve ter entre 1 e 200 caracteres"),
 
-  body("tipo_moradia")
-    .notEmpty()
-    .withMessage("Tipo de moradia é obrigatório")
-    .isLength({ max: 100 })
-    .withMessage("Tipo de moradia deve ter no máximo 100 caracteres"),
+  body("cidade")
+    .optional()
+    .isString()
+    .withMessage("Cidade deve ser uma string"),
 
-  body("tempo_disponivel")
-    .notEmpty()
-    .withMessage("Tempo disponível é obrigatório")
-    .isLength({ max: 100 })
-    .withMessage("Tempo disponível deve ter no máximo 100 caracteres"),
+  body("cep")
+    .optional()
+    .isString()
+    .withMessage("CEP deve ser uma string"),
 
-  body("experiencia_pets")
-    .notEmpty()
-    .withMessage("Experiência com pets é obrigatória")
-    .isLength({ min: 5, max: 300 })
-    .withMessage("Experiência deve ter entre 5 e 300 caracteres"),
+  body("data_nascimento")
+    .optional()
+    .isString()
+    .withMessage("Data de nascimento deve ser uma string"),
 
-  body("motivacao")
-    .notEmpty()
-    .withMessage("Motivação é obrigatória")
-    .isLength({ min: 10, max: 500 })
-    .withMessage("Motivação deve ter entre 10 e 500 caracteres"),
+  body("dt_nacimento")
+    .optional()
+    .isString()
+    .withMessage("Data de nascimento deve ser uma string"),
+
+  body("residencia_possui")
+    .optional()
+    .isArray()
+    .withMessage("residencia_possui deve ser uma lista"),
+
+  body("area_tipo")
+    .optional()
+    .isArray()
+    .withMessage("area_tipo deve ser uma lista"),
+
+  body("motivo_perda_animais")
+    .optional()
+    .isArray()
+    .withMessage("motivo_perda_animais deve ser uma lista"),
 
   body("pet_id")
     .optional()
     .isString()
-    .withMessage("ID do pet deve ser uma string válida"),
+    .withMessage("ID do pet deve ser uma string v?lida"),
+
+  body("petId")
+    .optional()
+    .isString()
+    .withMessage("ID do pet deve ser uma string v?lida"),
 ];
 
 // Validação para atualizar status do candidato
