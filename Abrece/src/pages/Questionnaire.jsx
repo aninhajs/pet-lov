@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -10,18 +10,12 @@ const sections = [
     accent: "sky",
     items: [
       { field: "nome", label: "Nome completo", type: "text", required: true },
-      { field: "idade", label: "Idade", type: "text" },
-      {
-        field: "endereco",
-        label: "Endereço completo",
-        type: "text",
-        required: true,
-        fullWidth: true,
-      },
+      { field: "endereco", label: "Endereço completo", type: "text", required: true, fullWidth: true },
       { field: "bairro", label: "Bairro", type: "text" },
       { field: "cep", label: "CEP", type: "text" },
       { field: "celular_01", label: "Celular 01", type: "text", required: true },
       { field: "celular_02", label: "Celular 02", type: "text" },
+      { field: "idade", label: "Idade", type: "text" },
       { field: "profissao", label: "Profissão", type: "text" },
       { field: "instagram", label: "Instagram", type: "text" },
       { field: "facebook", label: "Facebook", type: "text" },
@@ -46,19 +40,20 @@ const sections = [
       },
       {
         field: "proprietarios_aceitam",
-        label: "Se alugada, os proprietários aceitam animais?",
+        label: "Se alugada os proprietários aceitam animais?",
         type: "text",
         fullWidth: true,
       },
       {
         field: "normas_condominio_animais",
-        label: "Normas do condomínio sobre animais",
+        label:
+          "Em caso de residir em condomínio, quais são as normas a respeito da criação de animais?",
         type: "text",
         fullWidth: true,
       },
       {
         field: "tipo_portao",
-        label: "Portão com acesso à rua",
+        label: "O portão da sua residência que dá acesso à rua, é:",
         type: "radio",
         options: [
           "Gradeado",
@@ -66,13 +61,13 @@ const sections = [
           "Totalmente fechado",
           "Telado",
           "Não tem portão",
-          "Outro",
+          "Outro:",
         ],
         fullWidth: true,
       },
       {
         field: "residencia_possui",
-        label: "Assinale o que sua residência possui",
+        label: "Assinale as opções que sua residência possui:",
         type: "checkbox",
         options: [
           "Quintal",
@@ -81,13 +76,13 @@ const sections = [
           "Muro com mais de 2 metros",
           "Muro com 1 metro",
           "Cercada",
-          "Janelas teladas",
+          "Tem as janelas teladas",
         ],
         fullWidth: true,
       },
       {
         field: "area_tipo",
-        label: "Caso tenha quintal/área/varanda, elas são",
+        label: "Em caso de haver quintal/área/varanda, elas são:",
         type: "checkbox",
         options: [
           "Gramado(a)",
@@ -103,7 +98,7 @@ const sections = [
   },
   {
     id: "moradores",
-    title: "Moradores da casa",
+    title: "Informações sobre os moradores da casa",
     accent: "green",
     items: [
       {
@@ -121,91 +116,91 @@ const sections = [
       {
         field: "reacao_mordida_arranho",
         label:
-          "Se o animal mordesse/arranhasse alguém, qual seria a reação?",
+          "Se o animal mordesse/arranhasse você/seu filho/outro membro da família, como seria a reação?",
         type: "textarea",
       },
       {
         field: "possui_veiculo",
         label:
-          "Possui veículo para transporte? Se não, como levará ao veterinário?",
+          "Possui veículo para o transporte do animal? Caso sim, qual? Caso não, como levará o animal para o veterinário?",
         type: "textarea",
       },
       {
         field: "trabalha",
-        label: "Você trabalha? Qual profissão/emprego?",
+        label: "Você trabalha no momento? Qual sua profissão/emprego?",
         type: "text",
       },
       {
         field: "profissao_moradores",
-        label: "As pessoas que moram com você trabalham? Profissões?",
+        label: "As pessoas que moram com você trabalham? Qual a profissão delas?",
         type: "text",
       },
       {
         field: "alguem_alergico",
-        label: "Algum morador é alérgico?",
+        label: "Algum morador da residência é alérgico?",
         type: "text",
       },
       {
         field: "tem_criancas",
-        label: "Tem crianças em casa? Qual a idade?",
+        label: "Tem crianças em casa? Caso tenha, qual a idade?",
         type: "text",
       },
       {
         field: "alguem_dirige",
         label:
-          "Alguém dirige e poderia levar o animal imediatamente ao veterinário?",
+          "Alguém da casa dirige? Teria como levar o animalzinho imediatamente ao veterinário em caso de acidentes?",
         type: "text",
       },
     ],
   },
-  //A partir daqui as perguntas NÃO são obrigatórias!!!
+  // A partir daqui as perguntas NÃO são obrigatórias!
   {
     id: "animais",
-    title: "Animais atuais ou anteriores",
+    title: "Informações quanto aos outros animais da casa/animais que criou no passado",
     accent: "purple",
     items: [
       {
         field: "ja_teve_tem_animais",
-        label: "Já teve/tem outros animais? Quantos, espécie e idade.",
+        label: "Já teve/tem outros animais? Quantos, qual a espécie, e idade.",
         type: "textarea",
         fullWidth: true,
       },
       {
         field: "motivo_perda_animais",
-        label: "O que houve com os antigos animais?",
+        label: "O que houve com os seus antigos animais?",
         type: "checkbox",
         options: [
           "Faleceram de velhice",
-          "Faleceram por doença",
+          "Faleceram por conta de uma doença. Qual?:",
           "Se perderam/fugiram",
           "Morreu atropelado/envenenado",
-          "Doado para alguém de confiança",
-          "Doado para um estranho",
-          "Vendido",
-          "Outro",
+          "Doei para alguém de confiança",
+          "Doei para um estranho",
+          "Vendi",
+          "Outro:",
         ],
         fullWidth: true,
       },
       {
         field: "vacinados_quais",
-        label: "São/eram vacinados? Quais?",
+        label: "São/eram vacinados? Quais vacinas?",
         type: "textarea",
       },
-      { field: "marca_racao", label: "Marca da ração atual/anterior", type: "text" },
+      { field: "marca_racao", label: "Qual a marca da ração eles comem/comiam?", type: "text" },
       {
         field: "castrados_motivo",
-        label: "São/eram castrados? Caso não, por quê?",
+        label: "Os seus animais são/eram castrados? Caso não, por quê?",
         type: "textarea",
       },
       {
         field: "teve_filhotes",
         label:
-          "Já tiveram filhotes? Quantas vezes? O que fez com os filhotes?",
+          "Seus animais já tiveram filhotes? Se sim, quantas vezes? O que você fez com os filhotes?",
         type: "textarea",
       },
     ],
   },
-  //Aqui elas já voltam a ser obrigatórias!!
+  // Aqui elas já voltam a ser obrigatórias!
   {
     id: "cuidados",
     title: "Cuidados com o futuro animalzinho",
@@ -213,19 +208,19 @@ const sections = [
     items: [
       {
         field: "passeios",
-        label: "Em relação aos passeios",
+        label: "Em relação aos passeios:",
         type: "radio",
         options: [
-          "Acesso livre à rua",
-          "Ensinar a passear sozinho e voltar",
-          "Passeios sem guia, apenas com presença",
-          "Passeios apenas com guia e com presença",
+          "Ele terá acesso livre à rua quando quiser sair",
+          "Ensinarei ele a passear na rua sozinho e depois voltar para casa",
+          "Só passeará na rua na minha presença, porém sem guia",
+          "Só passeará na rua na minha presença, e somente com a guia",
         ],
         fullWidth: true,
       },
       {
         field: "quantia_mensal",
-        label: "Quantia mensal disponível para cuidados",
+        label: "Qual a quantia mensal que poderá dispor aos cuidados dos animais mensalmente?",
         type: "radio",
         options: [
           "Menos que 50 reais",
@@ -244,25 +239,25 @@ const sections = [
       },
       {
         field: "frequencia_passeios",
-        label: "Quantas vezes por dia/semana poderá passear?",
+        label: "Conseguem passear com o animal quantas vezes ao dia/semana?",
         type: "text",
       },
       {
         field: "devolveria_se_mudar",
         label:
-          "Devolveria o animal caso precise mudar? Como se organizaria?",
+          "Devolveria o animal caso precise mudar de casa ou de cidade? Como faria para se organizar nessa situação?",
         type: "textarea",
       },
       {
         field: "destino_animal",
         label: "Para qual destino seria o animal?",
         type: "radio",
-        options: ["Guarda", "Companhia", "Presente", "Outros"],
+        options: ["Guarda", "Companhia", "Presente", "Outros:"],
         fullWidth: true,
       },
       {
         field: "comodo_dia",
-        label: "Em qual cômodo ficará durante o dia",
+        label: "Em qual cômodo da casa o animal ficará durante o dia:",
         type: "radio",
         options: [
           "Quintal/Área/Varanda",
@@ -275,12 +270,12 @@ const sections = [
       },
       {
         field: "local_dormir",
-        label: "Onde o animalzinho irá dormir",
+        label: "Onde o animalzinho irá dormir:",
         type: "radio",
         options: [
           "No chão do quintal/Área/Varanda",
-          "Na casinha/caminha externa",
-          "Na casinha/caminha interna",
+          "Na casinha/caminha na parte externa da casa",
+          "Na casinha/caminha na parte interna da casa",
           "No meu quarto/sala",
           "No canil",
           "Amarrado",
@@ -289,23 +284,24 @@ const sections = [
       },
       {
         field: "tempo_preso",
-        label: "O animal ficará amarrado/preso? Razões e tempo.",
+        label:
+          "O animal ficará amarrado/preso em algum lugar? Caso sim, por quais razões? Ele passaria quantas horas amarrado/preso?",
         type: "textarea",
       },
       {
         field: "reacao_bagunca",
         label:
-          "Se fizer bagunça ou destruir algo de valor, qual sua atitude?",
+          "Caso o animal faça bagunça ou destrua algo de valor, qual será sua atitude diante de tal ato?",
         type: "textarea",
       },
       {
         field: "providencia_crescimento",
-        label: "Caso o animal cresça mais que o esperado, o que fará?",
+        label: "Caso o animal cresça mais que o esperado, qual serão as providências:",
         type: "radio",
         options: [
-          "Doar para alguém com mais espaço",
-          "Deixar apenas no quintal",
-          "Levar para um sítio",
+          "Irá doar para alguém com espaço maior a oferecer",
+          "Irá deixar ele somente no quintal",
+          "Levar para algum sítio",
           "Devolver para a ONG",
           "Continuar com ele",
         ],
@@ -318,73 +314,72 @@ const sections = [
       },
       {
         field: "pretende_mudar_5_anos",
-        label: "Pretende se mudar em 5 anos? Como ficará o animal?",
+        label: "Pretende se mudar em um espaço de 5 anos? Caso sim, como ficará o animal?",
         type: "text",
       },
       {
         field: "reacao_choro_latido",
-        label: "O que fará se o animal chorar/latir/uivar?",
+        label: "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
         type: "textarea",
       },
     ],
   },
   {
     id: "veterinario",
-    title: "Cuidados veterinários e saúde",
+    title: "Cuidados veterinários que o animalzinho receberá",
     accent: "red",
     items: [
       {
         field: "vacinas_que_dara",
-        label: "Quais vacinas irá dar ao adotado?",
+        label: "Quais vacinas irá dar ao animal adotado?",
         type: "textarea",
       },
       {
         field: "marca_racao_adotado",
-        label: "Marca de ração para o adotado",
+        label: "Qual a marca de ração pretende dar ao adotado?",
         type: "text",
       },
       {
         field: "criterios_alimentacao",
-        label: "Critérios para escolha da alimentação",
+        label: "Quais são os seus critérios ao escolher essa alimentação?",
         type: "textarea",
       },
       {
         field: "filhotes_ou_castrar",
-        label: "Pretende ter filhotes ou castrar? O que pensa?",
+        label: "Pretende por o animalzinho para ter filhotes ou irá castrar? O que pensa a respeito?",
         type: "textarea",
       },
       {
         field: "preparado_responsabilidade",
-        label: "Está preparado para 10 a 15 anos de responsabilidade?",
+        label: "O seu adotado pode viver de 10 a 15 anos. Já pensou sobre essa responsabilidade e está preparado?",
         type: "text",
       },
       {
         field: "disposto_adaptacao",
         label:
-          "A adaptação pode levar 1 semana a 1 mês. Está disposto a aguardar?",
+          "A adaptação do animal pode levar de 1 semana a 1 mês, tanto com o ambiente como com os outros moradores da casa (contando outros animais também). Está disposto a esperar esse tempo com paciência?",
         type: "text",
       },
       {
         field: "clinica_veterinario",
         label:
-          "Clínica e veterinário (nome do estabelecimento, endereço e responsável)",
+          "Qual clínica e veterinário levará ou leva os seus animais? Por favor, coloque nome do estabelecimento, endereço e nome do veterinário responsável.",
         type: "textarea",
       },
       {
         field: "reacao_doenca",
         label:
-          "Se diagnosticado com Calazar/Cinomose/Parvovirose/Erliquiose, o que faria?",
+          "O que faria se o animalzinho fosse diagnosticado com as devidas doenças: Calazar/Cinomose/Parvovirose/Erliquiose:",
         type: "textarea",
       },
       {
         field: "conhece_doencas",
-        label:
-          "Conhece essas doenças? Sabe formas de precaução e tratamento?",
+        label: "Conhece essas doenças citadas acima? Sabe as formas de precaução e tratamento?",
         type: "textarea",
       },
       {
         field: "frequencia_remedio_verme",
-        label: "Frequência do remédio de verme/carrapato/pulga",
+        label: "Seus animais, tomam/tomavam/tomará o remédio de verme/carrapato/pulga com qual frequência?",
         type: "radio",
         options: [
           "Nunca tomaram",
@@ -392,13 +387,13 @@ const sections = [
           "A cada 6 meses",
           "A cada 3 meses",
           "Raramente",
-          "Só quando necessário",
+          "Só quando tem necessidade",
         ],
         fullWidth: true,
       },
       {
         field: "frequencia_veterinario",
-        label: "Frequência de visitas ao veterinário",
+        label: "Com qual frequência leva/levava/levará seus animais para o veterinário?",
         type: "radio",
         options: [
           "Nunca foram",
@@ -406,7 +401,7 @@ const sections = [
           "A cada 6 meses",
           "A cada 3 meses",
           "Raramente",
-          "Só quando necessário",
+          "Só quando tem necessidade",
         ],
         fullWidth: true,
       },
@@ -431,13 +426,18 @@ const Questionnaire = () => {
 
   const [formData, setFormData] = useState(initialFormData);
   const [submitted, setSubmitted] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const totalSections = sections.length;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setSubmitted(false);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxArray = (field, option) => {
+    setSubmitted(false);
     setFormData((prev) => {
       const current = prev[field] || [];
       const exists = current.includes(option);
@@ -450,95 +450,172 @@ const Questionnaire = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    // Integração com backend será adicionada na próxima etapa.
-    console.log("Formulário de adoção (pré-envio):", { petId, ...formData });
+  const isFieldMissing = (item) => {
+    if (!item.required) return false;
+    const value = formData[item.field];
+    if (Array.isArray(value)) return value.length === 0;
+    return !value || (typeof value === "string" && value.trim() === "");
   };
 
+  const isSectionValid = (sectionIndex) => {
+    const section = sections[sectionIndex];
+    return section.items.every((item) => !isFieldMissing(item));
+  };
+
+  const goToNextSection = () => {
+    setShowErrors(true);
+    if (!isSectionValid(currentSectionIndex)) return;
+
+    setShowErrors(false);
+    setCurrentSectionIndex((prev) => Math.min(prev + 1, totalSections - 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToPreviousSection = () => {
+    setShowErrors(false);
+    setCurrentSectionIndex((prev) => Math.max(prev - 1, 0));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowErrors(true);
+
+    const hasMissing = sections.some((_, index) => !isSectionValid(index));
+    if (hasMissing) return;
+
+    setSubmitted(true);
+    setShowErrors(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Integracao com backend sera adicionada na proxima etapa.
+    console.log("Formulário de adoção (pre-envio):", { petId, ...formData });
+  };
   const renderField = (item) => {
+    const showError = (showErrors || submitted) && isFieldMissing(item);
+
     if (item.type === "text") {
       return (
-        <input
-          type="text"
-          name={item.field}
-          value={formData[item.field]}
-          onChange={handleChange}
-          required={item.required}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
-        />
+        <div className="space-y-1">
+          <input
+            type="text"
+            name={item.field}
+            value={formData[item.field]}
+            onChange={handleChange}
+            required={item.required}
+            aria-required={item.required}
+            aria-invalid={showError}
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
+            }`}
+          />
+          {showError && (
+            <p className="text-xs text-red-600">Campo obrigatório.</p>
+          )}
+        </div>
       );
     }
 
     if (item.type === "textarea") {
       return (
-        <textarea
-          name={item.field}
-          value={formData[item.field]}
-          onChange={handleChange}
-          rows={2}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
-        />
+        <div className="space-y-1">
+          <textarea
+            name={item.field}
+            value={formData[item.field]}
+            onChange={handleChange}
+            rows={2}
+            required={item.required}
+            aria-required={item.required}
+            aria-invalid={showError}
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
+                ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
+            }`}
+          />
+          {showError && (
+            <p className="text-xs text-red-600">Campo obrigatório.</p>
+          )}
+        </div>
       );
     }
 
     if (item.type === "radio") {
       return (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {item.options.map((option) => (
-            <label
-              key={option}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${
-                formData[item.field] === option
-                  ? "border-sky-500 bg-sky-50 text-sky-800"
-                  : "border-gray-200 bg-white hover:border-sky-300"
-              }`}
-            >
-              <input
-                type="radio"
-                name={item.field}
-                value={option}
-                checked={formData[item.field] === option}
-                onChange={handleChange}
-                className="text-sky-600"
-              />
-              <span className="text-sm font-medium">{option}</span>
-            </label>
-          ))}
+        <div className="space-y-1">
+          <div
+            className={`grid gap-2 sm:grid-cols-2 ${
+              showError ? "ring-2 ring-red-200 rounded-lg" : ""
+            }`}
+          >
+            {item.options.map((option) => (
+              <label
+                key={option}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${
+                  formData[item.field] === option
+                    ? "border-sky-500 bg-sky-50 text-sky-800"
+                    : "border-gray-200 bg-white hover:border-sky-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name={item.field}
+                  value={option}
+                  checked={formData[item.field] === option}
+                  onChange={handleChange}
+                  required={item.required}
+                  aria-required={item.required}
+                  aria-invalid={showError}
+                  className="text-sky-600"
+                />
+                <span className="text-sm font-medium">{option}</span>
+              </label>
+            ))}
+          </div>
+          {showError && (
+            <p className="text-xs text-red-600">Campo obrigatório.</p>
+          )}
         </div>
       );
     }
 
     if (item.type === "checkbox") {
       return (
-        <div className="flex flex-wrap gap-2">
-          {item.options.map((option) => (
-            <label
-              key={option}
-              className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${
-                formData[item.field]?.includes(option)
-                  ? "bg-sky-600 text-white border-sky-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-sky-400"
-              }`}
-            >
-              <input
-                type="checkbox"
-                className="hidden"
-                checked={formData[item.field]?.includes(option)}
-                onChange={() => handleCheckboxArray(item.field, option)}
-              />
-              {option}
-            </label>
-          ))}
+        <div className="space-y-1">
+          <div
+            className={`flex flex-wrap gap-2 ${
+              showError ? "ring-2 ring-red-200 rounded-lg" : ""
+            }`}
+          >
+            {item.options.map((option) => (
+              <label
+                key={option}
+                className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${
+                  formData[item.field]?.includes(option)
+                    ? "bg-sky-600 text-white border-sky-600"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-sky-400"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={formData[item.field]?.includes(option)}
+                  onChange={() => handleCheckboxArray(item.field, option)}
+                />
+                {option}
+              </label>
+            ))}
+          </div>
+          {showError && (
+            <p className="text-xs text-red-600">Campo obrigatório.</p>
+          )}
         </div>
       );
     }
 
     return null;
   };
-
   const accentBorder = (accent) => {
     const map = {
       sky: "border-sky-100",
@@ -563,6 +640,8 @@ const Questionnaire = () => {
     return map[accent] || "text-gray-600";
   };
 
+  const currentSection = sections[currentSectionIndex];
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
       <Header />
@@ -583,7 +662,7 @@ const Questionnaire = () => {
               </p>
               {petName && (
                 <p className="mt-2 text-sm font-semibold text-yellow-200">
-                  Pet de interesse: {petName} (ID: {petId})
+                  Pet de interesse: {petName}
                 </p>
               )}
             </div>
@@ -599,7 +678,7 @@ const Questionnaire = () => {
 
         {submitted && (
           <div className="mb-6 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-green-800 shadow">
-            Dados prontos! Integração com o backend será adicionada em seguida.
+            Dados prontos! Em breve entraremos em contato com você.
           </div>
         )}
 
@@ -608,53 +687,92 @@ const Questionnaire = () => {
           className="space-y-10"
           aria-label="Formulário de adoção"
         >
-          {sections.map((section) => (
-            <section
-              key={section.id}
-              className={`bg-white rounded-2xl shadow-lg border ${accentBorder(
-                section.accent
-              )} p-6`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className={`text-xs font-semibold ${accentPill(section.accent)}`}>
-                    Seção
-                  </p>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {section.title}
-                  </h2>
-                </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-semibold text-sky-900">
+                Etapa {currentSectionIndex + 1} de {totalSections}
+              </p>
+              <div className="h-2 w-28 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-sky-500 transition-all duration-300"
+                  style={{
+                    width: `${((currentSectionIndex + 1) / totalSections) * 100}%`,
+                  }}
+                />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.items.map((item) => (
-                  <div
-                    key={item.field}
-                    className={item.fullWidth ? "md:col-span-2" : ""}
-                  >
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {item.label}
-                    </label>
-                    {renderField(item)}
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
+            </div>
+          </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-end pb-8">
-            <button
-              type="button"
-              onClick={() => setFormData(initialFormData)}
-              className="px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold shadow hover:shadow-md transition"
-            >
-              Limpar respostas
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:from-sky-600 hover:to-sky-700 transition"
-            >
-              Salvar respostas (frontend)
-            </button>
+          <section
+            key={currentSection.id}
+            className={`bg-white rounded-2xl shadow-lg border ${accentBorder(
+              currentSection.accent
+            )} p-6 transition-all duration-300`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {currentSection.title}
+                </h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentSection.items.map((item) => (
+                <div
+                  key={item.field}
+                  className={item.fullWidth ? "md:col-span-2" : ""}
+                >
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {item.label}
+                    {item.required && <span className="text-red-600 ml-1">*</span>}
+                  </label>
+                  {renderField(item)}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-between pb-8">
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData(initialFormData);
+                  setSubmitted(false);
+                  setShowErrors(false);
+                  setCurrentSectionIndex(0);
+                }}
+                className="px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold shadow hover:shadow-md transition"
+              >
+                Limpar respostas
+              </button>
+              <button
+                type="button"
+                onClick={goToPreviousSection}
+                disabled={currentSectionIndex === 0}
+                className="px-6 py-3 rounded-lg border border-gray-300 bg-white text-gray-700 font-semibold shadow hover:shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Voltar
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-3 justify-end">
+              {currentSectionIndex < totalSections - 1 ? (
+                <button
+                  type="button"
+                  onClick={goToNextSection}
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:from-sky-600 hover:to-sky-700 transition"
+                >
+                  Avançar
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:from-sky-600 hover:to-sky-700 transition"
+                >
+                  Salvar respostas
+                </button>
+              )}
+            </div>
           </div>
         </form>
       </main>
