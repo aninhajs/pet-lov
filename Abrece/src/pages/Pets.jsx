@@ -975,9 +975,9 @@ const Pets = () => {
                 <div className="text-center space-y-3">
                   {selectedPet.status === "disponivel" ? (
                     <Link
-                      to="https://forms.gle/Vs2Arsu5bwi5h3wA9"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      to={`/questionnaire?petId=${selectedPet.id}&petName=${encodeURIComponent(
+                        selectedPet.nome
+                      )}`}
                       className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                       onClick={closeModal}
                     >

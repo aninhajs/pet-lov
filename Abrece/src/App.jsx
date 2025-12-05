@@ -9,6 +9,7 @@ import AdminAdoptants from "./pages/(protegido)/AdminAdoptants";
 import CadastrarPet from "./pages/(protegido)/CadastrarPet";
 import GerenciarPets from "./pages/(protegido)/GerenciarPets";
 import CartaoVacina from "./pages/(protegido)/CartaoVacina";
+import Questionnaire from "./pages/Questionnaire";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/pets" element={<Pets />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/questionnaire" element={<Questionnaire />} />
 
           {/* Rotas Administrativas (Protegidas) */}
           <Route

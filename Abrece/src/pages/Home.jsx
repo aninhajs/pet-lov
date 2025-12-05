@@ -23,7 +23,7 @@ import Footer from "../components/Footer";
 import { PetServices } from "../services/PetServices";
 
 // 🔗 Centralize aqui o link do seu Google Forms
-const GOOGLE_FORM_URL = "https://forms.gle/Vs2Arsu5bwi5h3wA9";
+const GOOGLE_FORM_URL = "/questionnaire";
 
 // Função para otimizar URLs de imagem
 const optimizeImageUrl = (url, width = 400, height = 300) => {
@@ -142,14 +142,12 @@ const Home = () => {
               >
                 Ver Pets
               </Link>
-              <a
-                href={GOOGLE_FORM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to={GOOGLE_FORM_URL}
                 className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 Adotar Pet
-              </a>
+              </Link>
             </div>
           </div>
         </nav>
@@ -905,15 +903,15 @@ const Home = () => {
 
               {/* Botão de adoção (EXTERNO) */}
               <div className="text-center">
-                <a
-                  href={GOOGLE_FORM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to={`/questionnaire?petId=${selectedPet.id}&petName=${encodeURIComponent(
+                    selectedPet.nome
+                  )}`}
                   className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                   onClick={closeModal}
                 >
                   💖 Quero Adotar {selectedPet.nome}
-                </a>
+                </Link>
               </div>
             </div>
           </div>
