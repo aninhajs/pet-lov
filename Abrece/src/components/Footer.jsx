@@ -5,10 +5,9 @@ import {
   Phone,
   Mail,
   Instagram,
-  MessageCircle,
   Heart,
 } from "lucide-react";
-import { FaTiktok } from "react-icons/fa6";
+import { FaTiktok, FaWhatsapp } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -93,7 +92,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="flex items-center text-gray-300 hover:text-white transition-colors group"
               >
-                <MessageCircle className="w-5 h-5 mr-3 text-yellow-400 group-hover:text-yellow-300" />
+                <FaWhatsapp className="w-5 h-5 mr-3 text-yellow-400 group-hover:text-yellow-300" />
                 WhatsApp
               </a>
               <a
