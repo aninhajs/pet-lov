@@ -365,7 +365,7 @@ const sections = [
         field: "reacao_choro_latido",
         label: "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
         type: "textarea",
-        required: true, 
+        required: true,
         placeholder: " ",
       },
     ],
@@ -647,7 +647,7 @@ const Questionnaire = () => {
       setCurrentSectionIndex(totalSections - 1);
       setSubmitMessage(
         response?.message ||
-          "A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs, daremos o feedback!"
+        "A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs, daremos o feedback!"
       );
     } catch (error) {
       const message =
@@ -673,11 +673,10 @@ const Questionnaire = () => {
             required={item.required}
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
-              showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-            }`}
+              }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -696,21 +695,20 @@ const Questionnaire = () => {
               item.field === "cpf"
                 ? formatCPF(formData[item.field])
                 : item.field === "cep"
-                ? formatCEP(formData[item.field])
-                : item.field === "celular_01" || item.field === "celular_02"
-                ? formatPhone(formData[item.field])
-                : formData[item.field]
+                  ? formatCEP(formData[item.field])
+                  : item.field === "celular_01" || item.field === "celular_02"
+                    ? formatPhone(formData[item.field])
+                    : formData[item.field]
             }
             onChange={handleChange}
             required={item.required}
             placeholder={item.placeholder || `Digite ${item.label.toLowerCase()}`}
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
-              showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-            }`}
+              }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -730,11 +728,10 @@ const Questionnaire = () => {
             required={item.required}
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
-              showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-            }`}
+              }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -747,18 +744,16 @@ const Questionnaire = () => {
       return (
         <div className="space-y-1">
           <div
-            className={`grid gap-2 sm:grid-cols-2 ${
-              showError ? "ring-2 ring-red-200 rounded-lg" : ""
-            }`}
+            className={`grid gap-2 sm:grid-cols-2 ${showError ? "ring-2 ring-red-200 rounded-lg" : ""
+              }`}
           >
             {item.options.map((option) => (
               <label
                 key={option}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${
-                  formData[item.field] === option
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${formData[item.field] === option
                     ? "border-sky-500 bg-sky-50 text-sky-800"
                     : "border-gray-200 bg-white hover:border-sky-300"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -786,18 +781,16 @@ const Questionnaire = () => {
       return (
         <div className="space-y-1">
           <div
-            className={`flex flex-wrap gap-2 ${
-              showError ? "ring-2 ring-red-200 rounded-lg" : ""
-            }`}
+            className={`flex flex-wrap gap-2 ${showError ? "ring-2 ring-red-200 rounded-lg" : ""
+              }`}
           >
             {item.options.map((option) => (
               <label
                 key={option}
-                className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${
-                  formData[item.field]?.includes(option)
+                className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${formData[item.field]?.includes(option)
                     ? "bg-sky-600 text-white border-sky-600"
                     : "bg-white text-gray-700 border-gray-300 hover:border-sky-400"
-                }`}
+                  }`}
               >
                 <input
                   type="checkbox"
@@ -943,6 +936,8 @@ const Questionnaire = () => {
               >
                 Limpar respostas
               </button>
+            </div>
+            <div className="flex flex-wrap gap-5 justify-end">
               <button
                 type="button"
                 onClick={goToPreviousSection}
@@ -951,8 +946,6 @@ const Questionnaire = () => {
               >
                 Voltar
               </button>
-            </div>
-            <div className="flex flex-wrap gap-3 justify-end">
               {currentSectionIndex < totalSections - 1 ? (
                 <button
                   type="button"
