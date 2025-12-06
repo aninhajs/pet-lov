@@ -90,6 +90,8 @@ const adoptionCandidateQuestions = [
 ];
 import { Link } from "react-router-dom";
 import { AdoptantServices } from "../../services/AdoptantServices";
+import { sections } from "../Questionnaire";
+import { useMemo } from "react";
 
 const AdminAdoptants = () => {
   const [selectedStatus, setSelectedStatus] = useState("todos");
@@ -100,6 +102,33 @@ const AdminAdoptants = () => {
   const [detalhesCandidato, setDetalhesCandidato] = useState(null);
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
+
+  // Controle de seções abertas no modal de detalhes
+  const [openSections, setOpenSections] = useState(() => {
+    const map = {};
+    (sections || []).forEach((s) => {
+      map[s.id] = false;
+    });
+    return map;
+  });
+
+  const toggleSection = (id) => {
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const formatDisplayValue = (field, val) => {
+    if (!val && val !== 0) return "-";
+    if (field === "dt_nacimento" || field === "data_nascimento") {
+      try {
+        return val ? new Date(val).toLocaleDateString("pt-BR") : "-";
+      } catch {
+        return val;
+      }
+    }
+    if (Array.isArray(val)) return val.join(", ");
+    if (typeof val === "object" && val !== null) return JSON.stringify(val);
+    return val;
+  };
 
   const [historicoIndex, setHistoricoIndex] = useState(0);
 
@@ -356,7 +385,7 @@ const AdminAdoptants = () => {
                             </span>
                           )}
                         </div>
-                        <div className="mt-1 text-sm text-gray-600">
+                        <div className="mt-1 text-base text-gray-700">
                           <p>
                             {candidato.email} • Tel:{" "}
                             {candidato.telefone || candidato.celular_01}
@@ -501,9 +530,10 @@ const AdminAdoptants = () => {
         {/* Modal de detalhes */}
         {candidatoSelecionado && (
           <div>
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-sky-200">
-                <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
+            <div onClick={() => setCandidatoSelecionado(null)} className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-sky-200 overflow-hidden">
+                <div className="max-h-[90vh] overflow-y-auto">
+                  <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-sky-700">
                     Detalhes do Candidato
                   </h2>
@@ -534,56 +564,66 @@ const AdminAdoptants = () => {
                         <h3 className="font-medium text-gray-900 mb-2">
                           Informações Pessoais
                         </h3>
-                        <div className="bg-gray-50 p-3 rounded">
-                          <p>
-                            <strong>Nome:</strong> {detalhesCandidato.nome}
-                          </p>
-                          <p>
-                            <strong>Email:</strong> {detalhesCandidato.email}
-                          </p>
-                          <p>
-                            <strong>Telefone:</strong>{" "}
-                            {detalhesCandidato.telefone ||
-                              detalhesCandidato.celular_01}
-                          </p>
-                          <p>
-                            <strong>Endereço:</strong>{" "}
-                            {detalhesCandidato.endereco}
-                          </p>
+                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 text-sm">
+                          {(() => {
+                            const adotanteSection = (sections || []).find(
+                              (s) => s.id === "adotante"
+                            );
+                            if (!adotanteSection) {
+                              return (
+                                <div>
+                                  <p>
+                                    <strong>Nome:</strong> {detalhesCandidato.nome}
+                                  </p>
+                                  <p>
+                                    <strong>Email:</strong> {detalhesCandidato.email}
+                                  </p>
+                                </div>
+                              );
+                            }
+
+                            return adotanteSection.items.map((item) => {
+                              const val = detalhesCandidato?.[item.field];
+                              return (
+                                  <div key={item.field} className="flex flex-col">
+                                    <span className="text-base text-gray-800 font-semibold">{item.label}</span>
+                                    <span className="text-base text-gray-900">{formatDisplayValue(item.field, val)}</span>
+                                  </div>
+                                );
+                            });
+                          })()}
                         </div>
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900 mt-4 mb-2">
                           Respostas do Formulário
                         </h3>
-                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto text-xs md:text-sm">
-                          {adoptionCandidateQuestions.map(
-                            ({ field, label }) => {
-                              const valor = detalhesCandidato[field];
-                              if (
-                                Array.isArray(valor) ||
-                                (typeof valor === "object" && valor !== null)
-                              ) {
-                                return null;
-                              }
-                              return (
-                                <p
-                                  key={field}
-                                  style={{ whiteSpace: "pre-line" }}
-                                >
-                                  <strong>{label}:</strong>{" "}
-                                  {field === "data_nascimento"
-                                    ? valor
-                                      ? new Date(valor).toLocaleDateString(
-                                          "pt-BR"
-                                        )
-                                      : "-"
-                                    : valor || "-"}
-                                  <br />
-                                </p>
-                              );
-                            }
-                          )}
+                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-4 text-base">
+                          {(sections || []).filter(s => s.id !== 'adotante').map((section) => (
+                            <div key={section.id} className="border rounded-lg overflow-hidden">
+                              <button
+                                type="button"
+                                onClick={() => toggleSection(section.id)}
+                                className="w-full text-left px-4 py-3 bg-white flex items-center justify-between hover:bg-gray-50"
+                              >
+                                <span className="font-medium text-gray-800">{section.title}</span>
+                                <span className="text-gray-500">{openSections[section.id] ? '−' : '+'}</span>
+                              </button>
+                              {openSections[section.id] && (
+                                <div className="px-4 py-3 bg-gray-50">
+                                  {section.items.map((item) => {
+                                    const val = detalhesCandidato?.[item.field];
+                                    return (
+                                      <div key={item.field} className="mb-2" style={{ whiteSpace: 'pre-line' }}>
+                                        <div className="text-base text-gray-800 font-semibold">{item.label}</div>
+                                        <div className="text-base text-gray-900">{formatDisplayValue(item.field, val)}</div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
@@ -723,6 +763,7 @@ const AdminAdoptants = () => {
                       Não foi possível carregar os detalhes do candidato.
                     </div>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -758,7 +799,7 @@ const AdminAdoptants = () => {
                     >
                       &#8592;
                     </button>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-base text-gray-700">
                       {historicoIndex + 1} de{" "}
                       {Array.isArray(candidatoSelecionado.cidade)
                         ? candidatoSelecionado.cidade.length
