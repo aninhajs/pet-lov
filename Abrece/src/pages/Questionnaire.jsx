@@ -14,7 +14,7 @@ const sections = [
       { field: "cpf", label: "CPF", type: "text", required: true, placeholder: "000.000.000-00" },
       { field: "endereco", label: "Rua e Bairro", type: "text", required: true, fullWidth: true },
       { field: "cidade", label: "Cidade", type: "text", required: true, placeholder: "Fortaleza-CE" },
-      { field: "cep", label: "CEP", type: "text", required: true, placeholder: "12345-00" },
+      { field: "cep", label: "CEP", type: "text", required: true, placeholder: "12345-000" },
       { field: "celular_01", label: "Celular 01", type: "text", required: true, placeholder: "(00) 9 0000-0000" },
       { field: "celular_02", label: "Celular 02", type: "text", placeholder: "(00) 9 0000-0000" },
       { field: "dt_nacimento", label: "Data de Nascimento", required: true, type: "date", placeholder: "DD/MM/AAAA" },
@@ -502,13 +502,61 @@ const Questionnaire = () => {
     () => ["cpf", "cep", "celular_01", "celular_02"],
     []
   );
+  // Funções para formatar para exibição (mantemos apenas dígitos no state)
+  const formatCPF = (input) => {
+    const digits = (input || "").replace(/\D/g, "").slice(0, 11);
+    if (!digits) return "";
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9)
+      return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+  };
 
+  const formatCEP = (input) => {
+    const digits = (input || "").replace(/\D/g, "").slice(0, 8);
+    if (!digits) return "";
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const formatPhone = (input) => {
+    const digits = (input || "").replace(/\D/g, "").slice(0, 11);
+    if (!digits) return "";
+    const area = digits.slice(0, 2);
+
+    // Progressivo enquanto o usuário digita
+    if (digits.length <= 2) return `(${area}`;
+    if (digits.length === 3) return `(${area}) ${digits.slice(2)}`; // mostra o '9' assim que digitado
+    if (digits.length > 3 && digits.length <= 6)
+      return `(${area}) ${digits.slice(2, 3)} ${digits.slice(3)}`; // (xx) 9 xxx...
+
+    // 10 dígitos (provável fixo): (xx) xxxx-xxxx
+    if (digits.length === 10)
+      return `(${area}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+
+    // 11 dígitos (celular): (xx) 9 xxxx-xxxx
+    return `(${area}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+  };
+
+  // Armazenamos somente dígitos no estado. A máscara é aplicada apenas na UI.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSubmitted(false);
-    const nextValue = numericFields.includes(name)
-      ? value.replace(/\D/g, "")
-      : value;
+
+    let nextValue;
+    if (name === "cpf") {
+      nextValue = value.replace(/\D/g, "").slice(0, 11); // cpf: 11 dígitos
+    } else if (name === "cep") {
+      nextValue = value.replace(/\D/g, "").slice(0, 8); // cep: 8 dígitos
+    } else if (name === "celular_01" || name === "celular_02") {
+      nextValue = value.replace(/\D/g, "").slice(0, 11); // celular: até 11 dígitos
+    } else if (numericFields.includes(name)) {
+      nextValue = value.replace(/\D/g, "");
+    } else {
+      nextValue = value;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: nextValue }));
   };
 
@@ -644,7 +692,15 @@ const Questionnaire = () => {
           <input
             type="text"
             name={item.field}
-            value={formData[item.field]}
+            value={
+              item.field === "cpf"
+                ? formatCPF(formData[item.field])
+                : item.field === "cep"
+                ? formatCEP(formData[item.field])
+                : item.field === "celular_01" || item.field === "celular_02"
+                ? formatPhone(formData[item.field])
+                : formData[item.field]
+            }
             onChange={handleChange}
             required={item.required}
             placeholder={item.placeholder || `Digite ${item.label.toLowerCase()}`}
