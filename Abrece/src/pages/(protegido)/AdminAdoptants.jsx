@@ -102,9 +102,9 @@ const AdminAdoptants = () => {
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
-  const [approveContext, setApproveContext] = useState({ cpf: null, candidatoNome: "", petId: null, petName: "" });
+  const [approveContext, setApproveContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [rejectContext, setRejectContext] = useState({ cpf: null, candidatoNome: "", petId: null, petName: "" });
+  const [rejectContext, setRejectContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
   const [rejectReason, setRejectReason] = useState("");
 
   // Controle de seções abertas no modal de detalhes
@@ -133,6 +133,48 @@ const AdminAdoptants = () => {
     if (typeof val === "object" && val !== null) return JSON.stringify(val);
     return val;
   };
+
+  // Formatação específica para CPF, CEP e telefones
+  const formatCPF = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length !== 11) return raw;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
+  const formatCEP = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length !== 8) return raw;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const formatPhone = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length === 11) {
+      // (XX) 9XXXX-XXXX
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    }
+    if (digits.length === 10) {
+      // (XX) XXXX-XXXX
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return raw;
+  };
+
+  // Enhance formatDisplayValue to mask cpf/cep/phones when rendering details
+  const originalFormatDisplayValue = formatDisplayValue;
+  const formatDisplayValueMasked = (field, val) => {
+    if (!val && val !== 0) return "-";
+    const key = String(field || "").toLowerCase();
+    if (key === "cpf") return formatCPF(val);
+    if (key === "cep") return formatCEP(val);
+    if (key === "celular_01" || key === "celular_02" || key === "telefone" || key === "telefone_01") return formatPhone(val);
+    return originalFormatDisplayValue(field, val);
+  };
+
+  // replace usages in this component by binding the masked formatter name used below
 
   const [historicoIndex, setHistoricoIndex] = useState(0);
 
@@ -436,7 +478,7 @@ const AdminAdoptants = () => {
                         <div className="mt-1 text-base text-gray-700">
                           <p>
                             {candidato.email} • Tel:{" "}
-                            {candidato.telefone || candidato.celular_01}
+                            {formatDisplayValueMasked('telefone', candidato.telefone || candidato.celular_01)}
                           </p>
                           {ultimaTentativa && (
                             <p>
@@ -451,11 +493,8 @@ const AdminAdoptants = () => {
                             setLoadingDetalhes(true);
                             setCandidatoSelecionado(candidato);
                             try {
-                              if (candidato.cpf) {
-                                const res =
-                                  await AdoptantServices.getAdoptantById(
-                                    candidato.cpf
-                                  );
+                                if (candidato.id) {
+                                  const res = await AdoptantServices.getAdoptantById(candidato.id);
                                 const candidatoDetalhado = res.data || {};
                                 setDetalhesCandidato({
                                   ...candidatoDetalhado,
@@ -467,11 +506,9 @@ const AdminAdoptants = () => {
                                       : []
                                   ),
                                 });
-                              } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível exibir detalhes."
-                                );
-                                setDetalhesCandidato(null);
+                                } else {
+                                  alert("ID do candidato não encontrado. Não é possível exibir detalhes.");
+                                  setDetalhesCandidato(null);
                               }
                             } catch {
                               setDetalhesCandidato(null);
@@ -569,7 +606,7 @@ const AdminAdoptants = () => {
                               return (
                                   <div key={item.field} className="flex flex-col">
                                     <span className="text-base text-gray-800 font-semibold">{item.label}</span>
-                                    <span className="text-base text-gray-900">{formatDisplayValue(item.field, val)}</span>
+                                    <span className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</span>
                                   </div>
                                 );
                             });
@@ -598,7 +635,7 @@ const AdminAdoptants = () => {
                                     return (
                                       <div key={item.field} className="mb-2" style={{ whiteSpace: 'pre-line' }}>
                                         <div className="text-base text-gray-800 font-semibold">{item.label}</div>
-                                        <div className="text-base text-gray-900">{formatDisplayValue(item.field, val)}</div>
+                                        <div className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</div>
                                       </div>
                                     );
                                   })}
@@ -667,20 +704,17 @@ const AdminAdoptants = () => {
                         <div className="flex space-x-3 pt-4">
                           <button
                             onClick={() => {
-                              if (detalhesCandidato?.cpf) {
-                                const interesse =
-                                  detalhesCandidato?.interesses?.[0];
+                              if (detalhesCandidato?.id) {
+                                const interesse = detalhesCandidato?.interesses?.[0];
                                 setApproveContext({
-                                  cpf: detalhesCandidato.cpf,
+                                  id: detalhesCandidato.id,
                                   candidatoNome: detalhesCandidato.nome,
                                   petId: interesse?.pet_id,
                                   petName: interesse?.pet?.nome || "Pet",
                                 });
                                 setShowApproveConfirm(true);
                               } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível aprovar."
-                                );
+                                alert("ID do candidato não encontrado. Não é possível aprovar.");
                               }
                             }}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
@@ -689,11 +723,10 @@ const AdminAdoptants = () => {
                           </button>
                           <button
                             onClick={() => {
-                              if (detalhesCandidato?.cpf) {
-                                const interesse =
-                                  detalhesCandidato?.interesses?.[0];
+                              if (detalhesCandidato?.id) {
+                                const interesse = detalhesCandidato?.interesses?.[0];
                                 setRejectContext({
-                                  cpf: detalhesCandidato.cpf,
+                                  id: detalhesCandidato.id,
                                   candidatoNome: detalhesCandidato.nome,
                                   petId: interesse?.pet_id,
                                   petName: interesse?.pet?.nome || "Pet",
@@ -701,9 +734,7 @@ const AdminAdoptants = () => {
                                 setRejectReason("");
                                 setShowRejectConfirm(true);
                               } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível rejeitar."
-                                );
+                                alert("ID do candidato não encontrado. Não é possível rejeitar.");
                               }
                             }}
                             className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
@@ -884,7 +915,7 @@ const AdminAdoptants = () => {
                           alert('pet_id não encontrado. Não é possível aprovar.');
                           return;
                         }
-                        await updateStatus(approveContext.cpf, 'aprovado', '', approveContext.petId);
+                        await updateStatus(approveContext.id, 'aprovado', '', approveContext.petId);
                         setShowApproveConfirm(false);
                         setCandidatoSelecionado(null);
                         setDetalhesCandidato(null);
@@ -933,7 +964,7 @@ const AdminAdoptants = () => {
                           alert('pet_id não encontrado. Não é possível rejeitar.');
                           return;
                         }
-                        await updateStatus(rejectContext.cpf, 'rejeitado', rejectReason || '', rejectContext.petId);
+                        await updateStatus(rejectContext.id, 'rejeitado', rejectReason || '', rejectContext.petId);
                         setShowRejectConfirm(false);
                         setCandidatoSelecionado(null);
                         setDetalhesCandidato(null);
