@@ -136,6 +136,26 @@ export const PetServices = {
       };
     }
   },
+
+  // Buscar estatísticas leves de pets (counts) — evita trazer lista completa
+  getStats: async () => {
+    try {
+      const response = await api.get(`/pets/stats`);
+      return {
+        success: true,
+        data: response.data,
+        message: "Estatísticas de pets carregadas com sucesso",
+      };
+    } catch (error) {
+      console.error("Erro ao buscar estatísticas de pets:", error);
+      return {
+        success: false,
+        data: null,
+        message: "Erro ao buscar estatísticas de pets",
+        error: error.message,
+      };
+    }
+  },
 };
 
 // Buscar pets com filtros
