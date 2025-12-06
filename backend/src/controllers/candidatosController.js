@@ -73,7 +73,7 @@ export const getCandidatoById = async (req, res) => {
     const candidato = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
       include: {
-        cidade: {
+        interesses: {
           include: {
             pet: {
               select: {
@@ -91,7 +91,7 @@ export const getCandidatoById = async (req, res) => {
           },
           orderBy: { data_interesse: "desc" },
         },
-        cep: {
+        adocoes: {
           include: {
             pet: {
               select: {
@@ -103,6 +103,15 @@ export const getCandidatoById = async (req, res) => {
             },
           },
           orderBy: { data_adocao: "desc" },
+        },
+        pets: {
+          select: {
+            id: true,
+            nome: true,
+            tipo: true,
+            porte: true,
+            status: true,
+          },
         },
       },
     });
