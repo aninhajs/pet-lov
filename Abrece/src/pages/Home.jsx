@@ -460,7 +460,8 @@ const Home = () => {
                     Sua Nota Tem Valor
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs">
+                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
+                  {/*OBS IMPORTANTE: Na minha opnião não devemos mexer nesses espaçamentos, pois os espaços em si vão ficar muito grandes, acredito que seja mais viável adicionar mais algum texto nessa div*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">1. CADASTRO:</strong>{" "}
@@ -500,7 +501,7 @@ const Home = () => {
                     O que você pode doar?
                   </p>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs">
+                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">01</strong>
@@ -534,7 +535,7 @@ const Home = () => {
                     DOE RAÇÃO
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs">
+                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
@@ -571,7 +572,7 @@ const Home = () => {
                     Vaquinha criada em: 22/08/2025
                   </p>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs">
+                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
