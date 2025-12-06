@@ -73,7 +73,7 @@ model AdoptionCandidate {
   endereco                    String?
   celular_01                  String?
   celular_02                  String?
-  cpf                         String        @id @default(cuid())
+  cpf                         String           @id @default(cuid())
   data_nascimento             DateTime?
   perfil_social               String?
   profissao                   String?
@@ -128,7 +128,8 @@ model AdoptionCandidate {
   CEP                         String?
   Cidade                      String?
   Pet_ID                      String?
-  pets                        Pet?          @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
+  status                      StatusCandidato?
+  pets                        Pet?             @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
   adocoes                     Adoption[]
   interesses                  PetInterest[]
 

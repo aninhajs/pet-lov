@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 
 // Mapeamento campo -> pergunta
 const adoptionCandidateQuestions = [
@@ -91,7 +91,6 @@ const adoptionCandidateQuestions = [
 import { Link } from "react-router-dom";
 import { AdoptantServices } from "../../services/AdoptantServices";
 import { sections } from "../Questionnaire";
-import { useMemo } from "react";
 
 const AdminAdoptants = () => {
   const [selectedStatus, setSelectedStatus] = useState("todos");
@@ -162,13 +161,35 @@ const AdminAdoptants = () => {
     });
   }
 
-  const candidatosOrdenados = candidatos.map((c) => ({
-    ...c,
-    cidade: ordenarInteresses(c.cidade),
-  }));
+  const normalizarStatusInteresse = (status) => {
+    const statusNormalizado = (status || "").toLowerCase();
+    if (!statusNormalizado) return "pendente";
+    return statusNormalizado === "interessado"
+      ? "pendente"
+      : statusNormalizado;
+  };
+
+  const formatarInteresses = (interessesBrutos = []) =>
+    ordenarInteresses(interessesBrutos).map((interesse) => ({
+      ...interesse,
+      status: normalizarStatusInteresse(interesse.status),
+    }));
+
+  const candidatosOrdenados = candidatos.map((c) => {
+    const interessesOriginais = Array.isArray(c.interesses)
+      ? c.interesses
+      : Array.isArray(c.cidade)
+      ? c.cidade
+      : [];
+
+    return {
+      ...c,
+      interesses: formatarInteresses(interessesOriginais),
+    };
+  });
 
   const filteredCandidatos = candidatosOrdenados.filter((candidato) => {
-    const interesses = candidato.cidade || [];
+    const interesses = candidato.interesses || [];
     const ultimaTentativa = interesses[0];
 
     if (selectedStatus === "todos") return true; // mostra todos cadastrados
@@ -217,6 +238,7 @@ const AdminAdoptants = () => {
       case "rejeitado":
         return "bg-red-100 text-red-800";
       case "pendente":
+      case "interessado":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -230,6 +252,7 @@ const AdminAdoptants = () => {
       case "rejeitado":
         return "Rejeitado";
       case "pendente":
+      case "interessado":
         return "Pendente";
       default:
         return status;
@@ -263,7 +286,7 @@ const AdminAdoptants = () => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
-                class="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
                 Dashboard
               </Link>
@@ -292,16 +315,6 @@ const AdminAdoptants = () => {
           </p>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setSelectedStatus("todos")}
-              className={`px-4 py-2 rounded-full text-sm font-medium shadow-md transition-all hover:scale-105 ${
-                selectedStatus === "todos"
-                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-sky-50"
-              }`}
-            >
-              Todos ({candidatos.length})
-            </button>
-            <button
               onClick={() => setSelectedStatus("pendente")}
               className={`px-4 py-2 rounded-full text-sm font-medium shadow-md transition-all hover:scale-105 ${
                 selectedStatus === "pendente"
@@ -311,10 +324,11 @@ const AdminAdoptants = () => {
             >
               Pendentes (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "pendente")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.interesses?.[0]?.status === "pendente"
+                ).length
               }
-              )
+            )
             </button>
             <button
               onClick={() => setSelectedStatus("aprovado")}
@@ -326,10 +340,11 @@ const AdminAdoptants = () => {
             >
               Aprovados (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "aprovado")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.interesses?.[0]?.status === "aprovado"
+                ).length
               }
-              )
+            )
             </button>
             <button
               onClick={() => setSelectedStatus("rejeitado")}
@@ -341,10 +356,11 @@ const AdminAdoptants = () => {
             >
               Rejeitados (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "rejeitado")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.interesses?.[0]?.status === "rejeitado"
+                ).length
               }
-              )
+            )
             </button>
           </div>
         </div>
@@ -367,7 +383,7 @@ const AdminAdoptants = () => {
           ) : (
             <div className="divide-y divide-gray-200">
               {filteredCandidatos.map((candidato) => {
-                const interesses = candidato.cidade || [];
+                const interesses = candidato.interesses || [];
                 const ultimaTentativa = interesses[0];
                 return (
                   <div
@@ -397,8 +413,7 @@ const AdminAdoptants = () => {
                           </p>
                           {ultimaTentativa && (
                             <p>
-                              Interesse em: {ultimaTentativa.pet?.nome || "-"} •
-                              Data: {new Date().toLocaleDateString("pt-BR")}
+                              Interesse no pet: {ultimaTentativa.pet?.nome || "-"}
                             </p>
                           )}
                         </div>
@@ -414,7 +429,17 @@ const AdminAdoptants = () => {
                                   await AdoptantServices.getAdoptantById(
                                     candidato.cpf
                                   );
-                                setDetalhesCandidato(res.data);
+                                const candidatoDetalhado = res.data || {};
+                                setDetalhesCandidato({
+                                  ...candidatoDetalhado,
+                                  interesses: formatarInteresses(
+                                    Array.isArray(
+                                      candidatoDetalhado.interesses
+                                    )
+                                      ? candidatoDetalhado.interesses
+                                      : []
+                                  ),
+                                });
                               } else {
                                 alert(
                                   "CPF do candidato não encontrado. Não é possível exibir detalhes."
@@ -442,52 +467,6 @@ const AdminAdoptants = () => {
                             <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
                               ✗ Rejeitado anteriormente
                             </div>
-                          )}
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "pendente" && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  if (candidato.cpf && ultimaTentativa?.pet_id) {
-                                    setApproveContext({
-                                      cpf: candidato.cpf,
-                                      candidatoNome: candidato.nome,
-                                      petId: ultimaTentativa.pet_id,
-                                      petName: ultimaTentativa.pet?.nome || "Pet",
-                                    });
-                                    setShowApproveConfirm(true);
-                                  } else {
-                                    alert(
-                                      "CPF ou pet_id não encontrado. Não é possível aprovar."
-                                    );
-                                  }
-                                }}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                              >
-                                Aprovar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (candidato.cpf) {
-                                    setRejectContext({
-                                      cpf: candidato.cpf,
-                                      candidatoNome: candidato.nome,
-                                      petId: ultimaTentativa?.pet_id,
-                                      petName: ultimaTentativa.pet?.nome || "Pet",
-                                    });
-                                    setRejectReason("");
-                                    setShowRejectConfirm(true);
-                                  } else {
-                                    alert(
-                                      "CPF do candidato não encontrado. Não é possível rejeitar."
-                                    );
-                                  }
-                                }}
-                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                              >
-                                Rejeitar
-                              </button>
-                            </>
                           )}
                       </div>
                     </div>
@@ -647,8 +626,8 @@ const AdminAdoptants = () => {
                           </div>
                         )}
 
-                      {detalhesCandidato.cidade &&
-                        detalhesCandidato.cidade.length > 1 && (
+                      {detalhesCandidato.interesses &&
+                        detalhesCandidato.interesses.length > 1 && (
                           <div>
                             <button
                               className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
@@ -664,7 +643,8 @@ const AdminAdoptants = () => {
                           <button
                             onClick={() => {
                               if (detalhesCandidato?.cpf) {
-                                const interesse = detalhesCandidato?.cidade?.[0];
+                                const interesse =
+                                  detalhesCandidato?.interesses?.[0];
                                 setApproveContext({
                                   cpf: detalhesCandidato.cpf,
                                   candidatoNome: detalhesCandidato.nome,
@@ -685,7 +665,8 @@ const AdminAdoptants = () => {
                           <button
                             onClick={() => {
                               if (detalhesCandidato?.cpf) {
-                                const interesse = detalhesCandidato?.cidade?.[0];
+                                const interesse =
+                                  detalhesCandidato?.interesses?.[0];
                                 setRejectContext({
                                   cpf: detalhesCandidato.cpf,
                                   candidatoNome: detalhesCandidato.nome,
@@ -750,8 +731,8 @@ const AdminAdoptants = () => {
                     </button>
                     <span className="text-base text-gray-700">
                       {historicoIndex + 1} de{" "}
-                      {Array.isArray(candidatoSelecionado.cidade)
-                        ? candidatoSelecionado.cidade.length
+                      {Array.isArray(candidatoSelecionado.interesses)
+                        ? candidatoSelecionado.interesses.length
                         : 0}
                     </span>
                     <button
@@ -759,23 +740,23 @@ const AdminAdoptants = () => {
                         setHistoricoIndex((prev) =>
                           Math.min(
                             prev + 1,
-                            (Array.isArray(candidatoSelecionado.cidade)
-                              ? candidatoSelecionado.cidade.length
+                            (Array.isArray(candidatoSelecionado.interesses)
+                              ? candidatoSelecionado.interesses.length
                               : 1) - 1
                           )
                         )
                       }
                       disabled={
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.cidade)
-                          ? candidatoSelecionado.cidade.length
+                        (Array.isArray(candidatoSelecionado.interesses)
+                          ? candidatoSelecionado.interesses.length
                           : 1) -
                           1
                       }
                       className={`text-2xl px-2 ${
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.cidade)
-                          ? candidatoSelecionado.cidade.length
+                        (Array.isArray(candidatoSelecionado.interesses)
+                          ? candidatoSelecionado.interesses.length
                           : 1) -
                           1
                           ? "text-gray-300"
@@ -786,13 +767,13 @@ const AdminAdoptants = () => {
                       &#8594;
                     </button>
                   </div>
-                  {Array.isArray(candidatoSelecionado.cidade) &&
-                    candidatoSelecionado.cidade.length > 0 && (
-                      <div className="bg-gray-50 p-3 rounded border border-sky-100">
-                        {(() => {
-                          const interesse =
-                            candidatoSelecionado.cidade[historicoIndex];
-                          return (
+                  {Array.isArray(candidatoSelecionado.interesses) &&
+                    candidatoSelecionado.interesses.length > 0 && (
+                    <div className="bg-gray-50 p-3 rounded border border-sky-100">
+                      {(() => {
+                        const interesse =
+                            candidatoSelecionado.interesses[historicoIndex];
+                        return (
                             <>
                               <div className="flex items-center gap-2 mb-2">
                                 <span
