@@ -73,7 +73,7 @@ export const getCandidatoById = async (req, res) => {
     const candidato = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
       include: {
-        cidade: {
+        interesses: {
           include: {
             pet: {
               select: {
@@ -91,7 +91,7 @@ export const getCandidatoById = async (req, res) => {
           },
           orderBy: { data_interesse: "desc" },
         },
-        cep: {
+        adocoes: {
           include: {
             pet: {
               select: {
@@ -349,7 +349,7 @@ export const createCandidato = async (req, res) => {
         como_organizaria_mudanca: devolveria_se_mudar,
 
         ...(petIdValue && {
-          cidade: {
+          interesses: {
             create: {
               pet_id: petIdValue,
               status: "interessado",
@@ -358,7 +358,7 @@ export const createCandidato = async (req, res) => {
         }),
       },
       include: {
-        cidade: {
+        interesses: {
           include: {
             pet: {
               select: {
@@ -404,7 +404,7 @@ export const updateCandidatoStatus = async (req, res) => {
     const candidato = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
       include: {
-        cidade: {
+        interesses: {
           include: {
             pet: {
               select: {
@@ -568,7 +568,7 @@ export const updateCandidatoStatus = async (req, res) => {
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
       include: {
-        cidade: {
+        interesses: {
           include: {
             pet: {
               select: {
