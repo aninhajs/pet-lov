@@ -346,6 +346,7 @@ export const createCandidato = async (req, res) => {
         CEP: cep,
         Cidade: cidade,
         Pet_ID: petIdValue,
+        status: "pendente",
         como_organizaria_mudanca: devolveria_se_mudar,
 
         ...(petIdValue && {
@@ -393,6 +394,7 @@ export const updateCandidatoStatus = async (req, res) => {
   try {
     const { id } = req.params; // Aqui 'id' é o CPF
     const { status, observacoes, pet_id } = req.body;
+    const statusNormalizado = (status || "").toLowerCase();
 
     console.log("🔍 DEBUG - updateCandidatoStatus:");
     console.log("  - ID (CPF):", id);
@@ -443,7 +445,7 @@ export const updateCandidatoStatus = async (req, res) => {
     }
 
     // Se estiver aprovando, verificar se o pet ainda está disponível
-    if (status.toLowerCase() === "aprovado") {
+    if (statusNormalizado === "aprovado") {
       console.log("🐕 Buscando pet com ID:", pet_id);
 
       const pet = await prisma.pet.findUnique({
@@ -558,12 +560,17 @@ export const updateCandidatoStatus = async (req, res) => {
       await prisma.petInterest.updateMany({
         where: { candidato_id: id, pet_id },
         data: {
-          status: status.toLowerCase(),
+          status: statusNormalizado,
           data_avaliacao: new Date(),
           observacoes_admin: observacoes,
         },
       });
     }
+
+    await prisma.adoptionCandidate.update({
+      where: { cpf: id },
+      data: { status: statusNormalizado },
+    });
 
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
       where: { cpf: id },
@@ -587,7 +594,7 @@ export const updateCandidatoStatus = async (req, res) => {
       success: true,
       data: candidatoAtualizado,
       message:
-        status.toLowerCase() === "aprovado"
+        statusNormalizado === "aprovado"
           ? "Candidato aprovado e adoção registrada automaticamente! Pet marcado como adotado."
           : "Candidato rejeitado com sucesso!",
     });

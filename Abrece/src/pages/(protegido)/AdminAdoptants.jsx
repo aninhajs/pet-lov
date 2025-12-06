@@ -93,7 +93,7 @@ import { AdoptantServices } from "../../services/AdoptantServices";
 import { sections } from "../Questionnaire";
 
 const AdminAdoptants = () => {
-  const [selectedStatus, setSelectedStatus] = useState("todos");
+  const [selectedStatus, setSelectedStatus] = useState("pendente");
   const [candidatos, setCandidatos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -175,33 +175,59 @@ const AdminAdoptants = () => {
       status: normalizarStatusInteresse(interesse.status),
     }));
 
+  const resolverStatusAtual = (candidato, interessesFormatados = []) => {
+    const statusDoCandidato = (candidato?.status || "").toLowerCase();
+    if (statusDoCandidato === "aprovado" || statusDoCandidato === "rejeitado") {
+      return statusDoCandidato;
+    }
+
+    const statusDaUltimaTentativa = normalizarStatusInteresse(
+      interessesFormatados?.[0]?.status
+    );
+
+    if (statusDaUltimaTentativa !== "pendente") {
+      return statusDaUltimaTentativa;
+    }
+
+    if (statusDoCandidato) {
+      return normalizarStatusInteresse(statusDoCandidato);
+    }
+
+    return "pendente";
+  };
+
   const candidatosOrdenados = candidatos.map((c) => {
     const interessesOriginais = Array.isArray(c.interesses)
       ? c.interesses
       : Array.isArray(c.cidade)
       ? c.cidade
       : [];
+    const interessesFormatados = formatarInteresses(interessesOriginais);
 
     return {
       ...c,
-      interesses: formatarInteresses(interessesOriginais),
+      interesses: interessesFormatados,
+      statusAtual: resolverStatusAtual(c, interessesFormatados),
     };
   });
 
   const filteredCandidatos = candidatosOrdenados.filter((candidato) => {
     const interesses = candidato.interesses || [];
     const ultimaTentativa = interesses[0];
+    const statusAtual =
+      candidato.statusAtual ||
+      normalizarStatusInteresse(ultimaTentativa?.status);
 
     if (selectedStatus === "todos") return true; // mostra todos cadastrados
-    if (!ultimaTentativa) return false; // só mostra nos outros filtros quem já tentou adotar
+    if (!ultimaTentativa && selectedStatus) return statusAtual === selectedStatus;
     if (selectedStatus === "aprovado") {
-      return ultimaTentativa.status === "aprovado";
+      return statusAtual === "aprovado";
     }
     if (selectedStatus === "rejeitado") {
-      return ultimaTentativa.status === "rejeitado";
+      return statusAtual === "rejeitado";
     }
     if (selectedStatus === "pendente") {
-      return ultimaTentativa.status === "pendente";
+      return statusAtual === "pendente";
     }
     return true;
   });
@@ -325,7 +351,7 @@ const AdminAdoptants = () => {
               Pendentes (
               {
                 candidatosOrdenados.filter(
-                  (c) => c.interesses?.[0]?.status === "pendente"
+                  (c) => c.statusAtual === "pendente"
                 ).length
               }
             )
@@ -341,7 +367,7 @@ const AdminAdoptants = () => {
               Aprovados (
               {
                 candidatosOrdenados.filter(
-                  (c) => c.interesses?.[0]?.status === "aprovado"
+                  (c) => c.statusAtual === "aprovado"
                 ).length
               }
             )
@@ -357,7 +383,7 @@ const AdminAdoptants = () => {
               Rejeitados (
               {
                 candidatosOrdenados.filter(
-                  (c) => c.interesses?.[0]?.status === "rejeitado"
+                  (c) => c.statusAtual === "rejeitado"
                 ).length
               }
             )
@@ -385,6 +411,7 @@ const AdminAdoptants = () => {
               {filteredCandidatos.map((candidato) => {
                 const interesses = candidato.interesses || [];
                 const ultimaTentativa = interesses[0];
+                const statusAtual = candidato.statusAtual;
                 return (
                   <div
                     key={candidato.id || candidato.cpf}
@@ -396,13 +423,13 @@ const AdminAdoptants = () => {
                           <h3 className="text-lg font-medium text-gray-900">
                             {candidato.nome}
                           </h3>
-                          {ultimaTentativa && (
+                          {statusAtual && (
                             <span
                               className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                                ultimaTentativa.status
+                                statusAtual
                               )}`}
                             >
-                              {getStatusText(ultimaTentativa.status)}
+                              {getStatusText(statusAtual)}
                             </span>
                           )}
                         </div>
@@ -456,18 +483,16 @@ const AdminAdoptants = () => {
                           Ver Detalhes
                         </button>
 
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "aprovado" && (
-                            <div className="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
-                              ✓ Já aprovado - Adoção ativa
-                            </div>
-                          )}
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "rejeitado" && (
-                            <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
-                              ✗ Rejeitado anteriormente
-                            </div>
-                          )}
+                        {statusAtual === "aprovado" && (
+                          <div className="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
+                            Ja aprovado - Adocao ativa
+                          </div>
+                        )}
+                        {statusAtual === "rejeitado" && (
+                          <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
+                            Rejeitado anteriormente
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
