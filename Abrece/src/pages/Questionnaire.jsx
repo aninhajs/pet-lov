@@ -647,7 +647,7 @@ const Questionnaire = () => {
       setCurrentSectionIndex(totalSections - 1);
       setSubmitMessage(
         response?.message ||
-          "Formulario enviado com sucesso! Entraremos em contato em breve."
+          "A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs, daremos o feedback!"
       );
     } catch (error) {
       const message =
