@@ -17,7 +17,7 @@ export const getCandidatos = async (req, res) => {
       prisma.adoptionCandidate.findMany({
         where,
         include: {
-          cidade: {
+          interesses: {
             include: {
               pet: {
                 select: {
@@ -255,7 +255,7 @@ export const createCandidato = async (req, res) => {
     };
 
     const normalizeToText = (value) => {
-      if (Array.isArray(value)) return value.join(', ');
+      if (Array.isArray(value)) return value.join(", ");
       return value || null;
     };
 
@@ -265,7 +265,8 @@ export const createCandidato = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: {
-          message: "Data de nascimento em formato invalido. Utilize DD/MM/AAAA.",
+          message:
+            "Data de nascimento em formato invalido. Utilize DD/MM/AAAA.",
         },
       });
     }

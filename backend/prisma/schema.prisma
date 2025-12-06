@@ -129,8 +129,8 @@ model AdoptionCandidate {
   Cidade                      String?
   Pet_ID                      String?
   pets                        Pet?          @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
-  cep                         Adoption[]
-  cidade                      PetInterest[]
+  adocoes                     Adoption[]
+  interesses                  PetInterest[]
 
   @@map("adoption_candidates")
 }

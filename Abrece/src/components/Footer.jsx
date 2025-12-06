@@ -1,13 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Instagram,
-  Heart,
-} from "lucide-react";
-import { FaTiktok, FaWhatsapp } from "react-icons/fa6";
+import { MapPin, Phone, Mail, Instagram, Heart } from "lucide-react";
+import { FaTiktok, FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {
   return (
