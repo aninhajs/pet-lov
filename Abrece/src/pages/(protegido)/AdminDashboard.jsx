@@ -32,9 +32,13 @@ const AdminDashboard = () => {
 
         if (response.success) {
           const pets = response.data.data || response.data || [];
-          const totalPets = pets.length;
+          const totalPets = pets.filter(
+            (pet) =>
+              (pet.status || "").toLowerCase() === "disponivel" ||
+              (pet.status || "").toLowerCase() === "em_processo"
+          ).length;
           const petsAdotados = pets.filter(
-            (pet) => pet.status === "adotado"
+            (pet) => (pet.status || "").toLowerCase() === "adotado"
           ).length;
 
           setStats((prevStats) => ({
@@ -53,15 +57,37 @@ const AdminDashboard = () => {
 
         // Buscar estatísticas de candidatos do backend
         try {
+          // Buscar estatísticas gerais (mantemos se necessário)
           const candidatosResponse = await AdoptantServices.getStats();
           if (candidatosResponse.success) {
-            const totalCandidatos =
-              candidatosResponse.data.total_candidatos || 0;
-            setStats((prevStats) => ({
-              ...prevStats,
-              candidatos: totalCandidatos,
-            }));
-            console.log("✅ Candidatos carregados:", totalCandidatos);
+            console.log(
+              "✅ Estatísticas gerais de candidatos carregadas (não usadas para o card de pendentes)",
+              candidatosResponse.data
+            );
+          }
+
+          // Agora buscar apenas a contagem de candidatos com status 'pendente'
+          try {
+            const pendentesResp = await AdoptantServices.getAllAdoptants({
+              status: "pendente",
+              page: 1,
+              limit: 1,
+            });
+
+            if (pendentesResp && pendentesResp.success) {
+              const pendentesCount =
+                pendentesResp.pagination?.totalCount ??
+                (Array.isArray(pendentesResp.data)
+                  ? pendentesResp.data.length
+                  : 0);
+              setStats((prevStats) => ({
+                ...prevStats,
+                candidatos: pendentesCount,
+              }));
+              console.log("✅ Candidatos pendentes carregados:", pendentesCount);
+            }
+          } catch (err) {
+            console.error("Erro ao carregar contagem de pendentes:", err);
           }
         } catch (error) {
           console.error(

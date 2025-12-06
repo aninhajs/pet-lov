@@ -356,7 +356,7 @@ const AdminAdoptants = () => {
                 to="/admin"
                 className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
-                Dashboard
+              🏠 Dashboard
               </Link>
               <button
                 onClick={() => {
@@ -365,7 +365,7 @@ const AdminAdoptants = () => {
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
               >
-                Sair
+               🚪 Sair
               </button>
             </div>
           </div>
@@ -688,17 +688,16 @@ const AdminAdoptants = () => {
                           </div>
                         )}
 
-                      {detalhesCandidato.interesses &&
-                        detalhesCandidato.interesses.length > 1 && (
-                          <div>
-                            <button
-                              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
-                              onClick={() => setShowHistorico(true)}
-                            >
-                              Histórico de Tentativas de Adoção
-                            </button>
-                          </div>
-                        )}
+                      {detalhesCandidato && (
+                        <div>
+                          <button
+                            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
+                            onClick={() => setShowHistorico(true)}
+                          >
+                            Histórico de Tentativas de Adoção
+                          </button>
+                        </div>
+                      )}
                       {/* Aprovação/Rejeição da última tentativa (forçado para teste) */}
                       {detalhesCandidato && (
                         <div className="flex space-x-3 pt-4">
@@ -754,7 +753,7 @@ const AdminAdoptants = () => {
               </div>
             </div>
             {/* Modal flutuante do histórico */}
-            {showHistorico && candidatoSelecionado && (
+            {showHistorico && detalhesCandidato && (
               <div
                 style={{ zIndex: 9999 }}
                 className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
@@ -786,9 +785,9 @@ const AdminAdoptants = () => {
                       &#8592;
                     </button>
                     <span className="text-base text-gray-700">
-                      {historicoIndex + 1} de{" "}
-                      {Array.isArray(candidatoSelecionado.interesses)
-                        ? candidatoSelecionado.interesses.length
+                      {historicoIndex + 1} de {" "}
+                      {Array.isArray(detalhesCandidato.interesses)
+                        ? detalhesCandidato.interesses.length
                         : 0}
                     </span>
                     <button
@@ -796,23 +795,23 @@ const AdminAdoptants = () => {
                         setHistoricoIndex((prev) =>
                           Math.min(
                             prev + 1,
-                            (Array.isArray(candidatoSelecionado.interesses)
-                              ? candidatoSelecionado.interesses.length
+                            (Array.isArray(detalhesCandidato.interesses)
+                              ? detalhesCandidato.interesses.length
                               : 1) - 1
                           )
                         )
                       }
                       disabled={
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.interesses)
-                          ? candidatoSelecionado.interesses.length
-                          : 1) -
-                          1
+                          (Array.isArray(detalhesCandidato.interesses)
+                            ? detalhesCandidato.interesses.length
+                            : 1) -
+                            1
                       }
                       className={`text-2xl px-2 ${
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.interesses)
-                          ? candidatoSelecionado.interesses.length
+                        (Array.isArray(detalhesCandidato.interesses)
+                          ? detalhesCandidato.interesses.length
                           : 1) -
                           1
                           ? "text-gray-300"
@@ -823,63 +822,42 @@ const AdminAdoptants = () => {
                       &#8594;
                     </button>
                   </div>
-                  {Array.isArray(candidatoSelecionado.interesses) &&
-                    candidatoSelecionado.interesses.length > 0 && (
+                    {Array.isArray(detalhesCandidato.interesses) &&
+                    detalhesCandidato.interesses.length > 0 && (
                     <div className="bg-gray-50 p-3 rounded border border-sky-100">
                       {(() => {
-                        const interesse =
-                            candidatoSelecionado.interesses[historicoIndex];
+                        const interesse = detalhesCandidato.interesses[historicoIndex];
                         return (
-                            <>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span
-                                  className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                                    interesse.status
-                                  )}`}
-                                >
-                                  {getStatusText(interesse.status)}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {interesse.data_interesse
-                                    ? new Date(
-                                        interesse.data_interesse
-                                      ).toLocaleDateString("pt-BR")
-                                    : "-"}
-                                </span>
-                              </div>
-                              <p>
-                                <strong>Pet:</strong>{" "}
-                                {interesse.pet?.nome || "-"}
+                          <>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(interesse.status)}`}>
+                                {getStatusText(interesse.status)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {interesse.data_interesse ? new Date(interesse.data_interesse).toLocaleDateString("pt-BR") : "-"}
+                              </span>
+                            </div>
+                            <p>
+                              <strong>Pet:</strong> {interesse.pet?.nome || "-"}
+                            </p>
+                            <p>
+                              <strong>Tipo de Moradia:</strong> {detalhesCandidato.tipo_moradia || detalhesCandidato.mora_em || "-"}
+                            </p>
+                            <p>
+                              <strong>Experiência:</strong> {detalhesCandidato.experiencia_pets || detalhesCandidato.ja_teve_tem_animais || "-"}
+                            </p>
+                            <p>
+                              <strong>Motivação:</strong> {detalhesCandidato.motivacao || detalhesCandidato.finalidade_animal || "-"}
+                            </p>
+                            {interesse.status === "rejeitado" && interesse.observacoes_admin && (
+                              <p className="text-red-700 mt-1">
+                                <strong>Motivo da Rejeição:</strong> {interesse.observacoes_admin}
                               </p>
-                              <p>
-                                <strong>Tipo de Moradia:</strong>{" "}
-                                {candidatoSelecionado.tipo_moradia ||
-                                  candidatoSelecionado.mora_em ||
-                                  "-"}
-                              </p>
-                              <p>
-                                <strong>Experiência:</strong>{" "}
-                                {candidatoSelecionado.experiencia_pets ||
-                                  candidatoSelecionado.ja_teve_tem_animais ||
-                                  "-"}
-                              </p>
-                              <p>
-                                <strong>Motivação:</strong>{" "}
-                                {candidatoSelecionado.motivacao ||
-                                  candidatoSelecionado.finalidade_animal ||
-                                  "-"}
-                              </p>
-                              {interesse.status === "rejeitado" &&
-                                interesse.observacoes_admin && (
-                                  <p className="text-red-700 mt-1">
-                                    <strong>Motivo da Rejeição:</strong>{" "}
-                                    {interesse.observacoes_admin}
-                                  </p>
-                                )}
-                            </>
-                          );
-                        })()}
-                      </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                     )}
                 </div>
               </div>

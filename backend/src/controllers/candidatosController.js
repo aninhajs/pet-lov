@@ -107,8 +107,26 @@ export const getCandidatoById = async (req, res) => {
       },
     });
 
-    // Se candidato existe, buscar histórico de rejeições
+    // Se candidato existe, buscar histórico de tentativas e histórico de rejeições
     if (candidato) {
+      // Todas as tentativas (interesses) do candidato
+      const historicoTentativas = await prisma.petInterest.findMany({
+        where: {
+          candidato_id: candidato.id,
+        },
+        include: {
+          pet: {
+            select: {
+              id: true,
+              nome: true,
+              tipo: true,
+            },
+          },
+        },
+        orderBy: { data_interesse: "desc" },
+      });
+
+      // Histórico apenas das rejeições que contenham observações (mantemos para destaque)
       const historicoRejeicoes = await prisma.petInterest.findMany({
         where: {
           candidato_id: candidato.id,
@@ -127,7 +145,8 @@ export const getCandidatoById = async (req, res) => {
         orderBy: { data_avaliacao: "desc" },
       });
 
-      // Adicionar histórico ao candidato
+      // Adicionar históricos ao candidato
+      candidato.historico_tentativas = historicoTentativas;
       candidato.historico_rejeicoes = historicoRejeicoes;
     }
 
