@@ -102,6 +102,11 @@ const AdminAdoptants = () => {
   const [detalhesCandidato, setDetalhesCandidato] = useState(null);
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [approveContext, setApproveContext] = useState({ cpf: null, candidatoNome: "", petId: null, petName: "" });
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+  const [rejectContext, setRejectContext] = useState({ cpf: null, candidatoNome: "", petId: null, petName: "" });
+  const [rejectReason, setRejectReason] = useState("");
 
   // Controle de seções abertas no modal de detalhes
   const [openSections, setOpenSections] = useState(() => {
@@ -451,27 +456,15 @@ const AdminAdoptants = () => {
                           ultimaTentativa.status === "pendente" && (
                             <>
                               <button
-                                onClick={async () => {
-                                  if (
-                                    candidato.cpf &&
-                                    ultimaTentativa?.pet_id
-                                  ) {
-                                    const confirmar = window.confirm(
-                                      `Tem certeza que deseja APROVAR o candidato "${
-                                        candidato.nome
-                                      }" para o pet "${
-                                        ultimaTentativa.pet?.nome || "Pet"
-                                      }"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
-                                    );
-
-                                    if (confirmar) {
-                                      await updateStatus(
-                                        candidato.cpf,
-                                        "aprovado",
-                                        "",
-                                        ultimaTentativa.pet_id
-                                      );
-                                    }
+                                onClick={() => {
+                                  if (candidato.cpf && ultimaTentativa?.pet_id) {
+                                    setApproveContext({
+                                      cpf: candidato.cpf,
+                                      candidatoNome: candidato.nome,
+                                      petId: ultimaTentativa.pet_id,
+                                      petName: ultimaTentativa.pet?.nome || "Pet",
+                                    });
+                                    setShowApproveConfirm(true);
                                   } else {
                                     alert(
                                       "CPF ou pet_id não encontrado. Não é possível aprovar."
@@ -485,29 +478,14 @@ const AdminAdoptants = () => {
                               <button
                                 onClick={() => {
                                   if (candidato.cpf) {
-                                    const confirmar = window.confirm(
-                                      `Tem certeza que deseja REJEITAR o candidato "${
-                                        candidato.nome
-                                      }" para o pet "${
-                                        ultimaTentativa.pet?.nome || "Pet"
-                                      }"?`
-                                    );
-
-                                    if (confirmar) {
-                                      const motivo = prompt(
-                                        "Motivo da rejeição:",
-                                        ""
-                                      );
-                                      if (motivo !== null) {
-                                        // Usuario não cancelou o prompt
-                                        updateStatus(
-                                          candidato.cpf,
-                                          "rejeitado",
-                                          motivo,
-                                          ultimaTentativa?.pet_id
-                                        );
-                                      }
-                                    }
+                                    setRejectContext({
+                                      cpf: candidato.cpf,
+                                      candidatoNome: candidato.nome,
+                                      petId: ultimaTentativa?.pet_id,
+                                      petName: ultimaTentativa.pet?.nome || "Pet",
+                                    });
+                                    setRejectReason("");
+                                    setShowRejectConfirm(true);
                                   } else {
                                     alert(
                                       "CPF do candidato não encontrado. Não é possível rejeitar."
@@ -694,27 +672,15 @@ const AdminAdoptants = () => {
                         <div className="flex space-x-3 pt-4">
                           <button
                             onClick={() => {
-                              if (detalhesCandidato.cpf) {
-                                const petNome =
-                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
-                                  "Pet";
-                                const confirmar = window.confirm(
-                                  `Tem certeza que deseja APROVAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
-                                );
-
-                                if (confirmar) {
-                                  // Busca o pet_id da última tentativa do candidato nos detalhes
-                                  const petIdAprovar =
-                                    detalhesCandidato?.cidade?.[0]?.pet_id;
-                                  updateStatus(
-                                    detalhesCandidato.cpf,
-                                    "aprovado",
-                                    "",
-                                    petIdAprovar
-                                  );
-                                  setCandidatoSelecionado(null);
-                                  setDetalhesCandidato(null);
-                                }
+                              if (detalhesCandidato?.cpf) {
+                                const interesse = detalhesCandidato?.cidade?.[0];
+                                setApproveContext({
+                                  cpf: detalhesCandidato.cpf,
+                                  candidatoNome: detalhesCandidato.nome,
+                                  petId: interesse?.pet_id,
+                                  petName: interesse?.pet?.nome || "Pet",
+                                });
+                                setShowApproveConfirm(true);
                               } else {
                                 alert(
                                   "CPF do candidato não encontrado. Não é possível aprovar."
@@ -727,33 +693,16 @@ const AdminAdoptants = () => {
                           </button>
                           <button
                             onClick={() => {
-                              if (detalhesCandidato.cpf) {
-                                const petNome =
-                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
-                                  "Pet";
-                                const confirmar = window.confirm(
-                                  `Tem certeza que deseja REJEITAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?`
-                                );
-
-                                if (confirmar) {
-                                  const motivo = prompt(
-                                    "Motivo da rejeição:",
-                                    ""
-                                  );
-                                  if (motivo !== null) {
-                                    // Usuario não cancelou o prompt
-                                    const petIdRejeitar =
-                                      detalhesCandidato?.cidade?.[0]?.pet_id;
-                                    updateStatus(
-                                      detalhesCandidato.cpf,
-                                      "rejeitado",
-                                      motivo,
-                                      petIdRejeitar
-                                    );
-                                    setCandidatoSelecionado(null);
-                                    setDetalhesCandidato(null);
-                                  }
-                                }
+                              if (detalhesCandidato?.cpf) {
+                                const interesse = detalhesCandidato?.cidade?.[0];
+                                setRejectContext({
+                                  cpf: detalhesCandidato.cpf,
+                                  candidatoNome: detalhesCandidato.nome,
+                                  petId: interesse?.pet_id,
+                                  petName: interesse?.pet?.nome || "Pet",
+                                });
+                                setRejectReason("");
+                                setShowRejectConfirm(true);
                               } else {
                                 alert(
                                   "CPF do candidato não encontrado. Não é possível rejeitar."
@@ -904,6 +853,99 @@ const AdminAdoptants = () => {
                         })()}
                       </div>
                     )}
+                </div>
+              </div>
+            )}
+            {/* Modal de confirmação de aprovação */}
+            {showApproveConfirm && (
+              <div
+                style={{ zIndex: 10000 }}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+                onClick={() => setShowApproveConfirm(false)}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+                >
+                  <h3 className="text-xl font-bold text-sky-700 mb-3">Confirmar Aprovação</h3>
+                  <p className="mb-4 text-gray-800">
+                    Tem certeza que deseja <strong>APROVAR</strong> o candidato "{approveContext.candidatoNome}" para o pet "{approveContext.petName}"?
+                  </p>
+                  <p className="mb-4 text-gray-600">
+                    Esta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowApproveConfirm(false)}
+                      className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!approveContext.petId) {
+                          alert('pet_id não encontrado. Não é possível aprovar.');
+                          return;
+                        }
+                        await updateStatus(approveContext.cpf, 'aprovado', '', approveContext.petId);
+                        setShowApproveConfirm(false);
+                        setCandidatoSelecionado(null);
+                        setDetalhesCandidato(null);
+                      }}
+                      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                    >
+                      Confirmar e Aprovar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Modal de confirmação de rejeição */}
+            {showRejectConfirm && (
+              <div
+                style={{ zIndex: 10000 }}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+                onClick={() => setShowRejectConfirm(false)}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+                >
+                  <h3 className="text-xl font-bold text-rose-700 mb-3">Confirmar Rejeição</h3>
+                  <p className="mb-3 text-gray-800">
+                    Tem certeza que deseja <strong>REJEITAR</strong> o candidato "{rejectContext.candidatoNome}" para o pet "{rejectContext.petName}"?
+                  </p>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Motivo da rejeição</label>
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    className="w-full border rounded p-2 mb-4"
+                    rows={4}
+                    placeholder="Descreva o motivo da rejeição (opcional)"
+                  />
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowRejectConfirm(false)}
+                      className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!rejectContext.petId) {
+                          alert('pet_id não encontrado. Não é possível rejeitar.');
+                          return;
+                        }
+                        await updateStatus(rejectContext.cpf, 'rejeitado', rejectReason || '', rejectContext.petId);
+                        setShowRejectConfirm(false);
+                        setCandidatoSelecionado(null);
+                        setDetalhesCandidato(null);
+                      }}
+                      className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Confirmar e Rejeitar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
