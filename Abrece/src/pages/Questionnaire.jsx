@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import QuestionnaireService from "../services/QuestionnaireService";
 
-const sections = [
+export const sections = [
   {
     id: "adotante",
     title: "Informações do adotante",
