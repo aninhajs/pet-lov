@@ -402,6 +402,22 @@ export const getPetStats = async (req, res) => {
       prisma.pet.count({ where: { status: "adotado" } }),
       prisma.pet.count({ where: { tipo: "cao" } }),
       prisma.pet.count({ where: { tipo: "gato" } }),
+      prisma.pet.count({
+        where: {
+          localizacao: {
+            contains: "fortaleza",
+            mode: "insensitive",
+          },
+        },
+      }),
+      prisma.pet.count({
+        where: {
+          localizacao: {
+            contains: "aquiraz",
+            mode: "insensitive",
+          },
+        },
+      }),
     ]);
 
     res.json({
@@ -413,6 +429,8 @@ export const getPetStats = async (req, res) => {
         adotados: stats[3],
         caes: stats[4],
         gatos: stats[5],
+        fortaleza: stats[6],
+        aquiraz: stats[7],
       },
     });
   } catch (error) {

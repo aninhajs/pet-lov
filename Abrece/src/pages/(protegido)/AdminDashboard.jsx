@@ -12,7 +12,8 @@ const AdminDashboard = () => {
     totalPets: 0,
     petsAdotados: 0,
     candidatos: 0,
-    processosPendentes: 5,
+    petsFortaleza: 0,
+    petsAquiraz: 0,
   });
 
   const [vacinas, setVacinas] = useState([]);
@@ -79,7 +80,7 @@ const AdminDashboard = () => {
 
         // PETS — usamos stats leves do backend (counts) para reduzir payload
         if (petsResp?.success && petsResp.data) {
-          // Esperamos { total, disponiveis, em_processo, adotados, caes, gatos }
+          // Esperamos { total, disponiveis, em_processo, adotados, caes, gatos, fortaleza, aquiraz }
           const petStats = petsResp.data.data || petsResp.data || petsResp.data?.data || petsResp.data;
           // totalPets no card é definido como disponiveis + em_processo
           const disponiveis = Number(petStats.disponiveis ?? petStats.disponiveis ?? 0);
@@ -88,8 +89,16 @@ const AdminDashboard = () => {
 
           const totalPets = disponiveis + emProcesso;
           const petsAdotados = adotados;
+          const petsFortaleza = Number(petStats.fortaleza ?? 0) || 0;
+          const petsAquiraz = Number(petStats.aquiraz ?? 0) || 0;
 
-          setStats((s) => ({ ...s, totalPets, petsAdotados }));
+          setStats((s) => ({
+            ...s,
+            totalPets,
+            petsAdotados,
+            petsFortaleza,
+            petsAquiraz,
+          }));
         }
 
         // PENDENTES — já buscado com limit 1, usar pagination.totalCount quando disponível
@@ -232,7 +241,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
               <div className="text-3xl mr-3">🐕</div>
@@ -271,7 +280,11 @@ const AdminDashboard = () => {
               <div>
                 <p className="text-sm font-bold text-gray-800">Candidatos</p>
                 <p className="text-4xl font-extrabold text-blue-700">
-                  {stats.candidatos}
+                  {isLoading ? (
+                    <span className="text-2xl">⏳</span>
+                  ) : (
+                    stats.candidatos
+                  )}
                 </p>
               </div>
             </div>
@@ -279,11 +292,31 @@ const AdminDashboard = () => {
 
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-3xl mr-3">⏳</div>
+              <div className="text-3xl mr-3">📍</div>
               <div>
-                <p className="text-sm font-bold text-gray-800">Pendências</p>
+                <p className="text-sm font-bold text-gray-800">Pets em Fortaleza</p>
                 <p className="text-4xl font-extrabold text-orange-700">
-                  {stats.processosPendentes}
+                  {isLoading ? (
+                    <span className="text-2xl">⏳</span>
+                  ) : (
+                    stats.petsFortaleza
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+            <div className="flex items-center">
+              <div className="text-3xl mr-3">🌊</div>
+              <div>
+                <p className="text-sm font-bold text-gray-800">Pets em Aquiraz</p>
+                <p className="text-4xl font-extrabold text-sky-700">
+                  {isLoading ? (
+                    <span className="text-2xl">⏳</span>
+                  ) : (
+                    stats.petsAquiraz
+                  )}
                 </p>
               </div>
             </div>
@@ -521,3 +554,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
