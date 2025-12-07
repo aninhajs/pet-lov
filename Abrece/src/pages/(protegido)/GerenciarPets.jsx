@@ -13,6 +13,8 @@ const GerenciarPets = () => {
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [petEditando, setPetEditando] = useState(null);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteContext, setDeleteContext] = useState({ id: null, nome: "" });
 
   // Função para abrir modal de edição
   const abrirModalEditar = (pet) => {
@@ -194,54 +196,59 @@ const GerenciarPets = () => {
   };
 
   const excluirPet = async (id) => {
-    if (window.confirm("Tem certeza que deseja excluir este pet?")) {
-      try {
-        // Excluir do backend
-        const response = await PetServices.deletePet(id);
+    if (!id) {
+      setShowDeleteConfirm(false);
+      alert("ID do pet não encontrado.");
+      return;
+    }
 
-        if (response.success) {
-          // Atualizar lista local
-          const petsAtualizados = pets.filter((pet) => pet.id !== id);
-          setPets(petsAtualizados);
+    try {
+      // Excluir do backend
+      const response = await PetServices.deletePet(id);
 
-          // Excluir vacinas do localStorage
-          const vacinasStorage = JSON.parse(
-            localStorage.getItem("vacinas") || "[]"
-          );
-          const vacinasAtualizadas = vacinasStorage.filter(
-            (vacina) => vacina.petId.toString() !== id.toString()
-          );
-          localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+      if (response.success) {
+        // Atualizar lista local
+        const petsAtualizados = pets.filter((pet) => pet.id !== id);
+        setPets(petsAtualizados);
 
-          // Excluir atividades de vacina do pet
-          const atividadesStorage = JSON.parse(
-            localStorage.getItem("atividades") || "[]"
-          );
-          const atividadesAtualizadas = atividadesStorage.filter(
-            (atividade) => {
-              if (atividade.tipo === "vacina") {
-                const petExcluido = pets.find((p) => p.id === id);
-                return atividade.petNome !== petExcluido?.nome;
-              }
-              return true;
-            }
-          );
-          localStorage.setItem(
-            "atividades",
-            JSON.stringify(atividadesAtualizadas)
-          );
+        // Excluir vacinas do localStorage
+        const vacinasStorage = JSON.parse(
+          localStorage.getItem("vacinas") || "[]"
+        );
+        const vacinasAtualizadas = vacinasStorage.filter(
+          (vacina) => vacina.petId.toString() !== id.toString()
+        );
+        localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
 
-          setPetSelecionado(null);
-          console.log(
-            `✅ Pet ${id} excluído junto com suas vacinas e atividades`
-          );
-        } else {
-          alert(`Erro ao excluir pet: ${response.message}`);
-        }
-      } catch (error) {
-        console.error("❌ Erro ao excluir pet:", error);
-        alert("Erro ao excluir pet. Tente novamente.");
+        // Excluir atividades de vacina do pet
+        const atividadesStorage = JSON.parse(
+          localStorage.getItem("atividades") || "[]"
+        );
+        const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
+          if (atividade.tipo === "vacina") {
+            const petExcluido = pets.find((p) => p.id === id);
+            return atividade.petNome !== petExcluido?.nome;
+          }
+          return true;
+        });
+        localStorage.setItem(
+          "atividades",
+          JSON.stringify(atividadesAtualizadas)
+        );
+
+        setPetSelecionado(null);
+        setShowDeleteConfirm(false);
+        console.log(
+          `✅ Pet ${id} excluído junto com suas vacinas e atividades`
+        );
+      } else {
+        alert(`Erro ao excluir pet: ${response.message}`);
       }
+    } catch (error) {
+      console.error("❌ Erro ao excluir pet:", error);
+      alert("Erro ao excluir pet. Tente novamente.");
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -964,12 +971,56 @@ const GerenciarPets = () => {
                 </button>
 
                 <button
-                  onClick={() => excluirPet(petSelecionado.id)}
+                  onClick={() => {
+                    setDeleteContext({
+                      id: petSelecionado.id,
+                      nome: petSelecionado.nome,
+                    });
+                    setShowDeleteConfirm(true);
+                  }}
                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
                 >
                   🗑️ Excluir
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteConfirm && (
+        <div
+          style={{ zIndex: 10000 }}
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+          >
+            <h3 className="text-xl font-bold text-rose-700 mb-3">
+              Confirmar Exclusão
+            </h3>
+            <p className="mb-3 text-gray-800">
+              Tem certeza que deseja excluir o pet "
+              {deleteContext.nome || "este pet"}"?
+            </p>
+            <p className="mb-4 text-gray-600">
+              Essa ação não pode ser desfeita e também remove vacinas e
+              atividades armazenadas localmente.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => excluirPet(deleteContext.id)}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirmar e Excluir
+              </button>
             </div>
           </div>
         </div>
