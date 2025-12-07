@@ -69,11 +69,12 @@ model PetImage {
 }
 
 model AdoptionCandidate {
+  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nome                        String?
   endereco                    String?
   celular_01                  String?
   celular_02                  String?
-  cpf                         String        @id @default(cuid())
+  cpf                         String           @unique
   data_nascimento             DateTime?
   perfil_social               String?
   profissao                   String?
@@ -128,7 +129,8 @@ model AdoptionCandidate {
   CEP                         String?
   Cidade                      String?
   Pet_ID                      String?
-  pets                        Pet?          @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
+  status                      StatusCandidato?
+  pets                        Pet?             @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
   adocoes                     Adoption[]
   interesses                  PetInterest[]
 
@@ -137,13 +139,13 @@ model AdoptionCandidate {
 
 model PetInterest {
   id                String            @id @default(cuid())
-  candidato_id      String
+  candidato_id      String            @db.Uuid
   pet_id            String
   status            StatusInteresse   @default(interessado)
   data_interesse    DateTime          @default(now())
   data_avaliacao    DateTime?
   observacoes_admin String?
-  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [cpf], onDelete: Cascade)
+  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
   pet               Pet               @relation(fields: [pet_id], references: [id], onDelete: Cascade)
 
   @@unique([candidato_id, pet_id])
@@ -153,13 +155,13 @@ model PetInterest {
 model Adoption {
   id               String            @id @default(cuid())
   pet_id           String
-  candidato_id     String
+  candidato_id     String            @db.Uuid
   data_adocao      DateTime          @default(now())
   observacoes      String?
   taxa_adocao      Decimal?
   status           StatusAdocao      @default(ativa)
   data_atualizacao DateTime          @updatedAt
-  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [cpf])
+  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
   pet              Pet               @relation(fields: [pet_id], references: [id])
 
   @@map("adoptions")

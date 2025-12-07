@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 
 // Mapeamento campo -> pergunta
 const adoptionCandidateQuestions = [
@@ -90,9 +90,10 @@ const adoptionCandidateQuestions = [
 ];
 import { Link } from "react-router-dom";
 import { AdoptantServices } from "../../services/AdoptantServices";
+import { sections } from "../Questionnaire";
 
 const AdminAdoptants = () => {
-  const [selectedStatus, setSelectedStatus] = useState("todos");
+  const [selectedStatus, setSelectedStatus] = useState("pendente");
   const [candidatos, setCandidatos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -100,6 +101,80 @@ const AdminAdoptants = () => {
   const [detalhesCandidato, setDetalhesCandidato] = useState(null);
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [approveContext, setApproveContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
+  const [rejectContext, setRejectContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
+  const [rejectReason, setRejectReason] = useState("");
+
+  // Controle de seções abertas no modal de detalhes
+  const [openSections, setOpenSections] = useState(() => {
+    const map = {};
+    (sections || []).forEach((s) => {
+      map[s.id] = false;
+    });
+    return map;
+  });
+
+  const toggleSection = (id) => {
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const formatDisplayValue = (field, val) => {
+    if (!val && val !== 0) return "-";
+    if (field === "dt_nacimento" || field === "data_nascimento") {
+      try {
+        return val ? new Date(val).toLocaleDateString("pt-BR") : "-";
+      } catch {
+        return val;
+      }
+    }
+    if (Array.isArray(val)) return val.join(", ");
+    if (typeof val === "object" && val !== null) return JSON.stringify(val);
+    return val;
+  };
+
+  // Formatação específica para CPF, CEP e telefones
+  const formatCPF = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length !== 11) return raw;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
+  const formatCEP = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length !== 8) return raw;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const formatPhone = (raw) => {
+    if (!raw) return "-";
+    const digits = String(raw).replace(/\D/g, "");
+    if (digits.length === 11) {
+      // (XX) 9XXXX-XXXX
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    }
+    if (digits.length === 10) {
+      // (XX) XXXX-XXXX
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return raw;
+  };
+
+  // Enhance formatDisplayValue to mask cpf/cep/phones when rendering details
+  const originalFormatDisplayValue = formatDisplayValue;
+  const formatDisplayValueMasked = (field, val) => {
+    if (!val && val !== 0) return "-";
+    const key = String(field || "").toLowerCase();
+    if (key === "cpf") return formatCPF(val);
+    if (key === "cep") return formatCEP(val);
+    if (key === "celular_01" || key === "celular_02" || key === "telefone" || key === "telefone_01") return formatPhone(val);
+    return originalFormatDisplayValue(field, val);
+  };
+
+  // replace usages in this component by binding the masked formatter name used below
 
   const [historicoIndex, setHistoricoIndex] = useState(0);
 
@@ -128,25 +203,73 @@ const AdminAdoptants = () => {
     });
   }
 
-  const candidatosOrdenados = candidatos.map((c) => ({
-    ...c,
-    cidade: ordenarInteresses(c.cidade),
-  }));
+  const normalizarStatusInteresse = (status) => {
+    const statusNormalizado = (status || "").toLowerCase();
+    if (!statusNormalizado) return "pendente";
+    return statusNormalizado === "interessado"
+      ? "pendente"
+      : statusNormalizado;
+  };
+
+  const formatarInteresses = (interessesBrutos = []) =>
+    ordenarInteresses(interessesBrutos).map((interesse) => ({
+      ...interesse,
+      status: normalizarStatusInteresse(interesse.status),
+    }));
+
+  const resolverStatusAtual = (candidato, interessesFormatados = []) => {
+    const statusDoCandidato = (candidato?.status || "").toLowerCase();
+    if (statusDoCandidato === "aprovado" || statusDoCandidato === "rejeitado") {
+      return statusDoCandidato;
+    }
+
+    const statusDaUltimaTentativa = normalizarStatusInteresse(
+      interessesFormatados?.[0]?.status
+    );
+
+    if (statusDaUltimaTentativa !== "pendente") {
+      return statusDaUltimaTentativa;
+    }
+
+    if (statusDoCandidato) {
+      return normalizarStatusInteresse(statusDoCandidato);
+    }
+
+    return "pendente";
+  };
+
+  const candidatosOrdenados = candidatos.map((c) => {
+    const interessesOriginais = Array.isArray(c.interesses)
+      ? c.interesses
+      : Array.isArray(c.cidade)
+      ? c.cidade
+      : [];
+    const interessesFormatados = formatarInteresses(interessesOriginais);
+
+    return {
+      ...c,
+      interesses: interessesFormatados,
+      statusAtual: resolverStatusAtual(c, interessesFormatados),
+    };
+  });
 
   const filteredCandidatos = candidatosOrdenados.filter((candidato) => {
-    const interesses = candidato.cidade || [];
+    const interesses = candidato.interesses || [];
     const ultimaTentativa = interesses[0];
+    const statusAtual =
+      candidato.statusAtual ||
+      normalizarStatusInteresse(ultimaTentativa?.status);
 
     if (selectedStatus === "todos") return true; // mostra todos cadastrados
-    if (!ultimaTentativa) return false; // só mostra nos outros filtros quem já tentou adotar
+    if (!ultimaTentativa && selectedStatus) return statusAtual === selectedStatus;
     if (selectedStatus === "aprovado") {
-      return ultimaTentativa.status === "aprovado";
+      return statusAtual === "aprovado";
     }
     if (selectedStatus === "rejeitado") {
-      return ultimaTentativa.status === "rejeitado";
+      return statusAtual === "rejeitado";
     }
     if (selectedStatus === "pendente") {
-      return ultimaTentativa.status === "pendente";
+      return statusAtual === "pendente";
     }
     return true;
   });
@@ -183,6 +306,7 @@ const AdminAdoptants = () => {
       case "rejeitado":
         return "bg-red-100 text-red-800";
       case "pendente":
+      case "interessado":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -196,6 +320,7 @@ const AdminAdoptants = () => {
       case "rejeitado":
         return "Rejeitado";
       case "pendente":
+      case "interessado":
         return "Pendente";
       default:
         return status;
@@ -211,10 +336,7 @@ const AdminAdoptants = () => {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <Link
-              to="/admin"
-              className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0"
-            >
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
@@ -225,22 +347,16 @@ const AdminAdoptants = () => {
                   className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                   style={{ wordBreak: "break-word" }}
                 >
-                  Gerenciar Candidatos
+                  Central de Gerenciamento
                 </h1>
               </div>
-            </Link>
+            </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
-                Dashboard
-              </Link>
-              <Link
-                to="/"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
-              >
-                Site Principal
+              🏠 Dashboard
               </Link>
               <button
                 onClick={() => {
@@ -249,7 +365,7 @@ const AdminAdoptants = () => {
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
               >
-                Sair
+               🚪 Sair
               </button>
             </div>
           </div>
@@ -267,16 +383,6 @@ const AdminAdoptants = () => {
           </p>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setSelectedStatus("todos")}
-              className={`px-4 py-2 rounded-full text-sm font-medium shadow-md transition-all hover:scale-105 ${
-                selectedStatus === "todos"
-                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-sky-50"
-              }`}
-            >
-              Todos ({candidatos.length})
-            </button>
-            <button
               onClick={() => setSelectedStatus("pendente")}
               className={`px-4 py-2 rounded-full text-sm font-medium shadow-md transition-all hover:scale-105 ${
                 selectedStatus === "pendente"
@@ -286,10 +392,11 @@ const AdminAdoptants = () => {
             >
               Pendentes (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "pendente")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.statusAtual === "pendente"
+                ).length
               }
-              )
+            )
             </button>
             <button
               onClick={() => setSelectedStatus("aprovado")}
@@ -301,10 +408,11 @@ const AdminAdoptants = () => {
             >
               Aprovados (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "aprovado")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.statusAtual === "aprovado"
+                ).length
               }
-              )
+            )
             </button>
             <button
               onClick={() => setSelectedStatus("rejeitado")}
@@ -316,10 +424,11 @@ const AdminAdoptants = () => {
             >
               Rejeitados (
               {
-                candidatos.filter((c) => c.cidade?.[0]?.status === "rejeitado")
-                  .length
+                candidatosOrdenados.filter(
+                  (c) => c.statusAtual === "rejeitado"
+                ).length
               }
-              )
+            )
             </button>
           </div>
         </div>
@@ -342,8 +451,9 @@ const AdminAdoptants = () => {
           ) : (
             <div className="divide-y divide-gray-200">
               {filteredCandidatos.map((candidato) => {
-                const interesses = candidato.cidade || [];
+                const interesses = candidato.interesses || [];
                 const ultimaTentativa = interesses[0];
+                const statusAtual = candidato.statusAtual;
                 return (
                   <div
                     key={candidato.id || candidato.cpf}
@@ -355,25 +465,24 @@ const AdminAdoptants = () => {
                           <h3 className="text-lg font-medium text-gray-900">
                             {candidato.nome}
                           </h3>
-                          {ultimaTentativa && (
+                          {statusAtual && (
                             <span
                               className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                                ultimaTentativa.status
+                                statusAtual
                               )}`}
                             >
-                              {getStatusText(ultimaTentativa.status)}
+                              {getStatusText(statusAtual)}
                             </span>
                           )}
                         </div>
-                        <div className="mt-1 text-sm text-gray-600">
+                        <div className="mt-1 text-base text-gray-700">
                           <p>
                             {candidato.email} • Tel:{" "}
-                            {candidato.telefone || candidato.celular_01}
+                            {formatDisplayValueMasked('telefone', candidato.telefone || candidato.celular_01)}
                           </p>
                           {ultimaTentativa && (
                             <p>
-                              Interesse em: {ultimaTentativa.pet?.nome || "-"} •
-                              Data: {new Date().toLocaleDateString("pt-BR")}
+                              Interesse no pet: {ultimaTentativa.pet?.nome || "-"}
                             </p>
                           )}
                         </div>
@@ -384,17 +493,22 @@ const AdminAdoptants = () => {
                             setLoadingDetalhes(true);
                             setCandidatoSelecionado(candidato);
                             try {
-                              if (candidato.cpf) {
-                                const res =
-                                  await AdoptantServices.getAdoptantById(
-                                    candidato.cpf
-                                  );
-                                setDetalhesCandidato(res.data);
-                              } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível exibir detalhes."
-                                );
-                                setDetalhesCandidato(null);
+                                if (candidato.id) {
+                                  const res = await AdoptantServices.getAdoptantById(candidato.id);
+                                const candidatoDetalhado = res.data || {};
+                                setDetalhesCandidato({
+                                  ...candidatoDetalhado,
+                                  interesses: formatarInteresses(
+                                    Array.isArray(
+                                      candidatoDetalhado.interesses
+                                    )
+                                      ? candidatoDetalhado.interesses
+                                      : []
+                                  ),
+                                });
+                                } else {
+                                  alert("ID do candidato não encontrado. Não é possível exibir detalhes.");
+                                  setDetalhesCandidato(null);
                               }
                             } catch {
                               setDetalhesCandidato(null);
@@ -406,91 +520,16 @@ const AdminAdoptants = () => {
                           Ver Detalhes
                         </button>
 
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "aprovado" && (
-                            <div className="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
-                              ✓ Já aprovado - Adoção ativa
-                            </div>
-                          )}
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "rejeitado" && (
-                            <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
-                              ✗ Rejeitado anteriormente
-                            </div>
-                          )}
-                        {ultimaTentativa &&
-                          ultimaTentativa.status === "pendente" && (
-                            <>
-                              <button
-                                onClick={async () => {
-                                  if (
-                                    candidato.cpf &&
-                                    ultimaTentativa?.pet_id
-                                  ) {
-                                    const confirmar = window.confirm(
-                                      `Tem certeza que deseja APROVAR o candidato "${
-                                        candidato.nome
-                                      }" para o pet "${
-                                        ultimaTentativa.pet?.nome || "Pet"
-                                      }"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
-                                    );
-
-                                    if (confirmar) {
-                                      await updateStatus(
-                                        candidato.cpf,
-                                        "aprovado",
-                                        "",
-                                        ultimaTentativa.pet_id
-                                      );
-                                    }
-                                  } else {
-                                    alert(
-                                      "CPF ou pet_id não encontrado. Não é possível aprovar."
-                                    );
-                                  }
-                                }}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                              >
-                                Aprovar
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (candidato.cpf) {
-                                    const confirmar = window.confirm(
-                                      `Tem certeza que deseja REJEITAR o candidato "${
-                                        candidato.nome
-                                      }" para o pet "${
-                                        ultimaTentativa.pet?.nome || "Pet"
-                                      }"?`
-                                    );
-
-                                    if (confirmar) {
-                                      const motivo = prompt(
-                                        "Motivo da rejeição:",
-                                        ""
-                                      );
-                                      if (motivo !== null) {
-                                        // Usuario não cancelou o prompt
-                                        updateStatus(
-                                          candidato.cpf,
-                                          "rejeitado",
-                                          motivo,
-                                          ultimaTentativa?.pet_id
-                                        );
-                                      }
-                                    }
-                                  } else {
-                                    alert(
-                                      "CPF do candidato não encontrado. Não é possível rejeitar."
-                                    );
-                                  }
-                                }}
-                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm shadow-md transition-all hover:scale-105"
-                              >
-                                Rejeitar
-                              </button>
-                            </>
-                          )}
+                        {statusAtual === "aprovado" && (
+                          <div className="bg-green-50 border border-green-200 rounded px-2 py-1 text-xs text-green-700">
+                            Ja aprovado - Adocao ativa
+                          </div>
+                        )}
+                        {statusAtual === "rejeitado" && (
+                          <div className="bg-red-50 border border-red-200 rounded px-2 py-1 text-xs text-red-700">
+                            Rejeitado anteriormente
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -510,9 +549,10 @@ const AdminAdoptants = () => {
         {/* Modal de detalhes */}
         {candidatoSelecionado && (
           <div>
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-sky-200">
-                <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
+            <div onClick={() => setCandidatoSelecionado(null)} className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-sky-200 overflow-hidden">
+                <div className="max-h-[90vh] overflow-y-auto">
+                  <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
                   <h2 className="text-xl font-semibold text-sky-700">
                     Detalhes do Candidato
                   </h2>
@@ -543,56 +583,66 @@ const AdminAdoptants = () => {
                         <h3 className="font-medium text-gray-900 mb-2">
                           Informações Pessoais
                         </h3>
-                        <div className="bg-gray-50 p-3 rounded">
-                          <p>
-                            <strong>Nome:</strong> {detalhesCandidato.nome}
-                          </p>
-                          <p>
-                            <strong>Email:</strong> {detalhesCandidato.email}
-                          </p>
-                          <p>
-                            <strong>Telefone:</strong>{" "}
-                            {detalhesCandidato.telefone ||
-                              detalhesCandidato.celular_01}
-                          </p>
-                          <p>
-                            <strong>Endereço:</strong>{" "}
-                            {detalhesCandidato.endereco}
-                          </p>
+                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 text-sm">
+                          {(() => {
+                            const adotanteSection = (sections || []).find(
+                              (s) => s.id === "adotante"
+                            );
+                            if (!adotanteSection) {
+                              return (
+                                <div>
+                                  <p>
+                                    <strong>Nome:</strong> {detalhesCandidato.nome}
+                                  </p>
+                                  <p>
+                                    <strong>Email:</strong> {detalhesCandidato.email}
+                                  </p>
+                                </div>
+                              );
+                            }
+
+                            return adotanteSection.items.map((item) => {
+                              const val = detalhesCandidato?.[item.field];
+                              return (
+                                  <div key={item.field} className="flex flex-col">
+                                    <span className="text-base text-gray-800 font-semibold">{item.label}</span>
+                                    <span className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</span>
+                                  </div>
+                                );
+                            });
+                          })()}
                         </div>
                       </div>
                       <div>
                         <h3 className="font-medium text-gray-900 mt-4 mb-2">
                           Respostas do Formulário
                         </h3>
-                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto text-xs md:text-sm">
-                          {adoptionCandidateQuestions.map(
-                            ({ field, label }) => {
-                              const valor = detalhesCandidato[field];
-                              if (
-                                Array.isArray(valor) ||
-                                (typeof valor === "object" && valor !== null)
-                              ) {
-                                return null;
-                              }
-                              return (
-                                <p
-                                  key={field}
-                                  style={{ whiteSpace: "pre-line" }}
-                                >
-                                  <strong>{label}:</strong>{" "}
-                                  {field === "data_nascimento"
-                                    ? valor
-                                      ? new Date(valor).toLocaleDateString(
-                                          "pt-BR"
-                                        )
-                                      : "-"
-                                    : valor || "-"}
-                                  <br />
-                                </p>
-                              );
-                            }
-                          )}
+                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-4 text-base">
+                          {(sections || []).filter(s => s.id !== 'adotante').map((section) => (
+                            <div key={section.id} className="border rounded-lg overflow-hidden">
+                              <button
+                                type="button"
+                                onClick={() => toggleSection(section.id)}
+                                className="w-full text-left px-4 py-3 bg-white flex items-center justify-between hover:bg-gray-50"
+                              >
+                                <span className="font-medium text-gray-800">{section.title}</span>
+                                <span className="text-gray-500">{openSections[section.id] ? '−' : '+'}</span>
+                              </button>
+                              {openSections[section.id] && (
+                                <div className="px-4 py-3 bg-gray-50">
+                                  {section.items.map((item) => {
+                                    const val = detalhesCandidato?.[item.field];
+                                    return (
+                                      <div key={item.field} className="mb-2" style={{ whiteSpace: 'pre-line' }}>
+                                        <div className="text-base text-gray-800 font-semibold">{item.label}</div>
+                                        <div className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
@@ -638,47 +688,32 @@ const AdminAdoptants = () => {
                           </div>
                         )}
 
-                      {detalhesCandidato.cidade &&
-                        detalhesCandidato.cidade.length > 1 && (
-                          <div>
-                            <button
-                              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
-                              onClick={() => setShowHistorico(true)}
-                            >
-                              Histórico de Tentativas de Adoção
-                            </button>
-                          </div>
-                        )}
+                      {detalhesCandidato && (
+                        <div>
+                          <button
+                            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
+                            onClick={() => setShowHistorico(true)}
+                          >
+                            Histórico de Tentativas de Adoção
+                          </button>
+                        </div>
+                      )}
                       {/* Aprovação/Rejeição da última tentativa (forçado para teste) */}
                       {detalhesCandidato && (
                         <div className="flex space-x-3 pt-4">
                           <button
                             onClick={() => {
-                              if (detalhesCandidato.cpf) {
-                                const petNome =
-                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
-                                  "Pet";
-                                const confirmar = window.confirm(
-                                  `Tem certeza que deseja APROVAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?\n\nEsta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.`
-                                );
-
-                                if (confirmar) {
-                                  // Busca o pet_id da última tentativa do candidato nos detalhes
-                                  const petIdAprovar =
-                                    detalhesCandidato?.cidade?.[0]?.pet_id;
-                                  updateStatus(
-                                    detalhesCandidato.cpf,
-                                    "aprovado",
-                                    "",
-                                    petIdAprovar
-                                  );
-                                  setCandidatoSelecionado(null);
-                                  setDetalhesCandidato(null);
-                                }
+                              if (detalhesCandidato?.id) {
+                                const interesse = detalhesCandidato?.interesses?.[0];
+                                setApproveContext({
+                                  id: detalhesCandidato.id,
+                                  candidatoNome: detalhesCandidato.nome,
+                                  petId: interesse?.pet_id,
+                                  petName: interesse?.pet?.nome || "Pet",
+                                });
+                                setShowApproveConfirm(true);
                               } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível aprovar."
-                                );
+                                alert("ID do candidato não encontrado. Não é possível aprovar.");
                               }
                             }}
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
@@ -687,37 +722,18 @@ const AdminAdoptants = () => {
                           </button>
                           <button
                             onClick={() => {
-                              if (detalhesCandidato.cpf) {
-                                const petNome =
-                                  detalhesCandidato?.cidade?.[0]?.pet?.nome ||
-                                  "Pet";
-                                const confirmar = window.confirm(
-                                  `Tem certeza que deseja REJEITAR o candidato "${detalhesCandidato.nome}" para o pet "${petNome}"?`
-                                );
-
-                                if (confirmar) {
-                                  const motivo = prompt(
-                                    "Motivo da rejeição:",
-                                    ""
-                                  );
-                                  if (motivo !== null) {
-                                    // Usuario não cancelou o prompt
-                                    const petIdRejeitar =
-                                      detalhesCandidato?.cidade?.[0]?.pet_id;
-                                    updateStatus(
-                                      detalhesCandidato.cpf,
-                                      "rejeitado",
-                                      motivo,
-                                      petIdRejeitar
-                                    );
-                                    setCandidatoSelecionado(null);
-                                    setDetalhesCandidato(null);
-                                  }
-                                }
+                              if (detalhesCandidato?.id) {
+                                const interesse = detalhesCandidato?.interesses?.[0];
+                                setRejectContext({
+                                  id: detalhesCandidato.id,
+                                  candidatoNome: detalhesCandidato.nome,
+                                  petId: interesse?.pet_id,
+                                  petName: interesse?.pet?.nome || "Pet",
+                                });
+                                setRejectReason("");
+                                setShowRejectConfirm(true);
                               } else {
-                                alert(
-                                  "CPF do candidato não encontrado. Não é possível rejeitar."
-                                );
+                                alert("ID do candidato não encontrado. Não é possível rejeitar.");
                               }
                             }}
                             className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
@@ -732,11 +748,12 @@ const AdminAdoptants = () => {
                       Não foi possível carregar os detalhes do candidato.
                     </div>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
             {/* Modal flutuante do histórico */}
-            {showHistorico && candidatoSelecionado && (
+            {showHistorico && detalhesCandidato && (
               <div
                 style={{ zIndex: 9999 }}
                 className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
@@ -767,10 +784,10 @@ const AdminAdoptants = () => {
                     >
                       &#8592;
                     </button>
-                    <span className="text-sm text-gray-600">
-                      {historicoIndex + 1} de{" "}
-                      {Array.isArray(candidatoSelecionado.cidade)
-                        ? candidatoSelecionado.cidade.length
+                    <span className="text-base text-gray-700">
+                      {historicoIndex + 1} de {" "}
+                      {Array.isArray(detalhesCandidato.interesses)
+                        ? detalhesCandidato.interesses.length
                         : 0}
                     </span>
                     <button
@@ -778,23 +795,23 @@ const AdminAdoptants = () => {
                         setHistoricoIndex((prev) =>
                           Math.min(
                             prev + 1,
-                            (Array.isArray(candidatoSelecionado.cidade)
-                              ? candidatoSelecionado.cidade.length
+                            (Array.isArray(detalhesCandidato.interesses)
+                              ? detalhesCandidato.interesses.length
                               : 1) - 1
                           )
                         )
                       }
                       disabled={
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.cidade)
-                          ? candidatoSelecionado.cidade.length
-                          : 1) -
-                          1
+                          (Array.isArray(detalhesCandidato.interesses)
+                            ? detalhesCandidato.interesses.length
+                            : 1) -
+                            1
                       }
                       className={`text-2xl px-2 ${
                         historicoIndex ===
-                        (Array.isArray(candidatoSelecionado.cidade)
-                          ? candidatoSelecionado.cidade.length
+                        (Array.isArray(detalhesCandidato.interesses)
+                          ? detalhesCandidato.interesses.length
                           : 1) -
                           1
                           ? "text-gray-300"
@@ -805,64 +822,136 @@ const AdminAdoptants = () => {
                       &#8594;
                     </button>
                   </div>
-                  {Array.isArray(candidatoSelecionado.cidade) &&
-                    candidatoSelecionado.cidade.length > 0 && (
-                      <div className="bg-gray-50 p-3 rounded border border-sky-100">
-                        {(() => {
-                          const interesse =
-                            candidatoSelecionado.cidade[historicoIndex];
-                          return (
-                            <>
-                              <div className="flex items-center gap-2 mb-2">
-                                <span
-                                  className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                                    interesse.status
-                                  )}`}
-                                >
-                                  {getStatusText(interesse.status)}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {interesse.data_interesse
-                                    ? new Date(
-                                        interesse.data_interesse
-                                      ).toLocaleDateString("pt-BR")
-                                    : "-"}
-                                </span>
-                              </div>
-                              <p>
-                                <strong>Pet:</strong>{" "}
-                                {interesse.pet?.nome || "-"}
+                    {Array.isArray(detalhesCandidato.interesses) &&
+                    detalhesCandidato.interesses.length > 0 && (
+                    <div className="bg-gray-50 p-3 rounded border border-sky-100">
+                      {(() => {
+                        const interesse = detalhesCandidato.interesses[historicoIndex];
+                        return (
+                          <>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(interesse.status)}`}>
+                                {getStatusText(interesse.status)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {interesse.data_interesse ? new Date(interesse.data_interesse).toLocaleDateString("pt-BR") : "-"}
+                              </span>
+                            </div>
+                            <p>
+                              <strong>Pet:</strong> {interesse.pet?.nome || "-"}
+                            </p>
+                            <p>
+                              <strong>Tipo de Moradia:</strong> {detalhesCandidato.tipo_moradia || detalhesCandidato.mora_em || "-"}
+                            </p>
+                            <p>
+                              <strong>Experiência:</strong> {detalhesCandidato.experiencia_pets || detalhesCandidato.ja_teve_tem_animais || "-"}
+                            </p>
+                            <p>
+                              <strong>Motivação:</strong> {detalhesCandidato.motivacao || detalhesCandidato.finalidade_animal || "-"}
+                            </p>
+                            {interesse.status === "rejeitado" && interesse.observacoes_admin && (
+                              <p className="text-red-700 mt-1">
+                                <strong>Motivo da Rejeição:</strong> {interesse.observacoes_admin}
                               </p>
-                              <p>
-                                <strong>Tipo de Moradia:</strong>{" "}
-                                {candidatoSelecionado.tipo_moradia ||
-                                  candidatoSelecionado.mora_em ||
-                                  "-"}
-                              </p>
-                              <p>
-                                <strong>Experiência:</strong>{" "}
-                                {candidatoSelecionado.experiencia_pets ||
-                                  candidatoSelecionado.ja_teve_tem_animais ||
-                                  "-"}
-                              </p>
-                              <p>
-                                <strong>Motivação:</strong>{" "}
-                                {candidatoSelecionado.motivacao ||
-                                  candidatoSelecionado.finalidade_animal ||
-                                  "-"}
-                              </p>
-                              {interesse.status === "rejeitado" &&
-                                interesse.observacoes_admin && (
-                                  <p className="text-red-700 mt-1">
-                                    <strong>Motivo da Rejeição:</strong>{" "}
-                                    {interesse.observacoes_admin}
-                                  </p>
-                                )}
-                            </>
-                          );
-                        })()}
-                      </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                     )}
+                </div>
+              </div>
+            )}
+            {/* Modal de confirmação de aprovação */}
+            {showApproveConfirm && (
+              <div
+                style={{ zIndex: 10000 }}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+                onClick={() => setShowApproveConfirm(false)}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+                >
+                  <h3 className="text-xl font-bold text-sky-700 mb-3">Confirmar Aprovação</h3>
+                  <p className="mb-4 text-gray-800">
+                    Tem certeza que deseja <strong>APROVAR</strong> o candidato "{approveContext.candidatoNome}" para o pet "{approveContext.petName}"?
+                  </p>
+                  <p className="mb-4 text-gray-600">
+                    Esta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowApproveConfirm(false)}
+                      className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!approveContext.petId) {
+                          alert('pet_id não encontrado. Não é possível aprovar.');
+                          return;
+                        }
+                        await updateStatus(approveContext.id, 'aprovado', '', approveContext.petId);
+                        setShowApproveConfirm(false);
+                        setCandidatoSelecionado(null);
+                        setDetalhesCandidato(null);
+                      }}
+                      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                    >
+                      Confirmar e Aprovar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Modal de confirmação de rejeição */}
+            {showRejectConfirm && (
+              <div
+                style={{ zIndex: 10000 }}
+                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+                onClick={() => setShowRejectConfirm(false)}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+                >
+                  <h3 className="text-xl font-bold text-rose-700 mb-3">Confirmar Rejeição</h3>
+                  <p className="mb-3 text-gray-800">
+                    Tem certeza que deseja <strong>REJEITAR</strong> o candidato "{rejectContext.candidatoNome}" para o pet "{rejectContext.petName}"?
+                  </p>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Motivo da rejeição</label>
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    className="w-full border rounded p-2 mb-4"
+                    rows={4}
+                    placeholder="Descreva o motivo da rejeição (opcional)"
+                  />
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => setShowRejectConfirm(false)}
+                      className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!rejectContext.petId) {
+                          alert('pet_id não encontrado. Não é possível rejeitar.');
+                          return;
+                        }
+                        await updateStatus(rejectContext.id, 'rejeitado', rejectReason || '', rejectContext.petId);
+                        setShowRejectConfirm(false);
+                        setCandidatoSelecionado(null);
+                        setDetalhesCandidato(null);
+                      }}
+                      className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Confirmar e Rejeitar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

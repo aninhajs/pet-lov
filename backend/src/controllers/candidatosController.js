@@ -71,7 +71,7 @@ export const getCandidatoById = async (req, res) => {
     const { id } = req.params;
 
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { cpf: id },
+      where: { id },
       include: {
         interesses: {
           include: {
@@ -116,11 +116,29 @@ export const getCandidatoById = async (req, res) => {
       },
     });
 
-    // Se candidato existe, buscar histórico de rejeições
+    // Se candidato existe, buscar histórico de tentativas e histórico de rejeições
     if (candidato) {
+      // Todas as tentativas (interesses) do candidato
+      const historicoTentativas = await prisma.petInterest.findMany({
+        where: {
+          candidato_id: candidato.id,
+        },
+        include: {
+          pet: {
+            select: {
+              id: true,
+              nome: true,
+              tipo: true,
+            },
+          },
+        },
+        orderBy: { data_interesse: "desc" },
+      });
+
+      // Histórico apenas das rejeições que contenham observações (mantemos para destaque)
       const historicoRejeicoes = await prisma.petInterest.findMany({
         where: {
-          candidato_id: id,
+          candidato_id: candidato.id,
           status: "rejeitado",
           observacoes_admin: { not: null },
         },
@@ -136,7 +154,8 @@ export const getCandidatoById = async (req, res) => {
         orderBy: { data_avaliacao: "desc" },
       });
 
-      // Adicionar histórico ao candidato
+      // Adicionar históricos ao candidato
+      candidato.historico_tentativas = historicoTentativas;
       candidato.historico_rejeicoes = historicoRejeicoes;
     }
 
@@ -286,11 +305,120 @@ export const createCandidato = async (req, res) => {
       });
 
       if (candidatoExistente) {
-        return res.status(409).json({
-          success: false,
-          error: {
-            message: "Ja existe um cadastro com este CPF",
-          },
+        // Atualiza candidato existente e cria/atualiza interesse, retorna 200
+        const atualizado = await prisma.$transaction(async (tx) => {
+          await tx.adoptionCandidate.update({
+            where: { id: candidatoExistente.id },
+            data: {
+              nome,
+              endereco,
+              celular_01,
+              celular_02,
+              data_nascimento: dataNascimento,
+              perfil_social: redes_sociais,
+              profissao,
+              mora_em,
+              tipo_residencia: residencia_tipo,
+              proprietario_aceita_animais: proprietarios_aceitam,
+              normas_condominio_animais,
+              tipo_portao,
+              possui_na_residencia: normalizeToText(residencia_possui),
+              tipo_quintal_varanda: normalizeToText(area_tipo),
+              reside_com_quantas_pessoas,
+              todos_aceitam_adocao: cientes_adocao,
+              responsavel_financeiro,
+              reacao_mordida_arranho,
+              possui_veiculo,
+              moradores_trabalham: profissao_moradores,
+              alguem_alergico,
+              tem_criancas,
+              como_levara_veterinario: alguem_dirige,
+              ja_teve_tem_animais,
+              motivo_perda_animais: normalizeToText(motivo_perda_animais),
+              vacinados_quais,
+              marca_racao,
+              castrados_motivo,
+              teve_filhotes,
+              passeios,
+              quantia_mensal_cuidados: quantia_mensal_cuidados || quantia_mensal,
+              tempo_sozinho,
+              frequencia_passeios,
+              devolveria_se_mudar,
+              finalidade_animal: destino_animal,
+              comodo_dia,
+              local_dormir,
+              tempo_preso,
+              reacao_bagunca,
+              providencia_crescimento,
+              responsavel_viagem,
+              pretende_mudar_5_anos,
+              reacao_choro_latido,
+              vacinas_que_dara,
+              marca_racao_adotado,
+              criterios_alimentacao,
+              filhotes_ou_castrar,
+              preparado_responsabilidade,
+              disposto_adaptacao,
+              clinica_veterinario,
+              reacao_doenca,
+              conhece_doencas,
+              frequencia_remedio_verme,
+              frequencia_veterinario,
+              CEP: cep,
+              Cidade: cidade,
+              Pet_ID: petIdValue,
+              como_organizaria_mudanca: devolveria_se_mudar,
+            },
+          });
+
+          if (petIdValue) {
+            const interesseExistente = await tx.petInterest.findUnique({
+              where: {
+                candidato_id_pet_id: {
+                  candidato_id: candidatoExistente.id,
+                  pet_id: petIdValue,
+                },
+              },
+            });
+
+            if (!interesseExistente) {
+              await tx.petInterest.create({
+                data: {
+                  candidato_id: candidatoExistente.id,
+                  pet_id: petIdValue,
+                  status: "interessado",
+                },
+              });
+            } else {
+              await tx.petInterest.update({
+                where: { id: interesseExistente.id },
+                data: {
+                  status: "interessado",
+                  data_interesse: new Date(),
+                },
+              });
+            }
+          }
+
+          await tx.adoptionCandidate.update({
+            where: { id: candidatoExistente.id },
+            data: { status: "pendente" },
+          });
+
+          return tx.adoptionCandidate.findUnique({
+            where: { id: candidatoExistente.id },
+            include: {
+              interesses: {
+                include: { pet: { select: { id: true, nome: true, tipo: true } } },
+              },
+            },
+          });
+        });
+
+        return res.status(200).json({
+          success: true,
+          data: atualizado,
+          message: "Cadastro existente atualizado e marcado como pendente.",
         });
       }
     }
@@ -355,6 +483,7 @@ export const createCandidato = async (req, res) => {
         CEP: cep,
         Cidade: cidade,
         Pet_ID: petIdValue,
+        status: "pendente",
         como_organizaria_mudanca: devolveria_se_mudar,
 
         ...(petIdValue && {
@@ -400,18 +529,19 @@ export const createCandidato = async (req, res) => {
 
 export const updateCandidatoStatus = async (req, res) => {
   try {
-    const { id } = req.params; // Aqui 'id' é o CPF
+    const { id } = req.params; // Aqui 'id' é o UUID do candidato
     const { status, observacoes, pet_id } = req.body;
+    const statusNormalizado = (status || "").toLowerCase();
 
     console.log("🔍 DEBUG - updateCandidatoStatus:");
-    console.log("  - ID (CPF):", id);
+    console.log("  - ID (UUID):", id);
     console.log("  - Status:", status);
     console.log("  - Pet ID:", pet_id);
     console.log("  - Observações:", observacoes);
 
     // Verificar se candidato existe
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { cpf: id },
+      where: { id },
       include: {
         interesses: {
           include: {
@@ -431,7 +561,7 @@ export const updateCandidatoStatus = async (req, res) => {
     console.log("📋 Candidato encontrado:", candidato ? "SIM" : "NÃO");
 
     if (!candidato) {
-      console.log("❌ Candidato não encontrado para CPF:", id);
+      console.log("❌ Candidato não encontrado para ID:", id);
       return res.status(404).json({
         success: false,
         error: {
@@ -452,7 +582,7 @@ export const updateCandidatoStatus = async (req, res) => {
     }
 
     // Se estiver aprovando, verificar se o pet ainda está disponível
-    if (status.toLowerCase() === "aprovado") {
+    if (statusNormalizado === "aprovado") {
       console.log("🐕 Buscando pet com ID:", pet_id);
 
       const pet = await prisma.pet.findUnique({
@@ -567,15 +697,20 @@ export const updateCandidatoStatus = async (req, res) => {
       await prisma.petInterest.updateMany({
         where: { candidato_id: id, pet_id },
         data: {
-          status: status.toLowerCase(),
+          status: statusNormalizado,
           data_avaliacao: new Date(),
           observacoes_admin: observacoes,
         },
       });
     }
 
+    await prisma.adoptionCandidate.update({
+      where: { id },
+      data: { status: statusNormalizado },
+    });
+
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
-      where: { cpf: id },
+      where: { id },
       include: {
         interesses: {
           include: {
@@ -596,7 +731,7 @@ export const updateCandidatoStatus = async (req, res) => {
       success: true,
       data: candidatoAtualizado,
       message:
-        status.toLowerCase() === "aprovado"
+        statusNormalizado === "aprovado"
           ? "Candidato aprovado e adoção registrada automaticamente! Pet marcado como adotado."
           : "Candidato rejeitado com sucesso!",
     });

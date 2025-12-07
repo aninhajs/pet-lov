@@ -7,7 +7,7 @@ import { AdoptionServices } from "../../services/AdoptionServices";
 
 const GerenciarPets = () => {
   const [pets, setPets] = useState([]);
-  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroStatus, setFiltroStatus] = useState("disponivel");
   const [filtroNome, setFiltroNome] = useState("");
   const [petSelecionado, setPetSelecionado] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
@@ -305,7 +305,7 @@ const GerenciarPets = () => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
+                className="text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
                 🏠 Dashboard
               </Link>
@@ -343,16 +343,7 @@ const GerenciarPets = () => {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setFiltroStatus("todos")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
-                filtroStatus === "todos"
-                  ? "bg-gradient-to-r from-sky-500 to-sky-600 text-white scale-105"
-                  : "bg-white text-gray-700 hover:bg-sky-50 hover:text-sky-600 hover:scale-105"
-              }`}
-            >
-              📋 Todos ({pets.length})
-            </button>
+            {/* Removed 'Todos' filter per request - only Disponíveis / Em Processo / Adotados remain */}
             <button
               onClick={() => setFiltroStatus("disponivel")}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
@@ -644,12 +635,12 @@ const GerenciarPets = () => {
                   ➕ Cadastrar Primeiro Pet
                 </Link>
               )}
-              {filtroStatus !== "todos" && pets.length > 0 && (
+              {filtroStatus !== "disponivel" && pets.length > 0 && (
                 <button
-                  onClick={() => setFiltroStatus("todos")}
+                  onClick={() => setFiltroStatus("disponivel")}
                   className="mt-4 text-sky-600 hover:text-sky-700 font-semibold"
                 >
-                  📋 Ver todos os pets
+                  ✅ Ver disponíveis
                 </button>
               )}
             </div>

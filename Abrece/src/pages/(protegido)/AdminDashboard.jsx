@@ -24,61 +24,85 @@ const AdminDashboard = () => {
   // Carregar estatísticas reais do backend
   useEffect(() => {
     const loadStats = async () => {
+      console.time("loadStats");
       try {
         setIsLoading(true);
 
-        // Buscar pets do backend
-        const response = await PetServices.getAllPets();
+        console.time("fetchAllMain");
 
-        if (response.success) {
-          const pets = response.data.data || response.data || [];
-          const totalPets = pets.length;
-          const petsAdotados = pets.filter(
-            (pet) => pet.status === "adotado"
-          ).length;
-
-          setStats((prevStats) => ({
-            ...prevStats,
-            totalPets,
-            petsAdotados,
-          }));
-
-          console.log("✅ Estatísticas carregadas:", {
-            totalPets,
-            petsAdotados,
-          });
-        } else {
-          console.error("❌ Erro ao carregar pets:", response.message);
-        }
-
-        // Buscar estatísticas de candidatos do backend
-        try {
-          const candidatosResponse = await AdoptantServices.getStats();
-          if (candidatosResponse.success) {
-            const totalCandidatos =
-              candidatosResponse.data.total_candidatos || 0;
-            setStats((prevStats) => ({
-              ...prevStats,
-              candidatos: totalCandidatos,
-            }));
-            console.log("✅ Candidatos carregados:", totalCandidatos);
+        // Medir latência individual de cada request envolvida no Promise.all
+        const petsPromise = (async () => {
+          console.time("AdminDashboard:petsFetch");
+          try {
+            // Usar endpoint de estatísticas para evitar trazer todos os registros
+            return await PetServices.getStats();
+          } finally {
+            console.timeEnd("AdminDashboard:petsFetch");
           }
-        } catch (error) {
-          console.error(
-            "❌ Erro ao carregar estatísticas de candidatos:",
-            error
-          );
+        })();
+
+        const pendentesPromise = (async () => {
+          console.time("AdminDashboard:pendentesFetch");
+          try {
+            return await AdoptantServices.getAllAdoptants({ status: "pendente", page: 1, limit: 1 });
+          } finally {
+            console.timeEnd("AdminDashboard:pendentesFetch");
+          }
+        })();
+
+        const vacinasPromise = (async () => {
+          console.time("AdminDashboard:vacinasFetch");
+          try {
+            return await VacinaServices.getAllVacinas({ limit: 10 });
+          } finally {
+            console.timeEnd("AdminDashboard:vacinasFetch");
+          }
+        })();
+
+        const candidatosStatsPromise = (async () => {
+          console.time("AdminDashboard:candidatosStatsFetch");
+          try {
+            return await AdoptantServices.getStats();
+          } finally {
+            console.timeEnd("AdminDashboard:candidatosStatsFetch");
+          }
+        })();
+
+        const [petsResp, pendentesResp, vacinasResp, candidatosStatsResp] = await Promise.all([
+          petsPromise,
+          pendentesPromise,
+          vacinasPromise,
+          candidatosStatsPromise,
+        ]);
+
+        console.timeEnd("fetchAllMain");
+
+        // PETS — usamos stats leves do backend (counts) para reduzir payload
+        if (petsResp?.success && petsResp.data) {
+          // Esperamos { total, disponiveis, em_processo, adotados, caes, gatos }
+          const petStats = petsResp.data.data || petsResp.data || petsResp.data?.data || petsResp.data;
+          // totalPets no card é definido como disponiveis + em_processo
+          const disponiveis = Number(petStats.disponiveis ?? petStats.disponiveis ?? 0);
+          const emProcesso = Number(petStats.em_processo ?? petStats.em_processo ?? 0);
+          const adotados = Number(petStats.adotados ?? petStats.adotados ?? 0);
+
+          const totalPets = disponiveis + emProcesso;
+          const petsAdotados = adotados;
+
+          setStats((s) => ({ ...s, totalPets, petsAdotados }));
         }
 
-        // Carregar vacinas do backend
-        const vacinasResponse = await VacinaServices.getAllVacinas({
-          limit: 10, // Buscar as 10 mais recentes
-        });
+        // PENDENTES — já buscado com limit 1, usar pagination.totalCount quando disponível
+        if (pendentesResp?.success) {
+          const pendentesCount =
+            pendentesResp.pagination?.totalCount ??
+            (Array.isArray(pendentesResp.data) ? pendentesResp.data.length : 0);
+          setStats((s) => ({ ...s, candidatos: pendentesCount }));
+        }
 
-        if (vacinasResponse.success) {
-          const vacinasData = vacinasResponse.data.data?.vacinas || [];
-
-          // Formatar para o formato esperado pelo componente
+        // VACINAS
+        if (vacinasResp?.success) {
+          const vacinasData = vacinasResp.data.data?.vacinas || [];
           const vacinasFormatadas = vacinasData.map((vacina) => ({
             id: vacina.id,
             petNome: vacina.pet?.nome || "Pet não encontrado",
@@ -87,21 +111,19 @@ const AdminDashboard = () => {
             dataRevacina: vacina.data_revacina,
             dataCadastro: vacina.data_cadastro,
           }));
-
           setTodasVacinas(vacinasFormatadas);
           setVacinas(vacinasFormatadas.slice(0, 2));
+        }
 
-          console.log("✅ Vacinas carregadas:", vacinasFormatadas.length);
-        } else {
-          console.error(
-            "❌ Erro ao carregar vacinas:",
-            vacinasResponse.message
-          );
+        // log opcional de stats de candidatos
+        if (candidatosStatsResp?.success) {
+          console.log("candidatos stats:", candidatosStatsResp.data);
         }
       } catch (error) {
         console.error("❌ Erro ao carregar estatísticas:", error);
       } finally {
         setIsLoading(false);
+        console.timeEnd("loadStats");
       }
     };
 
@@ -174,7 +196,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium text-center"
+                class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
                 Site Principal
               </Link>

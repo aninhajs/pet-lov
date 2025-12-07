@@ -22,13 +22,13 @@ const Header = () => {
           <div className="flex space-x-4">
             <Link
               to="/"
-              className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-full text-sm font-medium transition-colors"
+              class="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
             >
               Início
             </Link>
             <Link
               to="/pets"
-              className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-full text-sm font-medium transition-colors"
+              class="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
             >
               Ver Pets
             </Link>
