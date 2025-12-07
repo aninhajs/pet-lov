@@ -114,6 +114,12 @@ const CadastrarPet = () => {
     }
   };
 
+  const formatIdade = (idadeRaw) => {
+    if (!idadeRaw) return "";
+    const trimmed = idadeRaw.trim();
+    return /^\d+$/.test(trimmed) ? `${trimmed} anos` : trimmed;
+  };
+
   const handleRemoveImage = (index) => {
     setFormData({
       ...formData,
@@ -144,11 +150,13 @@ const CadastrarPet = () => {
     }
 
     try {
+      const idadeFormatada = formatIdade(formData.idade);
+
       // Preparar dados para envio ao backend
       const petData = {
         nome: formData.nome,
         tipo: formData.tipo, // Já está em lowercase
-        idade: formData.idade,
+        idade: idadeFormatada,
         porte: formData.porte, // Já está em lowercase
         sexo: formData.sexo, // Já está em lowercase
         cor:
@@ -279,7 +287,7 @@ const CadastrarPet = () => {
             <div className="flex space-x-3">
               <Link
                 to="/admin"
-                className="text-gray-700 hover:text-sky-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+               class="text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
               >
                 🏠 Dashboard
               </Link>

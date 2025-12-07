@@ -69,7 +69,6 @@ model PetImage {
 }
 
 model AdoptionCandidate {
-  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   nome                        String?
   endereco                    String?
   celular_01                  String?
@@ -130,6 +129,7 @@ model AdoptionCandidate {
   Cidade                      String?
   Pet_ID                      String?
   status                      StatusCandidato?
+  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   pets                        Pet?             @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
   adocoes                     Adoption[]
   interesses                  PetInterest[]

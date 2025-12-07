@@ -13,6 +13,8 @@ const GerenciarPets = () => {
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
   const [petEditando, setPetEditando] = useState(null);
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteContext, setDeleteContext] = useState({ id: null, nome: "" });
 
   // Função para abrir modal de edição
   const abrirModalEditar = (pet) => {
@@ -28,69 +30,8 @@ const GerenciarPets = () => {
   const salvarEdicaoPet = async (dadosEditados) => {
     setIsEditSubmitting(true);
     try {
-      // Remover campos que não devem ser enviados para atualização
-      const {
-        imagem: _imagem,
-        imagens: _imagens,
-        data_cadastro: _data_cadastro,
-        data_atualizacao: _data_atualizacao,
-        usuario_cadastrou: _usuario_cadastrou,
-        adoption_candidates: _adoption_candidates,
-        adocoes: _adocoes,
-        interesses: _interesses,
-        vacinas: _vacinas,
-        ...dadosParaEnviar
-      } = dadosEditados;
-
-      // Sanitizar dados antes de enviar
-      // Remover campos vazios que podem causar erro de validação
-      Object.keys(dadosParaEnviar).forEach((key) => {
-        if (dadosParaEnviar[key] === "" || dadosParaEnviar[key] === null) {
-          delete dadosParaEnviar[key];
-        }
-      });
-
-      // Converter tipos específicos
-      if (
-        dadosParaEnviar.peso !== undefined &&
-        dadosParaEnviar.peso !== null &&
-        dadosParaEnviar.peso !== ""
-      ) {
-        dadosParaEnviar.peso = parseFloat(dadosParaEnviar.peso);
-        // Se conversão resultar em NaN, remover o campo
-        if (isNaN(dadosParaEnviar.peso)) {
-          delete dadosParaEnviar.peso;
-        }
-      }
-
-      // Normalizar enums para lowercase
-      if (dadosParaEnviar.tipo) {
-        dadosParaEnviar.tipo = dadosParaEnviar.tipo.toLowerCase();
-      }
-      if (dadosParaEnviar.porte) {
-        dadosParaEnviar.porte = dadosParaEnviar.porte.toLowerCase();
-      }
-      if (dadosParaEnviar.sexo) {
-        dadosParaEnviar.sexo = dadosParaEnviar.sexo.toLowerCase();
-      }
-      if (dadosParaEnviar.status) {
-        dadosParaEnviar.status = dadosParaEnviar.status.toLowerCase();
-      }
-
-      // Garantir que booleanos estejam corretos
-      if (dadosParaEnviar.castrado !== undefined) {
-        dadosParaEnviar.castrado = Boolean(dadosParaEnviar.castrado);
-      }
-      if (dadosParaEnviar.vacinado !== undefined) {
-        dadosParaEnviar.vacinado = Boolean(dadosParaEnviar.vacinado);
-      }
-      if (dadosParaEnviar.vermifugado !== undefined) {
-        dadosParaEnviar.vermifugado = Boolean(dadosParaEnviar.vermifugado);
-      }
-
-      console.log("🔧 Dados originais:", dadosEditados);
-      console.log("📤 Dados que serão enviados:", dadosParaEnviar);
-
+      // Remover campos 'imagem', 'imagens' e 'id' (nÇœo aceitos no update do backend)
+      const { id, imagem, imagens, ...dadosParaEnviar } = dadosEditados;
       const response = await PetServices.updatePet(
         dadosEditados.id,
         dadosParaEnviar
@@ -104,19 +45,10 @@ const GerenciarPets = () => {
         );
         fecharModalEditar();
       } else {
-        console.error("Erro ao atualizar pet:", response);
-        let errorMessage = response.message || "Erro ao atualizar pet.";
-
-        // Se houver erros de validação, mostrar o primeiro erro específico
-        if (response.validationErrors && response.validationErrors.length > 0) {
-          errorMessage = response.validationErrors[0].msg;
-        }
-
-        alert(errorMessage);
+        alert(response.message || "Erro ao atualizar pet.");
       }
-    } catch (error) {
-      console.error("Erro inesperado ao salvar:", error);
-      alert("Erro inesperado ao salvar.");
+    } catch {
+      alert("Erro ao atualizar pet.");
     } finally {
       setIsEditSubmitting(false);
     }
@@ -264,54 +196,59 @@ const GerenciarPets = () => {
   };
 
   const excluirPet = async (id) => {
-    if (window.confirm("Tem certeza que deseja excluir este pet?")) {
-      try {
-        // Excluir do backend
-        const response = await PetServices.deletePet(id);
+    if (!id) {
+      setShowDeleteConfirm(false);
+      alert("ID do pet não encontrado.");
+      return;
+    }
 
-        if (response.success) {
-          // Atualizar lista local
-          const petsAtualizados = pets.filter((pet) => pet.id !== id);
-          setPets(petsAtualizados);
+    try {
+      // Excluir do backend
+      const response = await PetServices.deletePet(id);
 
-          // Excluir vacinas do localStorage
-          const vacinasStorage = JSON.parse(
-            localStorage.getItem("vacinas") || "[]"
-          );
-          const vacinasAtualizadas = vacinasStorage.filter(
-            (vacina) => vacina.petId.toString() !== id.toString()
-          );
-          localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
+      if (response.success) {
+        // Atualizar lista local
+        const petsAtualizados = pets.filter((pet) => pet.id !== id);
+        setPets(petsAtualizados);
 
-          // Excluir atividades de vacina do pet
-          const atividadesStorage = JSON.parse(
-            localStorage.getItem("atividades") || "[]"
-          );
-          const atividadesAtualizadas = atividadesStorage.filter(
-            (atividade) => {
-              if (atividade.tipo === "vacina") {
-                const petExcluido = pets.find((p) => p.id === id);
-                return atividade.petNome !== petExcluido?.nome;
-              }
-              return true;
-            }
-          );
-          localStorage.setItem(
-            "atividades",
-            JSON.stringify(atividadesAtualizadas)
-          );
+        // Excluir vacinas do localStorage
+        const vacinasStorage = JSON.parse(
+          localStorage.getItem("vacinas") || "[]"
+        );
+        const vacinasAtualizadas = vacinasStorage.filter(
+          (vacina) => vacina.petId.toString() !== id.toString()
+        );
+        localStorage.setItem("vacinas", JSON.stringify(vacinasAtualizadas));
 
-          setPetSelecionado(null);
-          console.log(
-            `✅ Pet ${id} excluído junto com suas vacinas e atividades`
-          );
-        } else {
-          alert(`Erro ao excluir pet: ${response.message}`);
-        }
-      } catch (error) {
-        console.error("❌ Erro ao excluir pet:", error);
-        alert("Erro ao excluir pet. Tente novamente.");
+        // Excluir atividades de vacina do pet
+        const atividadesStorage = JSON.parse(
+          localStorage.getItem("atividades") || "[]"
+        );
+        const atividadesAtualizadas = atividadesStorage.filter((atividade) => {
+          if (atividade.tipo === "vacina") {
+            const petExcluido = pets.find((p) => p.id === id);
+            return atividade.petNome !== petExcluido?.nome;
+          }
+          return true;
+        });
+        localStorage.setItem(
+          "atividades",
+          JSON.stringify(atividadesAtualizadas)
+        );
+
+        setPetSelecionado(null);
+        setShowDeleteConfirm(false);
+        console.log(
+          `✅ Pet ${id} excluído junto com suas vacinas e atividades`
+        );
+      } else {
+        alert(`Erro ao excluir pet: ${response.message}`);
       }
+    } catch (error) {
+      console.error("❌ Erro ao excluir pet:", error);
+      alert("Erro ao excluir pet. Tente novamente.");
+    } finally {
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -354,10 +291,7 @@ const GerenciarPets = () => {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <Link
-              to="/admin"
-              className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0"
-            >
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
@@ -368,10 +302,10 @@ const GerenciarPets = () => {
                   className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                   style={{ wordBreak: "break-word" }}
                 >
-                  Abrace Uma Causa Animal
+                  Central de Gerenciamento
                 </h1>
               </div>
-            </Link>
+            </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
@@ -381,7 +315,7 @@ const GerenciarPets = () => {
               </Link>
               <Link
                 to="/admin/cadastrar-pet"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 ➕ Novo Pet
               </Link>
@@ -639,16 +573,6 @@ const GerenciarPets = () => {
                     >
                       Editar
                     </button>
-                    {/* Modal de edição de pet */}
-                    {petEditando && (
-                      <ModalEditarPet
-                        pet={petEditando}
-                        onClose={fecharModalEditar}
-                        onSave={salvarEdicaoPet}
-                        isSubmitting={isEditSubmitting}
-                      />
-                    )}
-
                     {pet.status === "disponivel" && (
                       <button
                         onClick={() => alterarStatusPet(pet.id, "em_processo")}
@@ -717,6 +641,16 @@ const GerenciarPets = () => {
           )}
         </div>
       </main>
+
+      {/* Modal de edição */}
+      {petEditando && (
+        <ModalEditarPet
+          pet={petEditando}
+          onClose={fecharModalEditar}
+          onSave={salvarEdicaoPet}
+          isSubmitting={isEditSubmitting}
+        />
+      )}
 
       {/* Modal de detalhes */}
       {petSelecionado && (
@@ -1037,12 +971,56 @@ const GerenciarPets = () => {
                 </button>
 
                 <button
-                  onClick={() => excluirPet(petSelecionado.id)}
+                  onClick={() => {
+                    setDeleteContext({
+                      id: petSelecionado.id,
+                      nome: petSelecionado.nome,
+                    });
+                    setShowDeleteConfirm(true);
+                  }}
                   className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
                 >
                   🗑️ Excluir
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteConfirm && (
+        <div
+          style={{ zIndex: 10000 }}
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
+          >
+            <h3 className="text-xl font-bold text-rose-700 mb-3">
+              Confirmar Exclusão
+            </h3>
+            <p className="mb-3 text-gray-800">
+              Tem certeza que deseja excluir o pet "
+              {deleteContext.nome || "este pet"}"?
+            </p>
+            <p className="mb-4 text-gray-600">
+              Essa ação não pode ser desfeita e também remove vacinas e
+              atividades armazenadas localmente.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => excluirPet(deleteContext.id)}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirmar e Excluir
+              </button>
             </div>
           </div>
         </div>

@@ -288,9 +288,11 @@ const AdminAdoptants = () => {
         {/* Título e filtros */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
             Gerenciar Candidatos
+            </span>
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-6 text-xl">
             Analise e aprove formulários de adoção
           </p>
           <div className="flex flex-wrap gap-2">

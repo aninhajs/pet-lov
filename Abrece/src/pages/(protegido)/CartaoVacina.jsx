@@ -154,22 +154,27 @@ const CartaoVacina = () => {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
-            <Link to="/admin" className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
-                alt="Pet Lov Logo"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200"
+                alt="Abrace Uma Causa Animal"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
               />
-              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent">
-                Cartão de Vacina
-              </h1>
-            </Link>
+              <div className="min-w-0">
+                <h1
+                  className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
+                  style={{ wordBreak: "break-word" }}
+                >
+                  Central de Gerenciamento
+                </h1>
+              </div>
+            </div>
             <div className="flex space-x-3">
               <Link
-                to="/admin"
-                className="text-sky-700 hover:text-sky-800 hover:bg-yellow-100 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+               to="/admin"
+                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
-                Dashboard
+              🏠 Dashboard
               </Link>
               <button
                 onClick={() => {
@@ -178,7 +183,7 @@ const CartaoVacina = () => {
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
-                Sair
+              🚪 Sair
               </button>
             </div>
           </div>
@@ -193,7 +198,7 @@ const CartaoVacina = () => {
 
           {/* Seleção de Pet */}
           <div className="mb-6 relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">
               Pesquisar Pet pelo nome
             </label>
             <input
@@ -257,7 +262,7 @@ const CartaoVacina = () => {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-lg font-medium text-gray-700 mb-2">
                       Nome da Vacina
                     </label>
                     <input
@@ -273,7 +278,7 @@ const CartaoVacina = () => {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
                         Data da Vacina
                       </label>
                       <input
@@ -287,7 +292,7 @@ const CartaoVacina = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-lg font-medium text-gray-700 mb-2">
                         Data de Revacinação (Opcional)
                       </label>
                       <input
@@ -318,13 +323,13 @@ const CartaoVacina = () => {
               <button
                 type="submit"
                 disabled={!selectedPet}
-                className="flex-1 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-3 rounded-full font-medium transition-all duration-200 shadow-lg"
+                className="flex-1 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 disabled:from-gray-300 disabled:to-gray-400 text-white px-6 py-3 rounded-md font-medium transition-all duration-200 shadow-lg"
               >
                 Cadastrar Vacina(s)
               </button>
               <Link
                 to="/admin"
-                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-full font-medium transition-all duration-200 shadow-lg flex items-center gap-2"
+                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white px-6 py-3 rounded-md font-medium transition-all duration-200 shadow-lg flex items-center gap-2"
               >
                 ← Voltar
               </Link>
