@@ -30,11 +30,11 @@ const GerenciarPets = () => {
   const salvarEdicaoPet = async (dadosEditados) => {
     setIsEditSubmitting(true);
     try {
-      // Remover campos 'imagem' e 'imagens' se existirem
-      // const { imagem, imagens, ...dadosParaEnviar } = dadosEditados;
+      // Remover campos 'imagem', 'imagens' e 'id' (nÇœo aceitos no update do backend)
+      const { id, imagem, imagens, ...dadosParaEnviar } = dadosEditados;
       const response = await PetServices.updatePet(
         dadosEditados.id,
-        dadosEditados
+        dadosParaEnviar
       );
       if (response.success) {
         // Atualizar lista local
@@ -573,16 +573,6 @@ const GerenciarPets = () => {
                     >
                       Editar
                     </button>
-                    {/* Modal de edição de pet */}
-                    {petEditando && (
-                      <ModalEditarPet
-                        pet={petEditando}
-                        onClose={fecharModalEditar}
-                        onSave={salvarEdicaoPet}
-                        isSubmitting={isEditSubmitting}
-                      />
-                    )}
-
                     {pet.status === "disponivel" && (
                       <button
                         onClick={() => alterarStatusPet(pet.id, "em_processo")}
@@ -651,6 +641,16 @@ const GerenciarPets = () => {
           )}
         </div>
       </main>
+
+      {/* Modal de edição */}
+      {petEditando && (
+        <ModalEditarPet
+          pet={petEditando}
+          onClose={fecharModalEditar}
+          onSave={salvarEdicaoPet}
+          isSubmitting={isEditSubmitting}
+        />
+      )}
 
       {/* Modal de detalhes */}
       {petSelecionado && (
