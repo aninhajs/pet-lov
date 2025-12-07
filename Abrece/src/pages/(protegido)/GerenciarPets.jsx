@@ -28,11 +28,72 @@ const GerenciarPets = () => {
   const salvarEdicaoPet = async (dadosEditados) => {
     setIsEditSubmitting(true);
     try {
-      // Remover campos 'imagem' e 'imagens' se existirem
-      // const { imagem, imagens, ...dadosParaEnviar } = dadosEditados;
+      // Remover campos que não devem ser enviados para atualização
+      const {
+        imagem: _imagem,
+        imagens: _imagens,
+        data_cadastro: _data_cadastro,
+        data_atualizacao: _data_atualizacao,
+        usuario_cadastrou: _usuario_cadastrou,
+        adoption_candidates: _adoption_candidates,
+        adocoes: _adocoes,
+        interesses: _interesses,
+        vacinas: _vacinas,
+        ...dadosParaEnviar
+      } = dadosEditados;
+
+      // Sanitizar dados antes de enviar
+      // Remover campos vazios que podem causar erro de validação
+      Object.keys(dadosParaEnviar).forEach((key) => {
+        if (dadosParaEnviar[key] === "" || dadosParaEnviar[key] === null) {
+          delete dadosParaEnviar[key];
+        }
+      });
+
+      // Converter tipos específicos
+      if (
+        dadosParaEnviar.peso !== undefined &&
+        dadosParaEnviar.peso !== null &&
+        dadosParaEnviar.peso !== ""
+      ) {
+        dadosParaEnviar.peso = parseFloat(dadosParaEnviar.peso);
+        // Se conversão resultar em NaN, remover o campo
+        if (isNaN(dadosParaEnviar.peso)) {
+          delete dadosParaEnviar.peso;
+        }
+      }
+
+      // Normalizar enums para lowercase
+      if (dadosParaEnviar.tipo) {
+        dadosParaEnviar.tipo = dadosParaEnviar.tipo.toLowerCase();
+      }
+      if (dadosParaEnviar.porte) {
+        dadosParaEnviar.porte = dadosParaEnviar.porte.toLowerCase();
+      }
+      if (dadosParaEnviar.sexo) {
+        dadosParaEnviar.sexo = dadosParaEnviar.sexo.toLowerCase();
+      }
+      if (dadosParaEnviar.status) {
+        dadosParaEnviar.status = dadosParaEnviar.status.toLowerCase();
+      }
+
+      // Garantir que booleanos estejam corretos
+      if (dadosParaEnviar.castrado !== undefined) {
+        dadosParaEnviar.castrado = Boolean(dadosParaEnviar.castrado);
+      }
+      if (dadosParaEnviar.vacinado !== undefined) {
+        dadosParaEnviar.vacinado = Boolean(dadosParaEnviar.vacinado);
+      }
+      if (dadosParaEnviar.vermifugado !== undefined) {
+        dadosParaEnviar.vermifugado = Boolean(dadosParaEnviar.vermifugado);
+      }
+
+      console.log("🔧 Dados originais:", dadosEditados);
+      console.log("📤 Dados que serão enviados:", dadosParaEnviar);
+
       const response = await PetServices.updatePet(
         dadosEditados.id,
-        dadosEditados
+        dadosParaEnviar
       );
       if (response.success) {
         // Atualizar lista local
@@ -43,10 +104,19 @@ const GerenciarPets = () => {
         );
         fecharModalEditar();
       } else {
-        alert(response.message || "Erro ao atualizar pet.");
+        console.error("Erro ao atualizar pet:", response);
+        let errorMessage = response.message || "Erro ao atualizar pet.";
+
+        // Se houver erros de validação, mostrar o primeiro erro específico
+        if (response.validationErrors && response.validationErrors.length > 0) {
+          errorMessage = response.validationErrors[0].msg;
+        }
+
+        alert(errorMessage);
       }
-    } catch {
-      alert("Erro ao atualizar pet.");
+    } catch (error) {
+      console.error("Erro inesperado ao salvar:", error);
+      alert("Erro inesperado ao salvar.");
     } finally {
       setIsEditSubmitting(false);
     }

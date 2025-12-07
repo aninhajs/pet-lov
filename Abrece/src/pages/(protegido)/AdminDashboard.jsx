@@ -12,7 +12,8 @@ const AdminDashboard = () => {
     totalPets: 0,
     petsAdotados: 0,
     candidatos: 0,
-    processosPendentes: 5,
+    petsFortaleza: 0,
+    petsAquiraz: 0,
   });
 
   const [vacinas, setVacinas] = useState([]);
@@ -44,7 +45,11 @@ const AdminDashboard = () => {
         const pendentesPromise = (async () => {
           console.time("AdminDashboard:pendentesFetch");
           try {
-            return await AdoptantServices.getAllAdoptants({ status: "pendente", page: 1, limit: 1 });
+            return await AdoptantServices.getAllAdoptants({
+              status: "pendente",
+              page: 1,
+              limit: 1,
+            });
           } finally {
             console.timeEnd("AdminDashboard:pendentesFetch");
           }
@@ -68,28 +73,45 @@ const AdminDashboard = () => {
           }
         })();
 
-        const [petsResp, pendentesResp, vacinasResp, candidatosStatsResp] = await Promise.all([
-          petsPromise,
-          pendentesPromise,
-          vacinasPromise,
-          candidatosStatsPromise,
-        ]);
+        const [petsResp, pendentesResp, vacinasResp, candidatosStatsResp] =
+          await Promise.all([
+            petsPromise,
+            pendentesPromise,
+            vacinasPromise,
+            candidatosStatsPromise,
+          ]);
 
         console.timeEnd("fetchAllMain");
 
         // PETS — usamos stats leves do backend (counts) para reduzir payload
         if (petsResp?.success && petsResp.data) {
-          // Esperamos { total, disponiveis, em_processo, adotados, caes, gatos }
-          const petStats = petsResp.data.data || petsResp.data || petsResp.data?.data || petsResp.data;
+          // Esperamos { total, disponiveis, em_processo, adotados, caes, gatos, fortaleza, aquiraz }
+          const petStats =
+            petsResp.data.data ||
+            petsResp.data ||
+            petsResp.data?.data ||
+            petsResp.data;
           // totalPets no card é definido como disponiveis + em_processo
-          const disponiveis = Number(petStats.disponiveis ?? petStats.disponiveis ?? 0);
-          const emProcesso = Number(petStats.em_processo ?? petStats.em_processo ?? 0);
+          const disponiveis = Number(
+            petStats.disponiveis ?? petStats.disponiveis ?? 0
+          );
+          const emProcesso = Number(
+            petStats.em_processo ?? petStats.em_processo ?? 0
+          );
           const adotados = Number(petStats.adotados ?? petStats.adotados ?? 0);
+          const petsFortaleza = Number(petStats.fortaleza ?? 0);
+          const petsAquiraz = Number(petStats.aquiraz ?? 0);
 
           const totalPets = disponiveis + emProcesso;
           const petsAdotados = adotados;
 
-          setStats((s) => ({ ...s, totalPets, petsAdotados }));
+          setStats((s) => ({
+            ...s,
+            totalPets,
+            petsAdotados,
+            petsFortaleza,
+            petsAquiraz,
+          }));
         }
 
         // PENDENTES — já buscado com limit 1, usar pagination.totalCount quando disponível
@@ -120,7 +142,7 @@ const AdminDashboard = () => {
           console.log("candidatos stats:", candidatosStatsResp.data);
         }
       } catch (error) {
-        console.error("❌ Erro ao carregar estatísticas:", error);
+        console.error("Erro ao carregar estatísticas:", error);
       } finally {
         setIsLoading(false);
         console.timeEnd("loadStats");
@@ -229,15 +251,14 @@ const AdminDashboard = () => {
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-3xl mr-3">🐕</div>
               <div>
                 <p className="text-sm font-bold text-gray-800">Total de Pets</p>
                 <p className="text-4xl font-extrabold text-gray-900">
                   {isLoading ? (
-                    <span className="text-2xl">⏳</span>
+                    <span className="text-2xl">...</span>
                   ) : (
                     stats.totalPets
                   )}
@@ -248,12 +269,12 @@ const AdminDashboard = () => {
 
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-3xl mr-3">❤️</div>
+              <div className="text-3xl mr-3"></div>
               <div>
                 <p className="text-sm font-bold text-gray-800">Pets Adotados</p>
                 <p className="text-4xl font-extrabold text-green-700">
                   {isLoading ? (
-                    <span className="text-2xl">⏳</span>
+                    <span className="text-2xl">...</span>
                   ) : (
                     stats.petsAdotados
                   )}
@@ -264,7 +285,6 @@ const AdminDashboard = () => {
 
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-3xl mr-3">👥</div>
               <div>
                 <p className="text-sm font-bold text-gray-800">Candidatos</p>
                 <p className="text-4xl font-extrabold text-blue-700">
@@ -276,11 +296,33 @@ const AdminDashboard = () => {
 
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
             <div className="flex items-center">
-              <div className="text-3xl mr-3">⏳</div>
               <div>
-                <p className="text-sm font-bold text-gray-800">Pendências</p>
+                <p className="text-sm font-bold text-gray-800">
+                  Pets Fortaleza-CE
+                </p>
                 <p className="text-4xl font-extrabold text-orange-700">
-                  {stats.processosPendentes}
+                  {isLoading ? (
+                    <span className="text-2xl">...</span>
+                  ) : (
+                    stats.petsFortaleza
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 rounded-lg shadow-lg p-6 transform hover:scale-105 transition-all">
+            <div className="flex items-center">
+              <div>
+                <p className="text-sm font-bold text-gray-800">
+                  Pets Aquiraz-CE
+                </p>
+                <p className="text-4xl font-extrabold text-sky-700">
+                  {isLoading ? (
+                    <span className="text-2xl">...</span>
+                  ) : (
+                    stats.petsAquiraz
+                  )}
                 </p>
               </div>
             </div>
@@ -292,13 +334,13 @@ const AdminDashboard = () => {
           <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg shadow-lg">
             <div className="p-6 border-b-2 border-gray-300 bg-gradient-to-r from-gray-200 to-gray-300">
               <h2 className="text-xl font-bold text-gray-900 flex items-center mb-4">
-                💉 Vacinas Recentes
+                Vacinas Recentes
               </h2>
               {/* Campo de Busca */}
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="🔍 Buscar por nome do pet..."
+                  placeholder="Buscar por nome do pet..."
                   value={buscaPet}
                   onChange={(e) => setBuscaPet(e.target.value)}
                   className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm"
@@ -327,7 +369,7 @@ const AdminDashboard = () => {
                             className="text-base font-bold text-gray-900 cursor-pointer hover:underline"
                             onClick={() => setPetSelecionado(vacina.petNome)}
                           >
-                            🐾 {vacina.petNome}
+                            {vacina.petNome}
                           </p>
                           <p className="text-sm text-green-700 font-bold mt-1">
                             {vacina.nomeVacina}
@@ -359,7 +401,7 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <div className="text-4xl mb-2">💉</div>
+                  <div className="text-4xl mb-2"></div>
                   <p className="text-sm">
                     {buscaPet
                       ? `Nenhuma vacina encontrada para "${buscaPet}"`
@@ -470,7 +512,7 @@ const AdminDashboard = () => {
                   to="/admin/adoptants"
                   className="flex items-center p-4 bg-white hover:bg-green-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-green-600"
                 >
-                  <div className="text-3xl mr-4">📋</div>
+                  <div className="text-3xl mr-4"></div>
                   <div>
                     <p className="font-bold text-gray-900 text-lg">
                       Gerenciar Candidatos
@@ -484,7 +526,7 @@ const AdminDashboard = () => {
                   to="/admin/gerenciar-pets"
                   className="flex items-center p-4 bg-white hover:bg-blue-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-blue-600"
                 >
-                  <div className="text-3xl mr-4">🐾</div>
+                  <div className="text-3xl mr-4"></div>
                   <div>
                     <p className="font-bold text-gray-900 text-lg">
                       Gerenciar Pets
@@ -498,7 +540,7 @@ const AdminDashboard = () => {
                   to="/admin/cartao-vacina"
                   className="flex items-center p-4 bg-white hover:bg-purple-50 rounded-lg transition-all transform hover:scale-105 shadow-md border-l-4 border-purple-600"
                 >
-                  <div className="text-3xl mr-4">💉</div>
+                  <div className="text-3xl mr-4"></div>
                   <div>
                     <p className="font-bold text-gray-900 text-lg">
                       Cartão de Vacina

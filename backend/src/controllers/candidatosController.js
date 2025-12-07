@@ -10,33 +10,65 @@ export const getCandidatos = async (req, res) => {
 
     // Construir filtros
     const where = {};
-    if (status) where.status = status.toLowerCase();
+    if (status) {
+      // Verificar se o status é válido
+      const validStatuses = ["pendente", "aprovado", "rejeitado"];
+      if (validStatuses.includes(status.toLowerCase())) {
+        where.status = status.toLowerCase();
+      }
+    }
 
-    // Buscar candidatos com paginação
-    const [candidatos, totalCount] = await Promise.all([
-      prisma.adoptionCandidate.findMany({
-        where,
-        include: {
-          interesses: {
-            include: {
-              pet: {
-                select: {
-                  id: true,
-                  nome: true,
-                  tipo: true,
-                  status: true,
+    // Buscar candidatos com paginação - versão simplificada para evitar erros
+    let candidatos, totalCount;
+
+    try {
+      // Primeiro tentar query completa
+      [candidatos, totalCount] = await Promise.all([
+        prisma.adoptionCandidate.findMany({
+          where,
+          include: {
+            interesses: {
+              include: {
+                pet: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    tipo: true,
+                    status: true,
+                  },
                 },
               },
+              orderBy: { data_interesse: "desc" },
             },
-            orderBy: { data_interesse: "desc" },
           },
-        },
-        orderBy: { cpf: "desc" },
-        skip: offset,
-        take: parseInt(limit),
-      }),
-      prisma.adoptionCandidate.count({ where }),
-    ]);
+          orderBy: { id: "desc" },
+          skip: offset,
+          take: parseInt(limit),
+        }),
+        prisma.adoptionCandidate.count({ where }),
+      ]);
+    } catch (complexQueryError) {
+      console.error(
+        "Erro na query complexa, tentando query simples:",
+        complexQueryError
+      );
+
+      // Fallback: query simples sem includes
+      try {
+        [candidatos, totalCount] = await Promise.all([
+          prisma.adoptionCandidate.findMany({
+            where,
+            orderBy: { id: "desc" },
+            skip: offset,
+            take: parseInt(limit),
+          }),
+          prisma.adoptionCandidate.count({ where }),
+        ]);
+      } catch (simpleQueryError) {
+        console.error("Erro mesmo na query simples:", simpleQueryError);
+        throw simpleQueryError;
+      }
+    }
 
     // Calcular dados de paginação
     const totalPages = Math.ceil(totalCount / parseInt(limit));
@@ -57,10 +89,17 @@ export const getCandidatos = async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao buscar candidatos:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+    });
     res.status(500).json({
       success: false,
       error: {
-        message: "Erro interno do servidor",
+        message: "Erro interno do servidor ao buscar candidatos",
+        details:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       },
     });
   }
@@ -340,7 +379,8 @@ export const createCandidato = async (req, res) => {
               castrados_motivo,
               teve_filhotes,
               passeios,
-              quantia_mensal_cuidados: quantia_mensal_cuidados || quantia_mensal,
+              quantia_mensal_cuidados:
+                quantia_mensal_cuidados || quantia_mensal,
               tempo_sozinho,
               frequencia_passeios,
               devolveria_se_mudar,
@@ -409,7 +449,9 @@ export const createCandidato = async (req, res) => {
             where: { id: candidatoExistente.id },
             include: {
               interesses: {
-                include: { pet: { select: { id: true, nome: true, tipo: true } } },
+                include: {
+                  pet: { select: { id: true, nome: true, tipo: true } },
+                },
               },
             },
           });

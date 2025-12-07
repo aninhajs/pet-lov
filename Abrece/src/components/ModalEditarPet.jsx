@@ -15,9 +15,17 @@ const ModalEditarPet = ({ pet, onClose, onSave, isSubmitting }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    // Validação simples
+    // Validações
     if (!formData.nome || !formData.tipo) {
       setError("Nome e tipo são obrigatórios.");
+      return;
+    }
+    if (formData.descricao && formData.descricao.length < 10) {
+      setError("A descrição deve ter pelo menos 10 caracteres.");
+      return;
+    }
+    if (formData.descricao && formData.descricao.length > 500) {
+      setError("A descrição deve ter no máximo 500 caracteres.");
       return;
     }
     try {
@@ -125,13 +133,25 @@ const ModalEditarPet = ({ pet, onClose, onSave, isSubmitting }) => {
             placeholder="Peso (kg)"
             className="w-full border rounded p-2"
           />
-          <textarea
-            name="descricao"
-            value={formData.descricao || ""}
-            onChange={handleChange}
-            placeholder="Descrição"
-            className="w-full border rounded p-2"
-          />
+          <div>
+            <textarea
+              name="descricao"
+              value={formData.descricao || ""}
+              onChange={handleChange}
+              placeholder="Descrição (mínimo 10 caracteres)"
+              className="w-full border rounded p-2"
+              rows={3}
+            />
+            <div className="text-sm text-gray-500 mt-1">
+              {(formData.descricao || "").length}/500 caracteres
+              {(formData.descricao || "").length < 10 &&
+                (formData.descricao || "").length > 0 && (
+                  <span className="text-red-500 ml-2">
+                    Mínimo 10 caracteres
+                  </span>
+                )}
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2">
               <input

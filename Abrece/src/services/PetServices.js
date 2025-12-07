@@ -80,6 +80,8 @@ export const PetServices = {
   // Atualizar pet
   updatePet: async (id, petData) => {
     try {
+      console.log("🔄 PetServices.updatePet - ID:", id);
+      console.log("🔄 PetServices.updatePet - Dados:", petData);
       const response = await api.put(`/pets/${id}`, petData);
       return {
         success: true,
@@ -88,11 +90,16 @@ export const PetServices = {
       };
     } catch (error) {
       console.error("Erro ao atualizar pet:", error);
+      const errorMessage =
+        error.response?.data?.error?.message || "Erro ao atualizar pet";
+      const validationErrors = error.response?.data?.error?.details || null;
+
       return {
         success: false,
         data: null,
-        message: "Erro ao atualizar pet",
+        message: errorMessage,
         error: error.message,
+        validationErrors,
       };
     }
   },
