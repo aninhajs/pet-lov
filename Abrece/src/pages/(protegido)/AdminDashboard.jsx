@@ -195,22 +195,23 @@ const AdminDashboard = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
-                to="/"
-                class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
-              >
-                Site Principal
-              </Link>
-              <Link
                 to="/admin/adoptants"
                 className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
                 Ver Candidatos
               </Link>
+              <Link
+                to="/"
+                class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
+              >
+                Site Principal
+              </Link>
+              
               <button
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
               >
-                Sair
+              🚪 Sair
               </button>
             </div>
           </div>
@@ -221,9 +222,11 @@ const AdminDashboard = () => {
         {/* Título */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
+            <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
             Dashboard Administrativo
+            </span>
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 text-xl">
             Gerencie pets, adoções e candidatos
           </p>
         </div>

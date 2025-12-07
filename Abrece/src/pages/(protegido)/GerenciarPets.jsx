@@ -284,10 +284,7 @@ const GerenciarPets = () => {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <Link
-              to="/admin"
-              className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0"
-            >
+            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
               <img
                 src="/logoabrace.jpg"
                 alt="Abrace Uma Causa Animal"
@@ -298,10 +295,10 @@ const GerenciarPets = () => {
                   className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
                   style={{ wordBreak: "break-word" }}
                 >
-                  Abrace Uma Causa Animal
+                  Central de Gerenciamento
                 </h1>
               </div>
-            </Link>
+            </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Link
                 to="/admin"
@@ -311,7 +308,7 @@ const GerenciarPets = () => {
               </Link>
               <Link
                 to="/admin/cadastrar-pet"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 ➕ Novo Pet
               </Link>
