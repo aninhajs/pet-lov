@@ -16,8 +16,10 @@ const optimizeImageUrl = (url, width = 400, height = 300) => {
 };
 
 const Pets = () => {
-  const [selectedFilter, setSelectedFilter] = useState("todos");
-  const [cityMenu, setCityMenu] = useState(null); // null | "fortaleza-ce" | "aquiraz-ce"
+  // Filtros separados para permitir combinação e toggle
+  const [typeFilter, setTypeFilter] = useState(null); // 'cao' | 'gato' | null
+  const [statusFilter, setStatusFilter] = useState(null); // 'disponivel' | 'em_processo' | 'adotado' | null
+  const [cityFilter, setCityFilter] = useState(null); // 'fortaleza-ce' | 'aquiraz-ce' | null
   const [pets, setPets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState({});
@@ -70,6 +72,16 @@ const Pets = () => {
     carregarPets();
   }, []);
 
+  // Evita tremor na página quando filtros ativam/desativam
+  // Força a barra vertical do browser a ficar sempre visível durante a montagem
+  useEffect(() => {
+    const previous = document.body.style.overflowY;
+    document.body.style.overflowY = "scroll";
+    return () => {
+      document.body.style.overflowY = previous || "";
+    };
+  }, []);
+
   // Funções do modal
   const openModal = (pet) => {
     console.log("🔍 Pet selecionado:", pet);
@@ -109,71 +121,34 @@ const Pets = () => {
         .replace(/[\u0300-\u036f]/g, "");
     };
 
-    // Filtros combinados de cidade + tipo (aceita "cao" ou "cão")
-    if (selectedFilter === "fortaleza-ce-cão") {
-      return (
-        (normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
-          normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")) &&
-        ["cao", "cão"].includes(normalizarTexto(pet.tipo))
-      );
-    }
-    if (selectedFilter === "fortaleza-ce-gato") {
-      return (
-        (normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
-          normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")) &&
-        normalizarTexto(pet.tipo) === "gato"
-      );
-    }
-    if (selectedFilter === "aquiraz-ce-cão") {
-      return (
-        (normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
-          normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")) &&
-        ["cao", "cão"].includes(normalizarTexto(pet.tipo))
-      );
-    }
-    if (selectedFilter === "aquiraz-ce-gato") {
-      return (
-        (normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
-          normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")) &&
-        normalizarTexto(pet.tipo) === "gato"
-      );
+    const tipo = normalizarTexto(pet.tipo);
+    const local = normalizarTexto(pet.localizacao);
+
+    // Aplica filtros ativos (todas as condições devem ser verdadeiras)
+    // Tipo
+    if (typeFilter) {
+      if (typeFilter === "cao") {
+        if (!["cao", "cão"].includes(tipo)) return false;
+      } else if (typeFilter === "gato") {
+        if (tipo !== "gato") return false;
+      }
     }
 
-    // Filtros por tipo (aceita "cao" ou "cão")
-    if (selectedFilter === "cão") {
-      const tipoNormalizado = normalizarTexto(pet.tipo);
-      return ["cao", "cão"].includes(tipoNormalizado);
-    }
-    if (selectedFilter === "gato") {
-      const tipoNormalizado = normalizarTexto(pet.tipo);
-      return tipoNormalizado === "gato";
+    // Status
+    if (statusFilter) {
+      if (pet.status !== statusFilter) return false;
     }
 
-    // Filtros por status
-    if (
-      selectedFilter === "disponivel" ||
-      selectedFilter === "em_processo" ||
-      selectedFilter === "adotado"
-    ) {
-      return pet.status === selectedFilter;
+    // Cidade
+    if (cityFilter) {
+      if (cityFilter === "fortaleza-ce") {
+        if (!local?.includes("fortaleza") && !local?.includes("fortaleza-ce")) return false;
+      }
+      if (cityFilter === "aquiraz-ce") {
+        if (!local?.includes("aquiraz") && !local?.includes("aquiraz-ce")) return false;
+      }
     }
 
-    // Filtros por cidade simples
-    if (selectedFilter === "fortaleza-ce") {
-      return (
-        normalizarTexto(pet.localizacao)?.includes("fortaleza") ||
-        normalizarTexto(pet.localizacao)?.includes("fortaleza-ce")
-      );
-    }
-    if (selectedFilter === "aquiraz-ce") {
-      return (
-        normalizarTexto(pet.localizacao)?.includes("aquiraz") ||
-        normalizarTexto(pet.localizacao)?.includes("aquiraz-ce")
-      );
-    }
-
-    // Todos
-    if (selectedFilter === "todos") return true;
     return true;
   });
 
@@ -266,9 +241,9 @@ const Pets = () => {
               Filtrar por tipo:
             </h3>
             <button
-              onClick={() => setSelectedFilter("todos")}
+              onClick={() => setTypeFilter(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "todos"
+                !typeFilter
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -276,9 +251,9 @@ const Pets = () => {
               Todos os tipos
             </button>
             <button
-              onClick={() => setSelectedFilter("cão")}
+              onClick={() => setTypeFilter(typeFilter === "cao" ? null : "cao")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "cão"
+                typeFilter === "cao"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -286,9 +261,9 @@ const Pets = () => {
               Cães
             </button>
             <button
-              onClick={() => setSelectedFilter("gato")}
+              onClick={() => setTypeFilter(typeFilter === "gato" ? null : "gato")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "gato"
+                typeFilter === "gato"
                   ? "bg-indigo-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -298,93 +273,27 @@ const Pets = () => {
             {/* Filtros por cidade com submenu */}
             <div className="relative inline-block">
               <button
-                onClick={() =>
-                  setCityMenu(
-                    cityMenu === "fortaleza-ce" ? null : "fortaleza-ce"
-                  )
-                }
+                onClick={() => setCityFilter(cityFilter === "fortaleza-ce" ? null : "fortaleza-ce")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedFilter.startsWith("fortaleza-ce")
+                  cityFilter === "fortaleza-ce"
                     ? "bg-blue-700 text-white"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 Pets Fortaleza-CE
               </button>
-              {cityMenu === "fortaleza-ce" && (
-                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg z-20 min-w-[140px]">
-                  <button
-                    onClick={() => {
-                      setSelectedFilter("fortaleza-ce-cão");
-                      setCityMenu(null);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm rounded-t-lg ${
-                      selectedFilter === "fortaleza-ce-cão"
-                        ? "bg-blue-100 text-blue-800"
-                        : "hover:bg-blue-50"
-                    }`}
-                  >
-                    Cães
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedFilter("fortaleza-ce-gato");
-                      setCityMenu(null);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm rounded-b-lg ${
-                      selectedFilter === "fortaleza-ce-gato"
-                        ? "bg-blue-100 text-blue-800"
-                        : "hover:bg-blue-50"
-                    }`}
-                  >
-                    Gatos
-                  </button>
-                </div>
-              )}
             </div>
             <div className="relative inline-block">
               <button
-                onClick={() =>
-                  setCityMenu(cityMenu === "aquiraz-ce" ? null : "aquiraz-ce")
-                }
+                onClick={() => setCityFilter(cityFilter === "aquiraz-ce" ? null : "aquiraz-ce")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedFilter.startsWith("aquiraz-ce")
+                  cityFilter === "aquiraz-ce"
                     ? "bg-blue-700 text-white"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 Pets Aquiraz-CE
               </button>
-              {cityMenu === "aquiraz-ce" && (
-                <div className="absolute left-0 mt-2 bg-white border rounded-lg shadow-lg z-20 min-w-[140px]">
-                  <button
-                    onClick={() => {
-                      setSelectedFilter("aquiraz-ce-cão");
-                      setCityMenu(null);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm rounded-t-lg ${
-                      selectedFilter === "aquiraz-ce-cão"
-                        ? "bg-blue-100 text-blue-800"
-                        : "hover:bg-blue-50"
-                    }`}
-                  >
-                    Cães
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedFilter("aquiraz-ce-gato");
-                      setCityMenu(null);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm rounded-b-lg ${
-                      selectedFilter === "aquiraz-ce-gato"
-                        ? "bg-blue-100 text-blue-800"
-                        : "hover:bg-blue-50"
-                    }`}
-                  >
-                    Gatos
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
@@ -393,9 +302,9 @@ const Pets = () => {
               Filtrar por status:
             </h3>
             <button
-              onClick={() => setSelectedFilter("disponivel")}
+              onClick={() => setStatusFilter(statusFilter === "disponivel" ? null : "disponivel")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "disponivel"
+                statusFilter === "disponivel"
                   ? "bg-green-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -403,9 +312,9 @@ const Pets = () => {
               🟢 Disponíveis
             </button>
             <button
-              onClick={() => setSelectedFilter("em_processo")}
+              onClick={() => setStatusFilter(statusFilter === "em_processo" ? null : "em_processo")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "em_processo"
+                statusFilter === "em_processo"
                   ? "bg-yellow-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -413,9 +322,9 @@ const Pets = () => {
               ⏳ Em Processo
             </button>
             <button
-              onClick={() => setSelectedFilter("adotado")}
+              onClick={() => setStatusFilter(statusFilter === "adotado" ? null : "adotado")}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedFilter === "adotado"
+                statusFilter === "adotado"
                   ? "bg-gray-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
@@ -647,9 +556,13 @@ const Pets = () => {
                 Novos pets são cadastrados regularmente. Volte em breve!
               </p>
             )}
-            {selectedFilter !== "todos" && pets.length > 0 && (
+            {(typeFilter || statusFilter || cityFilter) && pets.length > 0 && (
               <button
-                onClick={() => setSelectedFilter("todos")}
+                onClick={() => {
+                  setTypeFilter(null);
+                  setStatusFilter(null);
+                  setCityFilter(null);
+                }}
                 className="mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 Ver todos os pets disponíveis
