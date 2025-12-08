@@ -31,7 +31,12 @@ const GerenciarPets = () => {
     setIsEditSubmitting(true);
     try {
       // Remover campos 'imagem', 'imagens' e 'id' (nÇœo aceitos no update do backend)
-      const { id, imagem, imagens, ...dadosParaEnviar } = dadosEditados;
+      const {
+        id: _id,
+        imagem: _imagem,
+        imagens: _imagens,
+        ...dadosParaEnviar
+      } = dadosEditados;
       const response = await PetServices.updatePet(
         dadosEditados.id,
         dadosParaEnviar
@@ -356,18 +361,18 @@ const GerenciarPets = () => {
                   : "bg-white text-gray-700 hover:bg-green-50 hover:text-green-600 hover:scale-105"
               }`}
             >
-              ✅ Disponíveis (
+              Disponíveis (
               {pets.filter((p) => p.status === "disponivel").length})
             </button>
             <button
               onClick={() => setFiltroStatus("em_processo")}
               className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
                 filtroStatus === "em_processo"
-                  ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 scale-105"
-                  : "bg-white text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 hover:scale-105"
+                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105"
+                  : "bg-white text-gray-700 hover:bg-green-50 hover:text-green-600 hover:scale-105"
               }`}
             >
-              ⏳ Em Processo (
+              Em Processo (
               {pets.filter((p) => p.status === "em_processo").length})
             </button>
             <button
@@ -378,7 +383,7 @@ const GerenciarPets = () => {
                   : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-105"
               }`}
             >
-              ❤️ Adotados ({pets.filter((p) => p.status === "adotado").length})
+              Adotados ({pets.filter((p) => p.status === "adotado").length})
             </button>
           </div>
         </div>

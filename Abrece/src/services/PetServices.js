@@ -4,7 +4,8 @@ export const PetServices = {
   // Buscar todos os pets
   getAllPets: async () => {
     try {
-      const response = await api.get("/pets");
+      // Solicitar todos os pets sem limite de paginação
+      const response = await api.get("/pets?limit=1000");
       return {
         success: true,
         data: response.data,

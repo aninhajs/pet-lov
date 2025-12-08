@@ -14,9 +14,19 @@ const AdminAdoptants = () => {
   const [loadingDetalhes, setLoadingDetalhes] = useState(false);
   const [showHistorico, setShowHistorico] = useState(false);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
-  const [approveContext, setApproveContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
+  const [approveContext, setApproveContext] = useState({
+    id: null,
+    candidatoNome: "",
+    petId: null,
+    petName: "",
+  });
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [rejectContext, setRejectContext] = useState({ id: null, candidatoNome: "", petId: null, petName: "" });
+  const [rejectContext, setRejectContext] = useState({
+    id: null,
+    candidatoNome: "",
+    petId: null,
+    petName: "",
+  });
   const [rejectReason, setRejectReason] = useState("");
 
   // Controle de seções abertas no modal de detalhes
@@ -51,7 +61,10 @@ const AdminAdoptants = () => {
     if (!raw) return "-";
     const digits = String(raw).replace(/\D/g, "");
     if (digits.length !== 11) return raw;
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(
+      6,
+      9
+    )}-${digits.slice(9)}`;
   };
 
   const formatCEP = (raw) => {
@@ -78,11 +91,40 @@ const AdminAdoptants = () => {
   // Enhance formatDisplayValue to mask cpf/cep/phones when rendering details
   const originalFormatDisplayValue = formatDisplayValue;
   const formatDisplayValueMasked = (field, val) => {
-    if (!val && val !== 0) return "-";
+    if (!val && val !== 0 && val !== false) return "-";
+
     const key = String(field || "").toLowerCase();
+
+    // Formatações específicas
     if (key === "cpf") return formatCPF(val);
     if (key === "cep") return formatCEP(val);
-    if (key === "celular_01" || key === "celular_02" || key === "telefone" || key === "telefone_01") return formatPhone(val);
+    if (key.includes("celular") || key.includes("telefone"))
+      return formatPhone(val);
+
+    // Formatação para arrays (campos checkbox)
+    if (Array.isArray(val)) {
+      return val.length > 0 ? val.join(", ") : "Nenhuma opção selecionada";
+    }
+
+    // Formatação para booleanos
+    if (typeof val === "boolean") {
+      return val ? "Sim" : "Não";
+    }
+
+    // Formatação para datas
+    if (key.includes("data") || key.includes("nascimento")) {
+      try {
+        return val ? new Date(val).toLocaleDateString("pt-BR") : "-";
+      } catch {
+        return val;
+      }
+    }
+
+    // Formatação para campos de texto longos
+    if (typeof val === "string" && val.length > 100) {
+      return val;
+    }
+
     return originalFormatDisplayValue(field, val);
   };
 
@@ -118,9 +160,7 @@ const AdminAdoptants = () => {
   const normalizarStatusInteresse = (status) => {
     const statusNormalizado = (status || "").toLowerCase();
     if (!statusNormalizado) return "pendente";
-    return statusNormalizado === "interessado"
-      ? "pendente"
-      : statusNormalizado;
+    return statusNormalizado === "interessado" ? "pendente" : statusNormalizado;
   };
 
   const formatarInteresses = (interessesBrutos = []) =>
@@ -173,7 +213,8 @@ const AdminAdoptants = () => {
       normalizarStatusInteresse(ultimaTentativa?.status);
 
     if (selectedStatus === "todos") return true; // mostra todos cadastrados
-    if (!ultimaTentativa && selectedStatus) return statusAtual === selectedStatus;
+    if (!ultimaTentativa && selectedStatus)
+      return statusAtual === selectedStatus;
     if (selectedStatus === "aprovado") {
       return statusAtual === "aprovado";
     }
@@ -268,7 +309,7 @@ const AdminAdoptants = () => {
                 to="/admin"
                 className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
               >
-              🏠 Dashboard
+                🏠 Dashboard
               </Link>
               <button
                 onClick={() => {
@@ -277,7 +318,7 @@ const AdminAdoptants = () => {
                 }}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
               >
-               🚪 Sair
+                🚪 Sair
               </button>
             </div>
           </div>
@@ -289,7 +330,7 @@ const AdminAdoptants = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             <span className="bg-gradient-to-r from-sky-600 to-yellow-500 bg-clip-text text-transparent">
-            Gerenciar Candidatos
+              Gerenciar Candidatos
             </span>
           </h1>
           <p className="text-gray-600 mb-6 text-xl">
@@ -306,11 +347,10 @@ const AdminAdoptants = () => {
             >
               Pendentes (
               {
-                candidatosOrdenados.filter(
-                  (c) => c.statusAtual === "pendente"
-                ).length
+                candidatosOrdenados.filter((c) => c.statusAtual === "pendente")
+                  .length
               }
-            )
+              )
             </button>
             <button
               onClick={() => setSelectedStatus("aprovado")}
@@ -322,11 +362,10 @@ const AdminAdoptants = () => {
             >
               Aprovados (
               {
-                candidatosOrdenados.filter(
-                  (c) => c.statusAtual === "aprovado"
-                ).length
+                candidatosOrdenados.filter((c) => c.statusAtual === "aprovado")
+                  .length
               }
-            )
+              )
             </button>
             <button
               onClick={() => setSelectedStatus("rejeitado")}
@@ -338,11 +377,10 @@ const AdminAdoptants = () => {
             >
               Rejeitados (
               {
-                candidatosOrdenados.filter(
-                  (c) => c.statusAtual === "rejeitado"
-                ).length
+                candidatosOrdenados.filter((c) => c.statusAtual === "rejeitado")
+                  .length
               }
-            )
+              )
             </button>
           </div>
         </div>
@@ -392,11 +430,15 @@ const AdminAdoptants = () => {
                         <div className="mt-1 text-base text-gray-700">
                           <p>
                             {candidato.email} • Tel:{" "}
-                            {formatDisplayValueMasked('telefone', candidato.telefone || candidato.celular_01)}
+                            {formatDisplayValueMasked(
+                              "telefone",
+                              candidato.telefone || candidato.celular_01
+                            )}
                           </p>
                           {ultimaTentativa && (
                             <p>
-                              Interesse no pet: {ultimaTentativa.pet?.nome || "-"}
+                              Interesse no pet:{" "}
+                              {ultimaTentativa.pet?.nome || "-"}
                             </p>
                           )}
                         </div>
@@ -407,22 +449,25 @@ const AdminAdoptants = () => {
                             setLoadingDetalhes(true);
                             setCandidatoSelecionado(candidato);
                             try {
-                                if (candidato.id) {
-                                  const res = await AdoptantServices.getAdoptantById(candidato.id);
+                              if (candidato.id) {
+                                const res =
+                                  await AdoptantServices.getAdoptantById(
+                                    candidato.id
+                                  );
                                 const candidatoDetalhado = res.data || {};
                                 setDetalhesCandidato({
                                   ...candidatoDetalhado,
                                   interesses: formatarInteresses(
-                                    Array.isArray(
-                                      candidatoDetalhado.interesses
-                                    )
+                                    Array.isArray(candidatoDetalhado.interesses)
                                       ? candidatoDetalhado.interesses
                                       : []
                                   ),
                                 });
-                                } else {
-                                  alert("ID do candidato não encontrado. Não é possível exibir detalhes.");
-                                  setDetalhesCandidato(null);
+                              } else {
+                                alert(
+                                  "ID do candidato não encontrado. Não é possível exibir detalhes."
+                                );
+                                setDetalhesCandidato(null);
                               }
                             } catch {
                               setDetalhesCandidato(null);
@@ -463,205 +508,285 @@ const AdminAdoptants = () => {
         {/* Modal de detalhes */}
         {candidatoSelecionado && (
           <div>
-            <div onClick={() => setCandidatoSelecionado(null)} className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-sky-200 overflow-hidden">
+            <div
+              onClick={() => setCandidatoSelecionado(null)}
+              className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border-2 border-sky-200 overflow-hidden"
+              >
                 <div className="max-h-[90vh] overflow-y-auto">
                   <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex justify-between items-center">
-                  <h2 className="text-xl font-semibold text-sky-700">
-                    Detalhes do Candidato
-                  </h2>
-                  <button
-                    onClick={() => setCandidatoSelecionado(null)}
-                    className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="px-6 py-4 space-y-6">
-                  {(() => {
-                    if (detalhesCandidato) {
-                      console.log(
-                        "DEBUG - detalhesCandidato:",
-                        detalhesCandidato
-                      );
-                    }
-                    return null;
-                  })()}
-                  {loadingDetalhes ? (
-                    <div className="text-center py-8 text-sky-700 font-semibold">
-                      Carregando detalhes...
-                    </div>
-                  ) : detalhesCandidato ? (
-                    <>
-                      <div>
-                        <h3 className="font-medium text-gray-900 mb-2">
-                          Informações Pessoais
-                        </h3>
-                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 text-sm">
-                          {(() => {
-                            const adotanteSection = (sections || []).find(
-                              (s) => s.id === "adotante"
-                            );
-                            if (!adotanteSection) {
-                              return (
-                                <div>
-                                  <p>
-                                    <strong>Nome:</strong> {detalhesCandidato.nome}
-                                  </p>
-                                  <p>
-                                    <strong>Email:</strong> {detalhesCandidato.email}
-                                  </p>
-                                </div>
+                    <h2 className="text-xl font-semibold text-sky-700">
+                      Detalhes do Candidato
+                    </h2>
+                    <button
+                      onClick={() => setCandidatoSelecionado(null)}
+                      className="text-gray-400 hover:text-sky-600 text-2xl transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="px-6 py-4 space-y-6">
+                    {(() => {
+                      if (detalhesCandidato) {
+                        console.log(
+                          "DEBUG - detalhesCandidato:",
+                          detalhesCandidato
+                        );
+                      }
+                      return null;
+                    })()}
+                    {loadingDetalhes ? (
+                      <div className="text-center py-8 text-sky-700 font-semibold">
+                        Carregando detalhes...
+                      </div>
+                    ) : detalhesCandidato ? (
+                      <>
+                        <div>
+                          <h3 className="font-medium text-gray-900 mb-2">
+                            Informações Pessoais
+                          </h3>
+                          <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-2 text-sm">
+                            {(() => {
+                              const adotanteSection = (sections || []).find(
+                                (s) => s.id === "adotante"
                               );
-                            }
 
-                            return adotanteSection.items.map((item) => {
-                              const val = detalhesCandidato?.[item.field];
-                              return (
-                                  <div key={item.field} className="flex flex-col">
-                                    <span className="text-base text-gray-800 font-semibold">{item.label}</span>
-                                    <span className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</span>
-                                  </div>
-                                );
-                            });
-                          })()}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 mt-4 mb-2">
-                          Respostas do Formulário
-                        </h3>
-                        <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-4 text-base">
-                          {(sections || []).filter(s => s.id !== 'adotante').map((section) => (
-                            <div key={section.id} className="border rounded-lg overflow-hidden">
-                              <button
-                                type="button"
-                                onClick={() => toggleSection(section.id)}
-                                className="w-full text-left px-4 py-3 bg-white flex items-center justify-between hover:bg-gray-50"
-                              >
-                                <span className="font-medium text-gray-800">{section.title}</span>
-                                <span className="text-gray-500">{openSections[section.id] ? '−' : '+'}</span>
-                              </button>
-                              {openSections[section.id] && (
-                                <div className="px-4 py-3 bg-gray-50">
-                                  {section.items.map((item) => {
-                                    const val = detalhesCandidato?.[item.field];
-                                    return (
-                                      <div key={item.field} className="mb-2" style={{ whiteSpace: 'pre-line' }}>
-                                        <div className="text-base text-gray-800 font-semibold">{item.label}</div>
-                                        <div className="text-base text-gray-900">{formatDisplayValueMasked(item.field, val)}</div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                              // Mapeamento de campos do adotante
+                              const adotanteFieldMapping = {
+                                dt_nacimento: "data_nascimento",
+                                redes_sociais: "perfil_social",
+                                endereco: "endereco",
+                                cidade: "Cidade",
+                                cep: "CEP",
+                              };
 
-                      {/* Histórico de Rejeições */}
-                      {detalhesCandidato.historico_rejeicoes &&
-                        detalhesCandidato.historico_rejeicoes.length > 0 && (
-                          <div>
-                            <h3 className="font-medium text-red-700 mt-4 mb-2 flex items-center">
-                              Histórico de Rejeições (
-                              {detalhesCandidato.historico_rejeicoes.length})
-                            </h3>
-                            <div className="bg-red-50 border border-red-200 p-3 rounded max-h-[200px] overflow-y-auto">
-                              {detalhesCandidato.historico_rejeicoes.map(
-                                (rejeicao, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="mb-3 pb-2 border-b border-red-100 last:border-b-0"
-                                  >
-                                    <div className="flex items-center justify-between">
-                                      <p className="font-medium text-red-800 text-sm">
-                                        Pet:{" "}
-                                        {rejeicao.pet?.nome || "Pet removido"}
-                                      </p>
-                                      <span className="text-xs text-red-600">
-                                        {rejeicao.data_avaliacao &&
-                                          new Date(
-                                            rejeicao.data_avaliacao
-                                          ).toLocaleDateString("pt-BR")}
-                                      </span>
-                                    </div>
-                                    <p className="text-sm text-red-700 mt-1">
-                                      <strong>Motivo:</strong>{" "}
-                                      {rejeicao.observacoes_admin}
+                              if (!adotanteSection) {
+                                return (
+                                  <div>
+                                    <p>
+                                      <strong>Nome:</strong>{" "}
+                                      {detalhesCandidato.nome}
+                                    </p>
+                                    <p>
+                                      <strong>Email:</strong>{" "}
+                                      {detalhesCandidato.email}
                                     </p>
                                   </div>
-                                )
-                              )}
-                              <p className="text-xs text-red-600 italic mt-2">
-                                Considere esses motivos ao avaliar nova
-                                solicitação
-                              </p>
+                                );
+                              }
+
+                              return adotanteSection.items.map((item) => {
+                                // Usa o campo mapeado se existir, senão usa o campo original
+                                const realField =
+                                  adotanteFieldMapping[item.field] ||
+                                  item.field;
+                                const val = detalhesCandidato?.[realField];
+
+                                return (
+                                  <div
+                                    key={item.field}
+                                    className="flex flex-col"
+                                  >
+                                    <span className="text-base text-gray-800 font-semibold">
+                                      {item.label}
+                                    </span>
+                                    <span className="text-base text-gray-900">
+                                      {formatDisplayValueMasked(realField, val)}
+                                    </span>
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 mt-4 mb-2">
+                            Respostas do Formulário
+                          </h3>
+                          <div className="bg-gray-50 p-3 rounded grid grid-cols-1 gap-4 text-base">
+                            {(sections || [])
+                              .filter((s) => s.id !== "adotante")
+                              .map((section) => {
+                                // Mapeamento de campos do formulário para o banco de dados
+                                const fieldMapping = {
+                                  dt_nacimento: "data_nascimento",
+                                  redes_sociais: "perfil_social",
+                                  residencia_tipo: "tipo_residencia",
+                                  proprietarios_aceitam:
+                                    "proprietario_aceita_animais",
+                                  residencia_possui: "possui_na_residencia",
+                                  area_tipo: "tipo_quintal_varanda",
+                                  cientes_adocao: "todos_aceitam_adocao",
+                                  profissao_moradores: "moradores_trabalham",
+                                  quantia_mensal: "quantia_mensal_cuidados",
+                                  destino_animal: "finalidade_animal",
+                                  alguem_dirige: "como_levara_veterinario",
+                                };
+
+                                return (
+                                  <div
+                                    key={section.id}
+                                    className="border rounded-lg overflow-hidden"
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleSection(section.id)}
+                                      className="w-full text-left px-4 py-3 bg-white flex items-center justify-between hover:bg-gray-50"
+                                    >
+                                      <span className="font-medium text-gray-800">
+                                        {section.title}
+                                      </span>
+                                      <span className="text-gray-500">
+                                        {openSections[section.id] ? "−" : "+"}
+                                      </span>
+                                    </button>
+                                    {openSections[section.id] && (
+                                      <div className="px-4 py-3 bg-gray-50">
+                                        {section.items.map((item) => {
+                                          // Usa o campo mapeado se existir, senão usa o campo original
+                                          const realField =
+                                            fieldMapping[item.field] ||
+                                            item.field;
+                                          const val =
+                                            detalhesCandidato?.[realField];
+
+                                          return (
+                                            <div
+                                              key={item.field}
+                                              className="mb-2"
+                                              style={{ whiteSpace: "pre-line" }}
+                                            >
+                                              <div className="text-base text-gray-800 font-semibold">
+                                                {item.label}
+                                              </div>
+                                              <div className="text-base text-gray-900">
+                                                {formatDisplayValueMasked(
+                                                  realField,
+                                                  val
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
+
+                        {/* Histórico de Rejeições */}
+                        {detalhesCandidato.historico_rejeicoes &&
+                          detalhesCandidato.historico_rejeicoes.length > 0 && (
+                            <div>
+                              <h3 className="font-medium text-red-700 mt-4 mb-2 flex items-center">
+                                Histórico de Rejeições (
+                                {detalhesCandidato.historico_rejeicoes.length})
+                              </h3>
+                              <div className="bg-red-50 border border-red-200 p-3 rounded max-h-[200px] overflow-y-auto">
+                                {detalhesCandidato.historico_rejeicoes.map(
+                                  (rejeicao, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="mb-3 pb-2 border-b border-red-100 last:border-b-0"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <p className="font-medium text-red-800 text-sm">
+                                          Pet:{" "}
+                                          {rejeicao.pet?.nome || "Pet removido"}
+                                        </p>
+                                        <span className="text-xs text-red-600">
+                                          {rejeicao.data_avaliacao &&
+                                            new Date(
+                                              rejeicao.data_avaliacao
+                                            ).toLocaleDateString("pt-BR")}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-red-700 mt-1">
+                                        <strong>Motivo:</strong>{" "}
+                                        {rejeicao.observacoes_admin}
+                                      </p>
+                                    </div>
+                                  )
+                                )}
+                                <p className="text-xs text-red-600 italic mt-2">
+                                  Considere esses motivos ao avaliar nova
+                                  solicitação
+                                </p>
+                              </div>
                             </div>
+                          )}
+
+                        {detalhesCandidato && (
+                          <div>
+                            <button
+                              className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
+                              onClick={() => setShowHistorico(true)}
+                            >
+                              Histórico de Tentativas de Adoção
+                            </button>
                           </div>
                         )}
-
-                      {detalhesCandidato && (
-                        <div>
-                          <button
-                            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded font-medium shadow-md transition-all"
-                            onClick={() => setShowHistorico(true)}
-                          >
-                            Histórico de Tentativas de Adoção
-                          </button>
-                        </div>
-                      )}
-                      {/* Aprovação/Rejeição da última tentativa (forçado para teste) */}
-                      {detalhesCandidato && (
-                        <div className="flex space-x-3 pt-4">
-                          <button
-                            onClick={() => {
-                              if (detalhesCandidato?.id) {
-                                const interesse = detalhesCandidato?.interesses?.[0];
-                                setApproveContext({
-                                  id: detalhesCandidato.id,
-                                  candidatoNome: detalhesCandidato.nome,
-                                  petId: interesse?.pet_id,
-                                  petName: interesse?.pet?.nome || "Pet",
-                                });
-                                setShowApproveConfirm(true);
-                              } else {
-                                alert("ID do candidato não encontrado. Não é possível aprovar.");
-                              }
-                            }}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
-                          >
-                            Aprovar Candidato
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (detalhesCandidato?.id) {
-                                const interesse = detalhesCandidato?.interesses?.[0];
-                                setRejectContext({
-                                  id: detalhesCandidato.id,
-                                  candidatoNome: detalhesCandidato.nome,
-                                  petId: interesse?.pet_id,
-                                  petName: interesse?.pet?.nome || "Pet",
-                                });
-                                setRejectReason("");
-                                setShowRejectConfirm(true);
-                              } else {
-                                alert("ID do candidato não encontrado. Não é possível rejeitar.");
-                              }
-                            }}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
-                          >
-                            Rejeitar Candidato
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-8 text-red-700 font-semibold">
-                      Não foi possível carregar os detalhes do candidato.
-                    </div>
-                  )}
+                        {/* Aprovação/Rejeição da última tentativa (forçado para teste) */}
+                        {detalhesCandidato && (
+                          <div className="flex space-x-3 pt-4">
+                            <button
+                              onClick={() => {
+                                if (detalhesCandidato?.id) {
+                                  const interesse =
+                                    detalhesCandidato?.interesses?.[0];
+                                  setApproveContext({
+                                    id: detalhesCandidato.id,
+                                    candidatoNome: detalhesCandidato.nome,
+                                    petId: interesse?.pet_id,
+                                    petName: interesse?.pet?.nome || "Pet",
+                                  });
+                                  setShowApproveConfirm(true);
+                                } else {
+                                  alert(
+                                    "ID do candidato não encontrado. Não é possível aprovar."
+                                  );
+                                }
+                              }}
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                            >
+                              Aprovar Candidato
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (detalhesCandidato?.id) {
+                                  const interesse =
+                                    detalhesCandidato?.interesses?.[0];
+                                  setRejectContext({
+                                    id: detalhesCandidato.id,
+                                    candidatoNome: detalhesCandidato.nome,
+                                    petId: interesse?.pet_id,
+                                    petName: interesse?.pet?.nome || "Pet",
+                                  });
+                                  setRejectReason("");
+                                  setShowRejectConfirm(true);
+                                } else {
+                                  alert(
+                                    "ID do candidato não encontrado. Não é possível rejeitar."
+                                  );
+                                }
+                              }}
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:scale-105"
+                            >
+                              Rejeitar Candidato
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-red-700 font-semibold">
+                        Não foi possível carregar os detalhes do candidato.
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -699,7 +824,7 @@ const AdminAdoptants = () => {
                       &#8592;
                     </button>
                     <span className="text-base text-gray-700">
-                      {historicoIndex + 1} de {" "}
+                      {historicoIndex + 1} de{" "}
                       {Array.isArray(detalhesCandidato.interesses)
                         ? detalhesCandidato.interesses.length
                         : 0}
@@ -717,10 +842,10 @@ const AdminAdoptants = () => {
                       }
                       disabled={
                         historicoIndex ===
-                          (Array.isArray(detalhesCandidato.interesses)
-                            ? detalhesCandidato.interesses.length
-                            : 1) -
-                            1
+                        (Array.isArray(detalhesCandidato.interesses)
+                          ? detalhesCandidato.interesses.length
+                          : 1) -
+                          1
                       }
                       className={`text-2xl px-2 ${
                         historicoIndex ===
@@ -736,42 +861,63 @@ const AdminAdoptants = () => {
                       &#8594;
                     </button>
                   </div>
-                    {Array.isArray(detalhesCandidato.interesses) &&
+                  {Array.isArray(detalhesCandidato.interesses) &&
                     detalhesCandidato.interesses.length > 0 && (
-                    <div className="bg-gray-50 p-3 rounded border border-sky-100">
-                      {(() => {
-                        const interesse = detalhesCandidato.interesses[historicoIndex];
-                        return (
-                          <>
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(interesse.status)}`}>
-                                {getStatusText(interesse.status)}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {interesse.data_interesse ? new Date(interesse.data_interesse).toLocaleDateString("pt-BR") : "-"}
-                              </span>
-                            </div>
-                            <p>
-                              <strong>Pet:</strong> {interesse.pet?.nome || "-"}
-                            </p>
-                            <p>
-                              <strong>Tipo de Moradia:</strong> {detalhesCandidato.tipo_moradia || detalhesCandidato.mora_em || "-"}
-                            </p>
-                            <p>
-                              <strong>Experiência:</strong> {detalhesCandidato.experiencia_pets || detalhesCandidato.ja_teve_tem_animais || "-"}
-                            </p>
-                            <p>
-                              <strong>Motivação:</strong> {detalhesCandidato.motivacao || detalhesCandidato.finalidade_animal || "-"}
-                            </p>
-                            {interesse.status === "rejeitado" && interesse.observacoes_admin && (
-                              <p className="text-red-700 mt-1">
-                                <strong>Motivo da Rejeição:</strong> {interesse.observacoes_admin}
+                      <div className="bg-gray-50 p-3 rounded border border-sky-100">
+                        {(() => {
+                          const interesse =
+                            detalhesCandidato.interesses[historicoIndex];
+                          return (
+                            <>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span
+                                  className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                                    interesse.status
+                                  )}`}
+                                >
+                                  {getStatusText(interesse.status)}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {interesse.data_interesse
+                                    ? new Date(
+                                        interesse.data_interesse
+                                      ).toLocaleDateString("pt-BR")
+                                    : "-"}
+                                </span>
+                              </div>
+                              <p>
+                                <strong>Pet:</strong>{" "}
+                                {interesse.pet?.nome || "-"}
                               </p>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
+                              <p>
+                                <strong>Tipo de Moradia:</strong>{" "}
+                                {detalhesCandidato.tipo_moradia ||
+                                  detalhesCandidato.mora_em ||
+                                  "-"}
+                              </p>
+                              <p>
+                                <strong>Experiência:</strong>{" "}
+                                {detalhesCandidato.experiencia_pets ||
+                                  detalhesCandidato.ja_teve_tem_animais ||
+                                  "-"}
+                              </p>
+                              <p>
+                                <strong>Motivação:</strong>{" "}
+                                {detalhesCandidato.motivacao ||
+                                  detalhesCandidato.finalidade_animal ||
+                                  "-"}
+                              </p>
+                              {interesse.status === "rejeitado" &&
+                                interesse.observacoes_admin && (
+                                  <p className="text-red-700 mt-1">
+                                    <strong>Motivo da Rejeição:</strong>{" "}
+                                    {interesse.observacoes_admin}
+                                  </p>
+                                )}
+                            </>
+                          );
+                        })()}
+                      </div>
                     )}
                 </div>
               </div>
@@ -787,12 +933,17 @@ const AdminAdoptants = () => {
                   onClick={(e) => e.stopPropagation()}
                   className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
                 >
-                  <h3 className="text-xl font-bold text-sky-700 mb-3">Confirmar Aprovação</h3>
+                  <h3 className="text-xl font-bold text-sky-700 mb-3">
+                    Confirmar Aprovação
+                  </h3>
                   <p className="mb-4 text-gray-800">
-                    Tem certeza que deseja <strong>APROVAR</strong> o candidato "{approveContext.candidatoNome}" para o pet "{approveContext.petName}"?
+                    Tem certeza que deseja <strong>APROVAR</strong> o candidato
+                    "{approveContext.candidatoNome}" para o pet "
+                    {approveContext.petName}"?
                   </p>
                   <p className="mb-4 text-gray-600">
-                    Esta ação criará automaticamente uma adoção ativa e marcará o pet como adotado.
+                    Esta ação criará automaticamente uma adoção ativa e marcará
+                    o pet como adotado.
                   </p>
                   <div className="flex justify-end space-x-3">
                     <button
@@ -804,10 +955,17 @@ const AdminAdoptants = () => {
                     <button
                       onClick={async () => {
                         if (!approveContext.petId) {
-                          alert('pet_id não encontrado. Não é possível aprovar.');
+                          alert(
+                            "pet_id não encontrado. Não é possível aprovar."
+                          );
                           return;
                         }
-                        await updateStatus(approveContext.id, 'aprovado', '', approveContext.petId);
+                        await updateStatus(
+                          approveContext.id,
+                          "aprovado",
+                          "",
+                          approveContext.petId
+                        );
                         setShowApproveConfirm(false);
                         setCandidatoSelecionado(null);
                         setDetalhesCandidato(null);
@@ -831,11 +989,17 @@ const AdminAdoptants = () => {
                   onClick={(e) => e.stopPropagation()}
                   className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 relative border-2 border-sky-200"
                 >
-                  <h3 className="text-xl font-bold text-rose-700 mb-3">Confirmar Rejeição</h3>
+                  <h3 className="text-xl font-bold text-rose-700 mb-3">
+                    Confirmar Rejeição
+                  </h3>
                   <p className="mb-3 text-gray-800">
-                    Tem certeza que deseja <strong>REJEITAR</strong> o candidato "{rejectContext.candidatoNome}" para o pet "{rejectContext.petName}"?
+                    Tem certeza que deseja <strong>REJEITAR</strong> o candidato
+                    "{rejectContext.candidatoNome}" para o pet "
+                    {rejectContext.petName}"?
                   </p>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Motivo da rejeição</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Motivo da rejeição
+                  </label>
                   <textarea
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
@@ -853,10 +1017,17 @@ const AdminAdoptants = () => {
                     <button
                       onClick={async () => {
                         if (!rejectContext.petId) {
-                          alert('pet_id não encontrado. Não é possível rejeitar.');
+                          alert(
+                            "pet_id não encontrado. Não é possível rejeitar."
+                          );
                           return;
                         }
-                        await updateStatus(rejectContext.id, 'rejeitado', rejectReason || '', rejectContext.petId);
+                        await updateStatus(
+                          rejectContext.id,
+                          "rejeitado",
+                          rejectReason || "",
+                          rejectContext.petId
+                        );
                         setShowRejectConfirm(false);
                         setCandidatoSelecionado(null);
                         setDetalhesCandidato(null);

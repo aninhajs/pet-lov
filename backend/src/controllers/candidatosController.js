@@ -438,6 +438,22 @@ export const createCandidato = async (req, res) => {
                 },
               });
             }
+
+            // Verificar se o pet precisa ser marcado como em_processo
+            const pet = await tx.pet.findUnique({
+              where: { id: petIdValue },
+              select: { status: true },
+            });
+
+            if (pet && pet.status === "disponivel") {
+              await tx.pet.update({
+                where: { id: petIdValue },
+                data: { status: "em_processo" },
+              });
+              console.log(
+                `✅ Pet ${petIdValue} marcado como em_processo (candidato existente)`
+              );
+            }
           }
 
           await tx.adoptionCandidate.update({
@@ -551,6 +567,24 @@ export const createCandidato = async (req, res) => {
         },
       },
     });
+
+    // Atualizar status do pet para em_processo se estava disponivel
+    if (petIdValue) {
+      const pet = await prisma.pet.findUnique({
+        where: { id: petIdValue },
+        select: { status: true },
+      });
+
+      if (pet && pet.status === "disponivel") {
+        await prisma.pet.update({
+          where: { id: petIdValue },
+          data: { status: "em_processo" },
+        });
+        console.log(
+          `✅ Pet ${petIdValue} marcado como em_processo (novo candidato)`
+        );
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -735,7 +769,7 @@ export const updateCandidatoStatus = async (req, res) => {
         `✅ Adoção automática criada: Pet ${pet_id} → Candidato ${id}`
       );
     } else {
-      // Para rejeição, apenas atualizar o interesse
+      // Para rejeição, atualizar o interesse
       await prisma.petInterest.updateMany({
         where: { candidato_id: id, pet_id },
         data: {
@@ -744,6 +778,35 @@ export const updateCandidatoStatus = async (req, res) => {
           observacoes_admin: observacoes,
         },
       });
+
+      // Se for rejeição, verificar se ainda há outros interessados pendentes
+      if (statusNormalizado === "rejeitado") {
+        const outrosInteressados = await prisma.petInterest.count({
+          where: {
+            pet_id,
+            status: "interessado",
+            candidato_id: { not: id },
+          },
+        });
+
+        // Se não há outros interessados, voltar pet para disponivel
+        if (outrosInteressados === 0) {
+          const pet = await prisma.pet.findUnique({
+            where: { id: pet_id },
+            select: { status: true },
+          });
+
+          if (pet && pet.status === "em_processo") {
+            await prisma.pet.update({
+              where: { id: pet_id },
+              data: { status: "disponivel" },
+            });
+            console.log(
+              `✅ Pet ${pet_id} voltou para disponivel (nenhum interessado restante)`
+            );
+          }
+        }
+      }
     }
 
     await prisma.adoptionCandidate.update({

@@ -34,25 +34,28 @@ const Pets = () => {
           console.log("📦 Dados brutos do backend:", response.data.data);
 
           // Formatar dados do backend para o formato esperado pelo frontend
-          const petsFormatados = response.data.data.map((pet) => ({
-            id: pet.id,
-            nome: pet.nome,
-            tipo: pet.tipo,
-            idade: pet.idade,
-            porte: pet.porte,
-            sexo: pet.sexo,
-            cor: pet.cor,
-            peso: pet.peso,
-            descricao: pet.descricao,
-            castrado: pet.castrado,
-            vacinado: pet.vacinado,
-            vermifugado: pet.vermifugado,
-            localizacao: pet.localizacao,
-            status: pet.status,
-            // Extrair URLs das imagens
-            imagens: pet.imagens?.map((img) => img.url_imagem) || [],
-            imagem: pet.imagens?.[0]?.url_imagem || null,
-          }));
+          // Filtrar apenas pets disponíveis e em processo (remover adotados)
+          const petsFormatados = response.data.data
+            .filter((pet) => pet.status !== "adotado")
+            .map((pet) => ({
+              id: pet.id,
+              nome: pet.nome,
+              tipo: pet.tipo,
+              idade: pet.idade,
+              porte: pet.porte,
+              sexo: pet.sexo,
+              cor: pet.cor,
+              peso: pet.peso,
+              descricao: pet.descricao,
+              castrado: pet.castrado,
+              vacinado: pet.vacinado,
+              vermifugado: pet.vermifugado,
+              localizacao: pet.localizacao,
+              status: pet.status,
+              // Extrair URLs das imagens
+              imagens: pet.imagens?.map((img) => img.url_imagem) || [],
+              imagem: pet.imagens?.[0]?.url_imagem || null,
+            }));
           setPets(petsFormatados);
           console.log("\u2705 Pets carregados do backend:", petsFormatados);
           console.log(
@@ -142,10 +145,12 @@ const Pets = () => {
     // Cidade
     if (cityFilter) {
       if (cityFilter === "fortaleza-ce") {
-        if (!local?.includes("fortaleza") && !local?.includes("fortaleza-ce")) return false;
+        if (!local?.includes("fortaleza") && !local?.includes("fortaleza-ce"))
+          return false;
       }
       if (cityFilter === "aquiraz-ce") {
-        if (!local?.includes("aquiraz") && !local?.includes("aquiraz-ce")) return false;
+        if (!local?.includes("aquiraz") && !local?.includes("aquiraz-ce"))
+          return false;
       }
     }
 
@@ -177,7 +182,7 @@ const Pets = () => {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <Link
                 to="/"
-                class="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
               >
                 Início
               </Link>
@@ -198,139 +203,172 @@ const Pets = () => {
             </span>
           </h2> */}
           <p className="text-gray-600 mb-4">
-            Veja todos os pets cadastrados - disponíveis, em processo de adoção
-            e já adotados
+            Veja todos os pets cadastrados - disponíveis e em processo de adoção
           </p>
 
           {/* Contador de pets por status */}
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-green-200 via-green-100 to-green-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-green-400">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 px-8 py-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-extrabold text-green-700 flex items-center gap-2">
-                  🟢 {pets.filter((pet) => pet.status === "disponivel").length}
+                <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
+                  {pets.filter((pet) => pet.status === "disponivel").length}
                 </span>
-                <span className="text-base sm:text-lg font-bold text-green-800 mt-1 tracking-wide">
+                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-2 tracking-wide">
                   Disponíveis
                 </span>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-yellow-400">
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 px-8 py-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-extrabold text-yellow-700 flex items-center gap-2">
-                  ⏳ {pets.filter((pet) => pet.status === "em_processo").length}
+                <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
+                  {pets.filter((pet) => pet.status === "em_processo").length}
                 </span>
-                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-1 tracking-wide">
+                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-2 tracking-wide">
                   Em Processo
                 </span>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-gray-200 via-gray-100 to-gray-50 p-3 sm:p-4 rounded-xl text-center shadow-md border border-gray-400">
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 px-8 py-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
               <div className="flex flex-col items-center justify-center">
-                <span className="text-2xl sm:text-3xl font-extrabold text-gray-700 flex items-center gap-2">
-                  ❤️ {pets.filter((pet) => pet.status === "adotado").length}
+                <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
+                  {
+                    pets.filter((pet) =>
+                      pet.localizacao?.toLowerCase().includes("fortaleza")
+                    ).length
+                  }
                 </span>
-                <span className="text-base sm:text-lg font-bold text-gray-800 mt-1 tracking-wide">
-                  Adotados
+                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-2 tracking-wide">
+                  Fortaleza
+                </span>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-200 via-yellow-100 to-yellow-50 px-8 py-6 rounded-2xl text-center shadow-lg border-2 border-yellow-400">
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
+                  {
+                    pets.filter((pet) =>
+                      pet.localizacao?.toLowerCase().includes("aquiraz")
+                    ).length
+                  }
+                </span>
+                <span className="text-base sm:text-lg font-bold text-yellow-800 mt-2 tracking-wide">
+                  Aquiraz
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 w-full mb-2">
-              Filtrar por tipo:
-            </h3>
-            <button
-              onClick={() => setTypeFilter(null)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                !typeFilter
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Todos os tipos
-            </button>
-            <button
-              onClick={() => setTypeFilter(typeFilter === "cao" ? null : "cao")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                typeFilter === "cao"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Cães
-            </button>
-            <button
-              onClick={() => setTypeFilter(typeFilter === "gato" ? null : "gato")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                typeFilter === "gato"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Gatos
-            </button>
-            {/* Filtros por cidade com submenu */}
-            <div className="relative inline-block">
+          {/* Seção de filtros com cor de fundo do site */}
+          <div
+            className="rounded-lg p-6 shadow-md border border-yellow-300 mb-6"
+            style={{ backgroundColor: "#f4f0e4" }}
+          >
+            <div className="flex flex-wrap gap-2 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 w-full mb-2">
+                Filtrar por tipo:
+              </h3>
               <button
-                onClick={() => setCityFilter(cityFilter === "fortaleza-ce" ? null : "fortaleza-ce")}
+                onClick={() => setTypeFilter(null)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  cityFilter === "fortaleza-ce"
-                    ? "bg-blue-700 text-white"
+                  !typeFilter
+                    ? "bg-indigo-600 text-white"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                Pets Fortaleza-CE
+                Todos os tipos
               </button>
-            </div>
-            <div className="relative inline-block">
               <button
-                onClick={() => setCityFilter(cityFilter === "aquiraz-ce" ? null : "aquiraz-ce")}
+                onClick={() =>
+                  setTypeFilter(typeFilter === "cao" ? null : "cao")
+                }
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  cityFilter === "aquiraz-ce"
-                    ? "bg-blue-700 text-white"
+                  typeFilter === "cao"
+                    ? "bg-indigo-600 text-white"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                Pets Aquiraz-CE
+                Cães
               </button>
+              <button
+                onClick={() =>
+                  setTypeFilter(typeFilter === "gato" ? null : "gato")
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  typeFilter === "gato"
+                    ? "bg-indigo-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                Gatos
+              </button>
+              {/* Filtros por cidade com submenu */}
+              <div className="relative inline-block">
+                <button
+                  onClick={() =>
+                    setCityFilter(
+                      cityFilter === "fortaleza-ce" ? null : "fortaleza-ce"
+                    )
+                  }
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    cityFilter === "fortaleza-ce"
+                      ? "bg-blue-700 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  Pets Fortaleza-CE
+                </button>
+              </div>
+              <div className="relative inline-block">
+                <button
+                  onClick={() =>
+                    setCityFilter(
+                      cityFilter === "aquiraz-ce" ? null : "aquiraz-ce"
+                    )
+                  }
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    cityFilter === "aquiraz-ce"
+                      ? "bg-blue-700 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  Pets Aquiraz-CE
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <h3 className="text-lg font-semibold text-gray-900 w-full mb-2">
-              Filtrar por status:
-            </h3>
-            <button
-              onClick={() => setStatusFilter(statusFilter === "disponivel" ? null : "disponivel")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                statusFilter === "disponivel"
-                  ? "bg-green-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              🟢 Disponíveis
-            </button>
-            <button
-              onClick={() => setStatusFilter(statusFilter === "em_processo" ? null : "em_processo")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                statusFilter === "em_processo"
-                  ? "bg-yellow-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              ⏳ Em Processo
-            </button>
-            <button
-              onClick={() => setStatusFilter(statusFilter === "adotado" ? null : "adotado")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                statusFilter === "adotado"
-                  ? "bg-gray-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              ❤️ Adotados
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 w-full mb-2">
+                Filtrar por status:
+              </h3>
+              <button
+                onClick={() =>
+                  setStatusFilter(
+                    statusFilter === "disponivel" ? null : "disponivel"
+                  )
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  statusFilter === "disponivel"
+                    ? "bg-green-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                🟢 Disponíveis
+              </button>
+              <button
+                onClick={() =>
+                  setStatusFilter(
+                    statusFilter === "em_processo" ? null : "em_processo"
+                  )
+                }
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  statusFilter === "em_processo"
+                    ? "bg-yellow-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                ⏳ Em Processo
+              </button>
+            </div>
           </div>
         </div>
 
@@ -882,9 +920,9 @@ const Pets = () => {
                 <div className="text-center space-y-3">
                   {selectedPet.status === "disponivel" ? (
                     <Link
-                      to={`/questionnaire?petId=${selectedPet.id}&petName=${encodeURIComponent(
-                        selectedPet.nome
-                      )}`}
+                      to={`/questionnaire?petId=${
+                        selectedPet.id
+                      }&petName=${encodeURIComponent(selectedPet.nome)}`}
                       className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                       onClick={closeModal}
                     >
