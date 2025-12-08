@@ -1,9 +1,23 @@
 import { prisma } from "../lib/prisma.js";
 import { validationResult } from "express-validator";
 
+// Cache simples em memória (em produção, usar Redis)
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 export const getPets = async (req, res) => {
   try {
     const { tipo, status, porte, sexo, page = 1, limit = 10 } = req.query;
+    
+    // Criar chave de cache baseada nos parâmetros
+    const cacheKey = `pets:${JSON.stringify({ tipo, status, porte, sexo, page, limit })}`;
+    const cached = cache.get(cacheKey);
+    
+    // Verificar cache
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log('📦 Retornando dados do cache:', cacheKey);
+      return res.json(cached.data);
+    }
 
     // Calcular offset para paginação
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -15,19 +29,34 @@ export const getPets = async (req, res) => {
     if (porte) where.porte = porte.toLowerCase();
     if (sexo) where.sexo = sexo.toLowerCase();
 
-    // Buscar pets com paginação
+    // Buscar pets com paginação (otimizado)
     const [pets, totalCount] = await Promise.all([
       prisma.pet.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          nome: true,
+          tipo: true,
+          idade: true,
+          porte: true,
+          sexo: true,
+          cor: true,
+          peso: true,
+          descricao: true,
+          castrado: true,
+          vacinado: true,
+          vermifugado: true,
+          localizacao: true,
+          status: true,
+          data_cadastro: true,
           imagens: {
             select: {
               id: true,
               url_imagem: true,
-              nome_arquivo: true,
               principal: true,
             },
             orderBy: { principal: "desc" }, // Principal primeiro
+            take: 5, // Limitar a 5 imagens por pet
           },
           usuario_cadastrou: {
             select: {
@@ -48,7 +77,7 @@ export const getPets = async (req, res) => {
     const hasNextPage = parseInt(page) < totalPages;
     const hasPrevPage = parseInt(page) > 1;
 
-    res.json({
+    const responseData = {
       success: true,
       data: pets,
       pagination: {
@@ -59,7 +88,21 @@ export const getPets = async (req, res) => {
         hasPrevPage,
         limit: parseInt(limit),
       },
+    };
+
+    // Armazenar no cache
+    cache.set(cacheKey, {
+      data: responseData,
+      timestamp: Date.now()
     });
+
+    // Limpar cache antigo (simple cleanup)
+    if (cache.size > 100) {
+      const oldestKey = cache.keys().next().value;
+      cache.delete(oldestKey);
+    }
+
+    res.json(responseData);
   } catch (error) {
     console.error("Erro ao buscar pets:", error);
     res.status(500).json({

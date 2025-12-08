@@ -25,7 +25,7 @@ model User {
 }
 
 model Pet {
-  id                     String              @id @default(cuid())
+  id                     String        @id @default(cuid())
   nome                   String
   tipo                   TipoPet
   idade                  String
@@ -34,21 +34,20 @@ model Pet {
   cor                    String
   peso                   Decimal?
   descricao              String
-  castrado               Boolean             @default(false)
-  vacinado               Boolean             @default(false)
-  vermifugado            Boolean             @default(false)
+  castrado               Boolean       @default(false)
+  vacinado               Boolean       @default(false)
+  vermifugado            Boolean       @default(false)
   necessidades_especiais String?
   historia               String?
-  status                 StatusPet           @default(disponivel)
-  data_cadastro          DateTime            @default(now())
-  data_atualizacao       DateTime            @updatedAt
+  status                 StatusPet     @default(disponivel)
+  data_cadastro          DateTime      @default(now())
+  data_atualizacao       DateTime      @updatedAt
   usuario_id             String
   localizacao            String?
-  adoption_candidates    AdoptionCandidate[]
   adocoes                Adoption[]
   imagens                PetImage[]
   interesses             PetInterest[]
-  usuario_cadastrou      User                @relation(fields: [usuario_id], references: [id])
+  usuario_cadastrou      User          @relation(fields: [usuario_id], references: [id])
   vacinas                Vaccine[]
 
   @@map("pets")
@@ -69,99 +68,112 @@ model PetImage {
 }
 
 model AdoptionCandidate {
-  nome                        String?
-  endereco                    String?
-  celular_01                  String?
-  celular_02                  String?
-  cpf                         String           @unique
-  data_nascimento             DateTime?
-  perfil_social               String?
-  profissao                   String?
-  alguem_alergico             String?
-  castrados_motivo            String?
-  clinica_veterinario         String?
-  como_levara_veterinario     String?
-  como_organizaria_mudanca    String?
-  comodo_dia                  String?
-  conhece_doencas             String?
-  criterios_alimentacao       String?
-  devolveria_se_mudar         String?
-  disposto_adaptacao          String?
-  filhotes_ou_castrar         String?
-  finalidade_animal           String?
-  frequencia_passeios         String?
-  frequencia_remedio_verme    String?
-  frequencia_veterinario      String?
-  ja_teve_tem_animais         String?
-  local_dormir                String?
-  marca_racao                 String?
-  marca_racao_adotado         String?
-  mora_em                     String?
-  moradores_trabalham         String?
-  motivo_perda_animais        String?
-  normas_condominio_animais   String?
-  passeios                    String?
-  possui_na_residencia        String?
-  possui_veiculo              String?
-  preparado_responsabilidade  String?
-  pretende_mudar_5_anos       String?
-  proprietario_aceita_animais String?
-  providencia_crescimento     String?
-  quantia_mensal_cuidados     String?
-  reacao_bagunca              String?
-  reacao_choro_latido         String?
-  reacao_doenca               String?
-  reacao_mordida_arranho      String?
-  reside_com_quantas_pessoas  String?
-  responsavel_financeiro      String?
-  responsavel_viagem          String?
-  tem_criancas                String?
-  tempo_preso                 String?
-  tempo_sozinho               String?
-  teve_filhotes               String?
-  tipo_portao                 String?
-  tipo_quintal_varanda        String?
-  tipo_residencia             String?
-  todos_aceitam_adocao        String?
-  vacinados_quais             String?
-  vacinas_que_dara            String?
-  CEP                         String?
-  Cidade                      String?
-  Pet_ID                      String?
-  status                      StatusCandidato?
-  id                          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  pets                        Pet?             @relation(fields: [Pet_ID], references: [id], onDelete: Cascade)
-  adocoes                     Adoption[]
-  interesses                  PetInterest[]
+  cpf               String        @id @default(cuid())
+  nome              String
+  endereco          String
+  celular_01        String
+  celular_02        String?
+  data_nascimento   DateTime
+  trabalha          Boolean
+  profissao         String?
+  perfil_social     String?
+
+  mora_em                       String?
+  tipo_residencia               String?
+  proprietario_aceita_animais   Boolean?
+  normas_condominio_animais     String?
+  tipo_portao                   String?
+  possui_na_residencia          String?
+  tipo_quintal_varanda          String?
+  reside_com_quantas_pessoas    String?
+  quem_sao                      String?
+  todos_aceitam_adocao          Boolean?
+  responsavel_financeiro        String?
+  reacao_mordida_arranho        String?
+  reacao_bagunca                String?
+  possui_veiculo                Boolean?
+  tipo_veiculo                  String?
+  como_levara_veterinario       String?
+  pode_levar_imediato           Boolean?
+  moradores_trabalham           Boolean?
+  profissao_moradores           String?
+  alguem_alergico               Boolean?
+  tem_criancas                  Boolean?
+  idade_criancas                String?
+  ja_teve_tem_animais           Boolean?
+  qtd_animais                   String?
+  especie_animais               String?
+  idade_animais                 String?
+  ja_perdeu_animal              Boolean?
+  motivo_perda_animais          String?
+  perdeu_mais_de_um             String?
+  vacinados_quais               String?
+  marca_racao                   String?
+  castrados_motivo              String?
+  teve_filhotes                 Boolean?
+  qtd_filhotes                  String?
+  destino_filhotess             String?
+  passeios                      String?
+  quantia_mensal_cuidados       String?
+  tempo_sozinho                 String?
+  frequencia_passeios           String?
+  devolveria_se_mudar           Boolean?
+  como_organizaria_mudanca      String?
+  finalidade_animal             String?
+  comodo_dia                    String?
+  local_dormir                  String?
+  ficara_preso                  Boolean?
+  motivo_preso                  String?
+  tempo_preso                   String?
+  providencia_crescimento       String?
+  responsavel_viagem            String?
+  pretende_mudar_5_anos         Boolean?
+  destino_animal_mudanca        String?
+  reacao_choro_latido           String?
+  vacinas_que_dara              String?
+  marca_racao_adotado           String?
+  criterios_alimentacao         String?
+  filhotes_ou_castrar           String?
+  preparado_responsabilidade    Boolean?
+  disposto_adaptacao            Boolean?
+  clinica_veterinario           String?
+  reacao_doenca                 String?
+  conhece_doencas               Boolean?
+  frequencia_remedio_verme      String?
+  frequencia_veterinario        String?
+
+  cep               Adoption[]
+  cidade            PetInterest[]
 
   @@map("adoption_candidates")
 }
 
 model PetInterest {
   id                String            @id @default(cuid())
-  candidato_id      String            @db.Uuid
+  candidato_id      String
   pet_id            String
   status            StatusInteresse   @default(interessado)
   data_interesse    DateTime          @default(now())
   data_avaliacao    DateTime?
   observacoes_admin String?
-  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
+  candidato         AdoptionCandidate @relation(fields: [candidato_id], references: [cpf], onDelete: Cascade)
   pet               Pet               @relation(fields: [pet_id], references: [id], onDelete: Cascade)
 
   @@unique([candidato_id, pet_id])
   @@map("pet_interests")
+
 }
 
 model Adoption {
   id               String            @id @default(cuid())
   pet_id           String
-  candidato_id     String            @db.Uuid
+  candidato_id     String
   data_adocao      DateTime          @default(now())
   observacoes      String?
   taxa_adocao      Decimal?
   status           StatusAdocao      @default(ativa)
   data_atualizacao DateTime          @updatedAt
-  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [id], onDelete: Cascade)
+  candidato        AdoptionCandidate @relation(fields: [candidato_id], references: [cpf])
   pet              Pet               @relation(fields: [pet_id], references: [id])
 
   @@map("adoptions")
