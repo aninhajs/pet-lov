@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      # Defina CORS_ORIGINS para liberar o domínio do frontend
+      - CORS_ORIGINS=http://localhost:5173
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Abrece
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:3001/api
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

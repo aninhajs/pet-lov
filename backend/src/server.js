@@ -19,18 +19,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedOrigins =
+  process.env.CORS_ORIGINS?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean) ||
+  (process.env.NODE_ENV === "production"
+    ? ["https://seu-frontend.vercel.app"]
+    : [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+      ]);
+
 // Middlewares globais
 app.use(helmet());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://seu-frontend.vercel.app"]
-        : [
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:3000",
-          ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
