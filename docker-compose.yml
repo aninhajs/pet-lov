@@ -11,7 +11,7 @@ services:
       - PORT=3001
       - NODE_ENV=production
       # Defina CORS_ORIGINS para liberar o domínio do frontend
-      - CORS_ORIGINS=http://localhost:5173
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "3001:3001"
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
       context: ./Abrece
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:3001/api
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3001/api}
     ports:
       - "5173:80"
     depends_on:

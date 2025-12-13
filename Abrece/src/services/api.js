@@ -2,12 +2,14 @@ import axios from "axios";
 
 // Permite configurar a URL da API via variáveis de ambiente do Vite.
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3001/api";
+  import.meta.env.VITE_API_BASE_URL || "/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    // Evita página de aviso do ngrok em chamadas do frontend
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
@@ -44,6 +46,7 @@ export const createPet = async (petData, token) => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "ngrok-skip-browser-warning": "true",
       },
       body: JSON.stringify(petData),
     });

@@ -6,8 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Gera o cliente do Prisma
+# Gera o cliente do Prisma (usa um DATABASE_URL padrão só para geração)
 COPY prisma ./prisma
+ARG DATABASE_URL=postgresql://user:password@localhost:5432/db
+ENV DATABASE_URL=$DATABASE_URL
 RUN npx prisma generate
 
 # Copia restante do código

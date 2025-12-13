@@ -48,9 +48,10 @@ const Home = () => {
     const carregarPets = async () => {
       try {
         const response = await PetServices.getAllPets();
-        if (response.success && response.data?.data) {
+        const payload = response.data?.data ?? response.data ?? [];
+        if (response.success && payload) {
           // Filtrar apenas pets disponíveis e formatar
-          const petsDisponiveis = response.data.data
+          const petsDisponiveis = payload
             .filter((pet) => pet.status === "disponivel")
             .map((pet) => ({
               id: pet.id,
@@ -925,3 +926,4 @@ const Home = () => {
 };
 
 export default Home;
+

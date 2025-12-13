@@ -30,12 +30,13 @@ const Pets = () => {
     const carregarPets = async () => {
       try {
         const response = await PetServices.getAllPets();
-        if (response.success && response.data?.data) {
-          console.log("📦 Dados brutos do backend:", response.data.data);
+        const payload = response.data?.data ?? response.data ?? [];
+        if (response.success && payload) {
+          console.log("Dados brutos do backend:", payload);
 
           // Formatar dados do backend para o formato esperado pelo frontend
-          // Filtrar apenas pets disponíveis e em processo (remover adotados)
-          const petsFormatados = response.data.data
+          // Filtrar apenas pets dispon�veis e em processo (remover adotados)
+          const petsFormatados = payload
             .filter((pet) => pet.status !== "adotado")
             .map((pet) => ({
               id: pet.id,
@@ -948,3 +949,5 @@ const Pets = () => {
 };
 
 export default Pets;
+
+

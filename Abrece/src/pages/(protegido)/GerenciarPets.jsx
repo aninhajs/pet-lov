@@ -65,9 +65,10 @@ const GerenciarPets = () => {
       console.log("🔄 Carregando pets do backend...");
       try {
         const response = await PetServices.getAllPets();
-        if (response.success && response.data?.data) {
+        const payload = response.data?.data ?? response.data ?? [];
+        if (response.success && payload) {
           // Formatar dados do backend para o formato esperado
-          const petsFormatados = response.data.data.map((pet) => ({
+          const petsFormatados = payload.map((pet) => ({
             id: pet.id,
             nome: pet.nome,
             tipo: pet.tipo,
@@ -1035,3 +1036,5 @@ const GerenciarPets = () => {
 };
 
 export default GerenciarPets;
+
+

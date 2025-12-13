@@ -17,7 +17,7 @@ const CartaoVacina = () => {
     const fetchPets = async () => {
       const result = await PetServices.getAllPets();
       if (result.success) {
-        setPets(result.data.data || []);
+        setPets(result.data?.data ?? result.data ?? []);
       } else {
         setMessage({ type: "error", text: "Erro ao carregar pets" });
       }
@@ -342,3 +342,4 @@ const CartaoVacina = () => {
 };
 
 export default CartaoVacina;
+

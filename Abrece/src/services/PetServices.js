@@ -4,11 +4,14 @@ export const PetServices = {
   // Buscar todos os pets
   getAllPets: async () => {
     try {
-      // Solicitar todos os pets sem limite de paginação
+      // Solicitar todos os pets sem limite de pagina��o
       const response = await api.get("/pets?limit=1000");
+      const pets = response.data?.data ?? response.data ?? [];
+      const pagination = response.data?.pagination ?? null;
       return {
         success: true,
-        data: response.data,
+        data: pets,
+        pagination,
         message: "Pets carregados com sucesso",
       };
     } catch (error) {
@@ -189,3 +192,5 @@ export const getPetsWithFilters = async (filters) => {
 
 // Exportar como função individual também para compatibilidade
 export const createPet = PetServices.createPet;
+
+
