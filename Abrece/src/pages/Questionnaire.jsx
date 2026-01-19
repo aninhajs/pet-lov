@@ -11,15 +11,66 @@ export const sections = [
     accent: "sky",
     items: [
       { field: "nome", label: "Nome completo", type: "text", required: true },
-      { field: "cpf", label: "CPF", type: "text", required: true, placeholder: "000.000.000-00" },
-      { field: "endereco", label: "Rua e Bairro", type: "text", required: true, fullWidth: true },
-      { field: "cidade", label: "Cidade", type: "text", required: true, placeholder: "Fortaleza-CE" },
-      { field: "cep", label: "CEP", type: "text", required: true, placeholder: "12345-000" },
-      { field: "celular_01", label: "Celular 01", type: "text", required: true, placeholder: "(00) 9 0000-0000" },
-      { field: "celular_02", label: "Celular 02", type: "text", placeholder: "(00) 9 0000-0000" },
-      { field: "dt_nacimento", label: "Data de Nascimento", required: true, type: "date", placeholder: "DD/MM/AAAA" },
-      { field: "profissao", label: "Você trabalha no momento? Qual sua profissão/emprego?", required: true, type: "text" },
-      { field: "redes_sociais", label: "Redes Sociais", type: "text", placeholder: "Informe seu perfil de rede social ou coloque o link" },
+      {
+        field: "cpf",
+        label: "CPF",
+        type: "text",
+        required: true,
+        placeholder: "000.000.000-00",
+      },
+      {
+        field: "endereco",
+        label: "Rua e Bairro",
+        type: "text",
+        required: true,
+        fullWidth: true,
+      },
+      {
+        field: "cidade",
+        label: "Cidade",
+        type: "text",
+        required: true,
+        placeholder: "Fortaleza-CE",
+      },
+      {
+        field: "cep",
+        label: "CEP",
+        type: "text",
+        required: true,
+        placeholder: "12345-000",
+      },
+      {
+        field: "celular_01",
+        label: "Celular 01",
+        type: "text",
+        required: true,
+        placeholder: "(00) 9 0000-0000",
+      },
+      {
+        field: "celular_02",
+        label: "Celular 02",
+        type: "text",
+        placeholder: "(00) 9 0000-0000",
+      },
+      {
+        field: "dt_nacimento",
+        label: "Data de Nascimento",
+        required: true,
+        type: "date",
+        placeholder: "DD/MM/AAAA",
+      },
+      {
+        field: "profissao",
+        label: "Você trabalha no momento? Qual sua profissão/emprego?",
+        required: true,
+        type: "text",
+      },
+      {
+        field: "redes_sociais",
+        label: "Redes Sociais",
+        type: "text",
+        placeholder: "Informe seu perfil de rede social ou coloque o link",
+      },
     ],
   },
   {
@@ -110,8 +161,7 @@ export const sections = [
     items: [
       {
         field: "reside_com_quantas_pessoas",
-        label:
-          "Reside com quantas pessoas? Quem são?",
+        label: "Reside com quantas pessoas? Quem são?",
         type: "textarea",
         fullWidth: true,
         required: true,
@@ -149,7 +199,8 @@ export const sections = [
       },
       {
         field: "profissao_moradores",
-        label: "As pessoas que moram com você trabalham? Qual a profissão delas?",
+        label:
+          "As pessoas que moram com você trabalham? Qual a profissão delas?",
         type: "text",
         placeholder: " ",
       },
@@ -179,7 +230,8 @@ export const sections = [
   },
   {
     id: "animais",
-    title: "Informações quanto aos outros animais da casa/animais que criou no passado",
+    title:
+      "Informações quanto aos outros animais da casa/animais que criou no passado",
     accent: "purple",
     items: [
       {
@@ -211,7 +263,11 @@ export const sections = [
         label: "São/eram vacinados? Quais vacinas?",
         type: "textarea",
       },
-      { field: "marca_racao", label: "Qual a marca da ração eles comem/comiam?", type: "text" },
+      {
+        field: "marca_racao",
+        label: "Qual a marca da ração eles comem/comiam?",
+        type: "text",
+      },
       {
         field: "castrados_motivo",
         label: "Os seus animais são/eram castrados? Caso não, por quê?",
@@ -245,7 +301,8 @@ export const sections = [
       },
       {
         field: "quantia_mensal",
-        label: "Qual a quantia mensal que poderá dispor aos cuidados dos animais mensalmente?",
+        label:
+          "Qual a quantia mensal que poderá dispor aos cuidados dos animais mensalmente?",
         type: "radio",
         options: [
           "Menos que 50 reais",
@@ -335,7 +392,8 @@ export const sections = [
       },
       {
         field: "providencia_crescimento",
-        label: "Caso o animal cresça mais que o esperado, qual serão as providências:",
+        label:
+          "Caso o animal cresça mais que o esperado, qual serão as providências:",
         type: "radio",
         options: [
           "Irá doar para alguém com espaço maior a oferecer",
@@ -356,14 +414,16 @@ export const sections = [
       },
       {
         field: "pretende_mudar_5_anos",
-        label: "Pretende se mudar em um espaço de 5 anos? Caso sim, como ficará o animal?",
+        label:
+          "Pretende se mudar em um espaço de 5 anos? Caso sim, como ficará o animal?",
         type: "text",
         required: true,
         placeholder: " ",
       },
       {
         field: "reacao_choro_latido",
-        label: "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
+        label:
+          "O que fará se o animalzinho chorar/latir/uivar durante o dia e noite?",
         type: "textarea",
         required: true,
         placeholder: " ",
@@ -397,14 +457,16 @@ export const sections = [
       },
       {
         field: "filhotes_ou_castrar",
-        label: "Pretende por o animalzinho para ter filhotes ou irá castrar? O que pensa a respeito?",
+        label:
+          "Pretende por o animalzinho para ter filhotes ou irá castrar? O que pensa a respeito?",
         type: "textarea",
         required: true,
         placeholder: " ",
       },
       {
         field: "preparado_responsabilidade",
-        label: "O seu adotado pode viver de 10 a 15 anos. Já pensou sobre essa responsabilidade e está preparado?",
+        label:
+          "O seu adotado pode viver de 10 a 15 anos. Já pensou sobre essa responsabilidade e está preparado?",
         type: "text",
         required: true,
         placeholder: " ",
@@ -435,14 +497,16 @@ export const sections = [
       },
       {
         field: "conhece_doencas",
-        label: "Conhece essas doenças citadas acima? Sabe as formas de precaução e tratamento?",
+        label:
+          "Conhece essas doenças citadas acima? Sabe as formas de precaução e tratamento?",
         type: "textarea",
         required: true,
         placeholder: " ",
       },
       {
         field: "frequencia_remedio_verme",
-        label: "Seus animais, tomam/tomavam/tomará o remédio de verme/carrapato/pulga com qual frequência?",
+        label:
+          "Seus animais, tomam/tomavam/tomará o remédio de verme/carrapato/pulga com qual frequência?",
         type: "radio",
         options: [
           "Nunca tomaram",
@@ -457,7 +521,8 @@ export const sections = [
       },
       {
         field: "frequencia_veterinario",
-        label: "Com qual frequência leva/levava/levará seus animais para o veterinário?",
+        label:
+          "Com qual frequência leva/levava/levará seus animais para o veterinário?",
         type: "radio",
         options: [
           "Nunca foram",
@@ -510,7 +575,10 @@ const Questionnaire = () => {
     if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
     if (digits.length <= 9)
       return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(
+      6,
+      9
+    )}-${digits.slice(9, 11)}`;
   };
 
   const formatCEP = (input) => {
@@ -536,7 +604,10 @@ const Questionnaire = () => {
       return `(${area}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
 
     // 11 dígitos (celular): (xx) 9 xxxx-xxxx
-    return `(${area}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+    return `(${area}) ${digits.slice(2, 3)} ${digits.slice(
+      3,
+      7
+    )}-${digits.slice(7)}`;
   };
 
   // Armazenamos somente dígitos no estado. A máscara é aplicada apenas na UI.
@@ -647,7 +718,7 @@ const Questionnaire = () => {
       setCurrentSectionIndex(totalSections - 1);
       setSubmitMessage(
         response?.message ||
-        "A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs, daremos o feedback!"
+          "A ONG ABRACE agradece a sua atenção em responder o questionário e em breve, no máximo em 48 hs, daremos o feedback!"
       );
     } catch (error) {
       const message =
@@ -673,10 +744,11 @@ const Questionnaire = () => {
             required={item.required}
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-              }`}
+            }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -695,20 +767,23 @@ const Questionnaire = () => {
               item.field === "cpf"
                 ? formatCPF(formData[item.field])
                 : item.field === "cep"
-                  ? formatCEP(formData[item.field])
-                  : item.field === "celular_01" || item.field === "celular_02"
-                    ? formatPhone(formData[item.field])
-                    : formData[item.field]
+                ? formatCEP(formData[item.field])
+                : item.field === "celular_01" || item.field === "celular_02"
+                ? formatPhone(formData[item.field])
+                : formData[item.field]
             }
             onChange={handleChange}
             required={item.required}
-            placeholder={item.placeholder || `Digite ${item.label.toLowerCase()}`}
+            placeholder={
+              item.placeholder || `Digite ${item.label.toLowerCase()}`
+            }
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-              }`}
+            }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -728,10 +803,11 @@ const Questionnaire = () => {
             required={item.required}
             aria-required={item.required}
             aria-invalid={showError}
-            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${showError
+            className={`w-full rounded-lg border px-3 py-2 focus:ring-2 ${
+              showError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:border-sky-500 focus:ring-sky-200"
-              }`}
+            }`}
           />
           {showError && (
             <p className="text-xs text-red-600">Campo obrigatório.</p>
@@ -744,16 +820,18 @@ const Questionnaire = () => {
       return (
         <div className="space-y-1">
           <div
-            className={`grid gap-2 sm:grid-cols-2 ${showError ? "ring-2 ring-red-200 rounded-lg" : ""
-              }`}
+            className={`grid gap-2 sm:grid-cols-2 ${
+              showError ? "ring-2 ring-red-200 rounded-lg" : ""
+            }`}
           >
             {item.options.map((option) => (
               <label
                 key={option}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${formData[item.field] === option
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition ${
+                  formData[item.field] === option
                     ? "border-sky-500 bg-sky-50 text-sky-800"
                     : "border-gray-200 bg-white hover:border-sky-300"
-                  }`}
+                }`}
               >
                 <input
                   type="radio"
@@ -781,16 +859,18 @@ const Questionnaire = () => {
       return (
         <div className="space-y-1">
           <div
-            className={`flex flex-wrap gap-2 ${showError ? "ring-2 ring-red-200 rounded-lg" : ""
-              }`}
+            className={`flex flex-wrap gap-2 ${
+              showError ? "ring-2 ring-red-200 rounded-lg" : ""
+            }`}
           >
             {item.options.map((option) => (
               <label
                 key={option}
-                className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${formData[item.field]?.includes(option)
+                className={`px-3 py-2 rounded-full border text-sm cursor-pointer transition ${
+                  formData[item.field]?.includes(option)
                     ? "bg-sky-600 text-white border-sky-600"
                     : "bg-white text-gray-700 border-gray-300 hover:border-sky-400"
-                  }`}
+                }`}
               >
                 <input
                   type="checkbox"
@@ -886,7 +966,9 @@ const Questionnaire = () => {
                 <div
                   className="h-full bg-sky-500 transition-all duration-300"
                   style={{
-                    width: `${((currentSectionIndex + 1) / totalSections) * 100}%`,
+                    width: `${
+                      ((currentSectionIndex + 1) / totalSections) * 100
+                    }%`,
                   }}
                 />
               </div>
@@ -914,7 +996,9 @@ const Questionnaire = () => {
                 >
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {item.label}
-                    {item.required && <span className="text-red-600 ml-1">*</span>}
+                    {item.required && (
+                      <span className="text-red-600 ml-1">*</span>
+                    )}
                   </label>
                   {renderField(item)}
                 </div>

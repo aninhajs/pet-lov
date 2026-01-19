@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom"; // Importando Link para navegação
 // CSS para animação das patinhas
 const pawAnimationStyle = `
 @keyframes pawUp {
@@ -18,7 +19,8 @@ const pawAnimationStyle = `
   animation-delay: 0.8s;
 }
 `;
-import { Link } from "react-router-dom";
+
+import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { PetServices } from "../services/PetServices";
 
@@ -114,38 +116,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
-      {/* Header customizado para Home - sem botão "Ver Pets" */}
-      <header
-        className="shadow-lg border-b-2 border-yellow-300"
-        style={{ backgroundColor: "#f4f0e4" }}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
-              <img
-                src="/logoabrace.jpg"
-                alt="Abrace Uma Causa Animal"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
-              />
-              <h1
-                className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
-                style={{ wordBreak: "break-word" }}
-              >
-                Abrace Uma Causa Animal
-                <br className="block sm:hidden" />
-              </h1>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-              <Link
-                to="/pets"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
-              >
-                Ver Pets
-              </Link>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Estilos de animação das patinhas */}
@@ -460,7 +431,9 @@ const Home = () => {
                     Sua Nota Tem Valor
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
+                <div className="text-gray-700 space-y-2 text-xs">
+                  {" "}
+                  {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   {/*OBS IMPORTANTE: Na minha opnião não devemos mexer nesses espaçamentos, pois os espaços em si vão ficar muito grandes, acredito que seja mais viável adicionar mais algum texto nessa div*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
@@ -501,7 +474,9 @@ const Home = () => {
                     O que você pode doar?
                   </p>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
+                <div className="text-gray-700 space-y-2 text-xs">
+                  {" "}
+                  {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong className="text-green-600">01</strong>
@@ -535,7 +510,9 @@ const Home = () => {
                     DOE RAÇÃO
                   </h3>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
+                <div className="text-gray-700 space-y-2 text-xs">
+                  {" "}
+                  {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
@@ -572,7 +549,9 @@ const Home = () => {
                     Vaquinha criada em: 22/08/2025
                   </p>
                 </div>
-                <div className="text-gray-700 space-y-2 text-xs"> {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
+                <div className="text-gray-700 space-y-2 text-xs">
+                  {" "}
+                  {/* É aqui onde aumenta o espaçamento dessa div, no space-y*/}
                   <div className="bg-white/80 p-2 rounded-lg border-l-4 border-green-500">
                     <p>
                       <strong>
@@ -899,9 +878,9 @@ const Home = () => {
               {/* Botão de adoção (EXTERNO) */}
               <div className="text-center">
                 <Link
-                  to={`/questionnaire?petId=${selectedPet.id}&petName=${encodeURIComponent(
-                    selectedPet.nome
-                  )}`}
+                  to={`/questionnaire?petId=${
+                    selectedPet.id
+                  }&petName=${encodeURIComponent(selectedPet.nome)}`}
                   className="inline-flex items-center bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-6 py-2.5 rounded-lg text-base font-semibold transition-all shadow-lg"
                   onClick={closeModal}
                 >

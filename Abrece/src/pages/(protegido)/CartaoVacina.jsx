@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+
+import Header from "../../components/Header";
 import { PetServices } from "../../services/PetServices";
 import { VacinaServices } from "../../services/VacinaServices";
 
@@ -147,48 +149,7 @@ const CartaoVacina = () => {
         </div>
       )}
 
-      {/* Header */}
-      <header
-        className="shadow-lg border-b-2 border-yellow-300"
-        style={{ backgroundColor: "#f4f0e4" }}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20 items-center">
-            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
-              <img
-                src="/logoabrace.jpg"
-                alt="Abrace Uma Causa Animal"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
-              />
-              <div className="min-w-0">
-                <h1
-                  className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
-                  style={{ wordBreak: "break-word" }}
-                >
-                  Central de Gerenciamento
-                </h1>
-              </div>
-            </div>
-            <div className="flex space-x-3">
-              <Link
-               to="/admin"
-                className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
-              >
-              🏠 Dashboard
-              </Link>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("isAdminLoggedIn");
-                  window.location.href = "/";
-                }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-              🚪 Sair
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg p-8">

@@ -1,3 +1,52 @@
+import Header from "../../components/Header";
+// Componente de menu de ações para mobile
+const MenuAcoesMobile = ({ onDetalhes, onEditar, onEmProcesso }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative inline-block text-left md:hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="p-2 rounded-full hover:bg-gray-200 focus:outline-none"
+        aria-label="Abrir menu de ações"
+      >
+        <span className="text-2xl">⋮</span>
+      </button>
+      {open && (
+        <div className="absolute right-0 z-20 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="py-1">
+            <button
+              onClick={() => {
+                setOpen(false);
+                onDetalhes();
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-sky-100"
+            >
+              Detalhes
+            </button>
+            <button
+              onClick={() => {
+                setOpen(false);
+                onEditar();
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-sky-100"
+            >
+              Editar
+            </button>
+            <button
+              onClick={() => {
+                setOpen(false);
+                onEmProcesso();
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-sky-100"
+            >
+              Em processo
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 import React, { useState, useEffect } from "react";
 import api from "../../lib/api";
 import ModalEditarPet from "../../components/ModalEditarPet";
@@ -6,6 +55,16 @@ import { PetServices } from "../../services/PetServices";
 import { AdoptionServices } from "../../services/AdoptionServices";
 
 const GerenciarPets = () => {
+  // Handler para ação "Em processo" do menu mobile
+  const handleEmProcesso = (pet) => {
+    if (pet.status === "disponivel") {
+      alterarStatusPet(pet.id, "em_processo");
+    } else if (pet.status === "em_processo") {
+      alterarStatusPet(pet.id, "adotado");
+    } else if (pet.status === "adotado") {
+      alterarStatusPet(pet.id, "disponivel");
+    }
+  };
   const [pets, setPets] = useState([]);
   const [filtroStatus, setFiltroStatus] = useState("disponivel");
   const [filtroNome, setFiltroNome] = useState("");
@@ -289,55 +348,7 @@ const GerenciarPets = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
-      {/* Header */}
-      <header
-        className="shadow-lg border-b-2 border-yellow-300"
-        style={{ backgroundColor: "#f4f0e4" }}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
-              <img
-                src="/logoabrace.jpg"
-                alt="Abrace Uma Causa Animal"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
-              />
-              <div className="min-w-0">
-                <h1
-                  className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
-                  style={{ wordBreak: "break-word" }}
-                >
-                  Central de Gerenciamento
-                </h1>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-              <Link
-                to="/admin"
-                className="text-white bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 px-3 py-2 rounded-md text-sm font-medium transition-colors text-center"
-              >
-                🏠 Dashboard
-              </Link>
-              <Link
-                to="/admin/cadastrar-pet"
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
-              >
-                ➕ Novo Pet
-              </Link>
-              <button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("user");
-                  window.location.href = "/login";
-                }}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md transition-all text-center"
-              >
-                🚪 Sair
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Título e filtros */}
@@ -351,14 +362,13 @@ const GerenciarPets = () => {
             Visualize e gerencie todos os pets cadastrados
           </p>
 
-          <div className="flex flex-wrap gap-3">
-            {/* Removed 'Todos' filter per request - only Disponíveis / Em Processo / Adotados remain */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <button
               onClick={() => setFiltroStatus("disponivel")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all ${
                 filtroStatus === "disponivel"
-                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105"
-                  : "bg-white text-gray-700 hover:bg-green-50 hover:text-green-600 hover:scale-105"
+                  ? "bg-green-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-green-50"
               }`}
             >
               Disponíveis (
@@ -366,10 +376,10 @@ const GerenciarPets = () => {
             </button>
             <button
               onClick={() => setFiltroStatus("em_processo")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all ${
                 filtroStatus === "em_processo"
-                  ? "bg-gradient-to-r from-green-500 to-green-600 text-white scale-105"
-                  : "bg-white text-gray-700 hover:bg-green-50 hover:text-green-600 hover:scale-105"
+                  ? "bg-yellow-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-yellow-50"
               }`}
             >
               Em Processo (
@@ -377,10 +387,10 @@ const GerenciarPets = () => {
             </button>
             <button
               onClick={() => setFiltroStatus("adotado")}
-              className={`px-5 py-2.5 rounded-full text-sm font-semibold shadow-md transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all ${
                 filtroStatus === "adotado"
-                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white scale-105"
-                  : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-105"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-blue-50"
               }`}
             >
               Adotados ({pets.filter((p) => p.status === "adotado").length})
@@ -390,14 +400,14 @@ const GerenciarPets = () => {
 
         {/* Lista de pets */}
         <div className="bg-white shadow-xl rounded-xl overflow-hidden border-2 border-sky-200">
-          <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex items-center justify-between">
+          <div className="px-6 py-5 border-b-2 border-sky-100 bg-gradient-to-r from-sky-50 to-yellow-50 flex flex-wrap items-center justify-between gap-4">
             <h2 className="text-xl font-bold text-sky-700">
               🐾 Pets Cadastrados ({petsFiltrados.length})
             </h2>
             <input
               type="text"
               placeholder="Pesquisar por nome..."
-              className="ml-4 px-4 py-2 rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm w-64"
+              className="px-4 py-2 rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm w-64"
               value={filtroNome}
               onChange={(e) => setFiltroNome(e.target.value)}
             />
@@ -565,53 +575,64 @@ const GerenciarPets = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setPetSelecionado(pet)}
-                      className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
-                    >
-                      Detalhes
-                    </button>
-                    <button
-                      onClick={() => abrirModalEditar(pet)}
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
-                    >
-                      Editar
-                    </button>
-                    {pet.status === "disponivel" && (
+                  <div className="flex space-x-2 items-center">
+                    {/* Botões tradicionais para desktop */}
+                    <div className="hidden md:flex space-x-2">
                       <button
-                        onClick={() => alterarStatusPet(pet.id, "em_processo")}
+                        onClick={() => setPetSelecionado(pet)}
+                        className="bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                      >
+                        Detalhes
+                      </button>
+                      <button
+                        onClick={() => abrirModalEditar(pet)}
                         className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
                       >
-                        Em Processo
+                        Editar
                       </button>
-                    )}
-
-                    {pet.status === "em_processo" && (
-                      <>
+                      {pet.status === "disponivel" && (
                         <button
-                          onClick={() => alterarStatusPet(pet.id, "adotado")}
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                          onClick={() =>
+                            alterarStatusPet(pet.id, "em_processo")
+                          }
+                          className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
                         >
-                          ❤️ Adotado
+                          Em Processo
                         </button>
+                      )}
+                      {pet.status === "em_processo" && (
+                        <>
+                          <button
+                            onClick={() => alterarStatusPet(pet.id, "adotado")}
+                            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                          >
+                            ❤️ Adotado
+                          </button>
+                          <button
+                            onClick={() =>
+                              alterarStatusPet(pet.id, "disponivel")
+                            }
+                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
+                          >
+                            ✅ Disponível
+                          </button>
+                        </>
+                      )}
+                      {pet.status === "adotado" && (
                         <button
                           onClick={() => alterarStatusPet(pet.id, "disponivel")}
                           className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
                         >
-                          ✅ Disponível
+                          🔄 Reativar
                         </button>
-                      </>
-                    )}
-
-                    {pet.status === "adotado" && (
-                      <button
-                        onClick={() => alterarStatusPet(pet.id, "disponivel")}
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all hover:scale-105"
-                      >
-                        🔄 Reativar
-                      </button>
-                    )}
+                      )}
+                    </div>
+                    {/* Menu mobile */}
+                    <MenuAcoesMobile
+                      onDetalhes={() => setPetSelecionado(pet)}
+                      onEditar={() => abrirModalEditar(pet)}
+                      onEmProcesso={() => handleEmProcesso(pet)}
+                    />
                   </div>
                 </div>
               </div>

@@ -8,6 +8,7 @@ const Login = () => {
   const senhaRef = useRef();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   // Verifica token ao carregar
@@ -65,7 +66,7 @@ const Login = () => {
       } else if (err.request) {
         // Requisição foi feita mas não houve resposta
         setError(
-          "Não foi possível conectar ao servidor. Verifique se o backend está rodando."
+          "Não foi possível conectar ao servidor. Verifique se o backend está rodando.",
         );
       } else {
         // Erro ao configurar a requisição
@@ -117,15 +118,26 @@ const Login = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Senha
               </label>
-              <input
-                type="password"
-                ref={senhaRef}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                onChange={() => setError("")}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  ref={senhaRef}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors pr-12"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  onChange={() => setError("")}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl focus:outline-none"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
             </div>
 
             {error && (

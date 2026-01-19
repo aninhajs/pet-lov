@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import Header from "../../components/Header";
 import { PetServices } from "../../services/PetServices";
 import { VacinaServices } from "../../services/VacinaServices";
 import { AdoptantServices } from "../../services/AdoptantServices";
@@ -195,44 +196,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#f4f0e4" }}>
-      {/* Header responsivo */}
-      <header
-        className="shadow-lg border-b-2 border-yellow-300"
-        style={{ backgroundColor: "#f4f0e4" }}
-      >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-20 py-2 sm:py-0 gap-2">
-            <div className="flex items-center space-x-3 w-full sm:w-auto mb-2 sm:mb-0">
-              <img
-                src="/logoabrace.jpg"
-                alt="Abrace Uma Causa Animal"
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover shadow-lg border-2 border-yellow-200 flex-shrink-0"
-              />
-              <h1
-                className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 to-sky-700 bg-clip-text text-transparent leading-tight break-words max-w-[120px] sm:max-w-none"
-                style={{ wordBreak: "break-word" }}
-              >
-                Central de Gerenciamento
-              </h1>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-              <Link
-                to="/"
-                class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-md text-center"
-              >
-                Site Principal
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium text-center"
-              >
-                Sair
-              </button>
-            </div>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Título */}
