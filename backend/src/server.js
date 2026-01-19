@@ -32,7 +32,7 @@ app.use(
             "http://localhost:3000",
           ],
     credentials: true,
-  })
+  }),
 );
 app.use(morgan("combined"));
 app.use(express.json({ limit: "10mb" }));
@@ -45,6 +45,11 @@ app.get("/api/health", (req, res) => {
     message: "Pet Lov API está funcionando!",
     timestamp: new Date().toISOString(),
   });
+});
+
+// Rota raiz amigável para Render
+app.get("/", (req, res) => {
+  res.json({ message: "API Pet Lov rodando com sucesso!" });
 });
 
 // Rotas Públicas da API
@@ -90,13 +95,13 @@ app.listen(PORT, () => {
   console.log(`\nROTAS PRIVADAS (Admin):`);
   console.log(`  Dashboard: http://localhost:${PORT}/api/admin/dashboard`);
   console.log(
-    `  Cadastrar Pet: http://localhost:${PORT}/api/admin/cadastrar-pet`
+    `  Cadastrar Pet: http://localhost:${PORT}/api/admin/cadastrar-pet`,
   );
   console.log(
-    `  Gerenciar Pets: http://localhost:${PORT}/api/admin/gerenciar-pets`
+    `  Gerenciar Pets: http://localhost:${PORT}/api/admin/gerenciar-pets`,
   );
   console.log(`  Adotantes: http://localhost:${PORT}/api/admin/adoptants`);
   console.log(
-    `  Cartão Vacina: http://localhost:${PORT}/api/admin/cartao-vacina`
+    `  Cartão Vacina: http://localhost:${PORT}/api/admin/cartao-vacina`,
   );
 });

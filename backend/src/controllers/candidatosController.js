@@ -10,65 +10,33 @@ export const getCandidatos = async (req, res) => {
 
     // Construir filtros
     const where = {};
-    if (status) {
-      // Verificar se o status é válido
-      const validStatuses = ["pendente", "aprovado", "rejeitado"];
-      if (validStatuses.includes(status.toLowerCase())) {
-        where.status = status.toLowerCase();
-      }
-    }
+    if (status) where.status = status.toLowerCase();
 
-    // Buscar candidatos com paginação - versão simplificada para evitar erros
-    let candidatos, totalCount;
-
-    try {
-      // Primeiro tentar query completa
-      [candidatos, totalCount] = await Promise.all([
-        prisma.adoptionCandidate.findMany({
-          where,
-          include: {
-            interesses: {
-              include: {
-                pet: {
-                  select: {
-                    id: true,
-                    nome: true,
-                    tipo: true,
-                    status: true,
-                  },
+    // Buscar candidatos com paginação
+    const [candidatos, totalCount] = await Promise.all([
+      prisma.adoptionCandidate.findMany({
+        where,
+        include: {
+          cidade: {
+            include: {
+              pet: {
+                select: {
+                  id: true,
+                  nome: true,
+                  tipo: true,
+                  status: true,
                 },
               },
-              orderBy: { data_interesse: "desc" },
             },
+            orderBy: { data_interesse: "desc" },
           },
-          orderBy: { id: "desc" },
-          skip: offset,
-          take: parseInt(limit),
-        }),
-        prisma.adoptionCandidate.count({ where }),
-      ]);
-    } catch (complexQueryError) {
-      console.error(
-        "Erro na query complexa, tentando query simples:",
-        complexQueryError
-      );
-
-      // Fallback: query simples sem includes
-      try {
-        [candidatos, totalCount] = await Promise.all([
-          prisma.adoptionCandidate.findMany({
-            where,
-            orderBy: { id: "desc" },
-            skip: offset,
-            take: parseInt(limit),
-          }),
-          prisma.adoptionCandidate.count({ where }),
-        ]);
-      } catch (simpleQueryError) {
-        console.error("Erro mesmo na query simples:", simpleQueryError);
-        throw simpleQueryError;
-      }
-    }
+        },
+        orderBy: { cpf: "desc" },
+        skip: offset,
+        take: parseInt(limit),
+      }),
+      prisma.adoptionCandidate.count({ where }),
+    ]);
 
     // Calcular dados de paginação
     const totalPages = Math.ceil(totalCount / parseInt(limit));
@@ -89,17 +57,10 @@ export const getCandidatos = async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao buscar candidatos:", error);
-    console.error("Error details:", {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    });
     res.status(500).json({
       success: false,
       error: {
-        message: "Erro interno do servidor ao buscar candidatos",
-        details:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
+        message: "Erro interno do servidor",
       },
     });
   }
@@ -110,9 +71,9 @@ export const getCandidatoById = async (req, res) => {
     const { id } = req.params;
 
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { id }, // Alterado de cpf para id
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -130,7 +91,7 @@ export const getCandidatoById = async (req, res) => {
           },
           orderBy: { data_interesse: "desc" },
         },
-        adocoes: {
+        cep: {
           include: {
             pet: {
               select: {
@@ -143,41 +104,14 @@ export const getCandidatoById = async (req, res) => {
           },
           orderBy: { data_adocao: "desc" },
         },
-        pets: {
-          select: {
-            id: true,
-            nome: true,
-            tipo: true,
-            porte: true,
-            status: true,
-          },
-        },
       },
     });
 
-    // Se candidato existe, buscar histórico de tentativas e histórico de rejeições
+    // Se candidato existe, buscar histórico de rejeições
     if (candidato) {
-      // Todas as tentativas (interesses) do candidato
-      const historicoTentativas = await prisma.petInterest.findMany({
-        where: {
-          candidato_id: candidato.id,
-        },
-        include: {
-          pet: {
-            select: {
-              id: true,
-              nome: true,
-              tipo: true,
-            },
-          },
-        },
-        orderBy: { data_interesse: "desc" },
-      });
-
-      // Histórico apenas das rejeições que contenham observações (mantemos para destaque)
       const historicoRejeicoes = await prisma.petInterest.findMany({
         where: {
-          candidato_id: candidato.id,
+          candidato_id: id,
           status: "rejeitado",
           observacoes_admin: { not: null },
         },
@@ -193,8 +127,7 @@ export const getCandidatoById = async (req, res) => {
         orderBy: { data_avaliacao: "desc" },
       });
 
-      // Adicionar históricos ao candidato
-      candidato.historico_tentativas = historicoTentativas;
+      // Adicionar histórico ao candidato
       candidato.historico_rejeicoes = historicoRejeicoes;
     }
 
@@ -344,139 +277,11 @@ export const createCandidato = async (req, res) => {
       });
 
       if (candidatoExistente) {
-        // Atualiza candidato existente e cria/atualiza interesse, retorna 200
-        const atualizado = await prisma.$transaction(async (tx) => {
-          await tx.adoptionCandidate.update({
-            where: { id: candidatoExistente.id },
-            data: {
-              nome,
-              endereco,
-              celular_01,
-              celular_02,
-              data_nascimento: dataNascimento,
-              perfil_social: redes_sociais,
-              profissao,
-              mora_em,
-              tipo_residencia: residencia_tipo,
-              proprietario_aceita_animais: proprietarios_aceitam,
-              normas_condominio_animais,
-              tipo_portao,
-              possui_na_residencia: normalizeToText(residencia_possui),
-              tipo_quintal_varanda: normalizeToText(area_tipo),
-              reside_com_quantas_pessoas,
-              todos_aceitam_adocao: cientes_adocao,
-              responsavel_financeiro,
-              reacao_mordida_arranho,
-              possui_veiculo,
-              moradores_trabalham: profissao_moradores,
-              alguem_alergico,
-              tem_criancas,
-              como_levara_veterinario: alguem_dirige,
-              ja_teve_tem_animais,
-              motivo_perda_animais: normalizeToText(motivo_perda_animais),
-              vacinados_quais,
-              marca_racao,
-              castrados_motivo,
-              teve_filhotes,
-              passeios,
-              quantia_mensal_cuidados:
-                quantia_mensal_cuidados || quantia_mensal,
-              tempo_sozinho,
-              frequencia_passeios,
-              devolveria_se_mudar,
-              finalidade_animal: destino_animal,
-              comodo_dia,
-              local_dormir,
-              tempo_preso,
-              reacao_bagunca,
-              providencia_crescimento,
-              responsavel_viagem,
-              pretende_mudar_5_anos,
-              reacao_choro_latido,
-              vacinas_que_dara,
-              marca_racao_adotado,
-              criterios_alimentacao,
-              filhotes_ou_castrar,
-              preparado_responsabilidade,
-              disposto_adaptacao,
-              clinica_veterinario,
-              reacao_doenca,
-              conhece_doencas,
-              frequencia_remedio_verme,
-              frequencia_veterinario,
-              CEP: cep,
-              Cidade: cidade,
-              Pet_ID: petIdValue,
-              como_organizaria_mudanca: devolveria_se_mudar,
-            },
-          });
-
-          if (petIdValue) {
-            const interesseExistente = await tx.petInterest.findUnique({
-              where: {
-                candidato_id_pet_id: {
-                  candidato_id: candidatoExistente.id,
-                  pet_id: petIdValue,
-                },
-              },
-            });
-
-            if (!interesseExistente) {
-              await tx.petInterest.create({
-                data: {
-                  candidato_id: candidatoExistente.id,
-                  pet_id: petIdValue,
-                  status: "interessado",
-                },
-              });
-            } else {
-              await tx.petInterest.update({
-                where: { id: interesseExistente.id },
-                data: {
-                  status: "interessado",
-                  data_interesse: new Date(),
-                },
-              });
-            }
-
-            // Verificar se o pet precisa ser marcado como em_processo
-            const pet = await tx.pet.findUnique({
-              where: { id: petIdValue },
-              select: { status: true },
-            });
-
-            if (pet && pet.status === "disponivel") {
-              await tx.pet.update({
-                where: { id: petIdValue },
-                data: { status: "em_processo" },
-              });
-              console.log(
-                `✅ Pet ${petIdValue} marcado como em_processo (candidato existente)`
-              );
-            }
-          }
-
-          await tx.adoptionCandidate.update({
-            where: { id: candidatoExistente.id },
-            data: { status: "pendente" },
-          });
-
-          return tx.adoptionCandidate.findUnique({
-            where: { id: candidatoExistente.id },
-            include: {
-              interesses: {
-                include: {
-                  pet: { select: { id: true, nome: true, tipo: true } },
-                },
-              },
-            },
-          });
-        });
-
-        return res.status(200).json({
-          success: true,
-          data: atualizado,
-          message: "Cadastro existente atualizado e marcado como pendente.",
+        return res.status(409).json({
+          success: false,
+          error: {
+            message: "Ja existe um cadastro com este CPF",
+          },
         });
       }
     }
@@ -541,11 +346,10 @@ export const createCandidato = async (req, res) => {
         CEP: cep,
         Cidade: cidade,
         Pet_ID: petIdValue,
-        status: "pendente",
         como_organizaria_mudanca: devolveria_se_mudar,
 
         ...(petIdValue && {
-          interesses: {
+          cidade: {
             create: {
               pet_id: petIdValue,
               status: "interessado",
@@ -554,7 +358,7 @@ export const createCandidato = async (req, res) => {
         }),
       },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -567,24 +371,6 @@ export const createCandidato = async (req, res) => {
         },
       },
     });
-
-    // Atualizar status do pet para em_processo se estava disponivel
-    if (petIdValue) {
-      const pet = await prisma.pet.findUnique({
-        where: { id: petIdValue },
-        select: { status: true },
-      });
-
-      if (pet && pet.status === "disponivel") {
-        await prisma.pet.update({
-          where: { id: petIdValue },
-          data: { status: "em_processo" },
-        });
-        console.log(
-          `✅ Pet ${petIdValue} marcado como em_processo (novo candidato)`
-        );
-      }
-    }
 
     res.status(201).json({
       success: true,
@@ -605,21 +391,20 @@ export const createCandidato = async (req, res) => {
 
 export const updateCandidatoStatus = async (req, res) => {
   try {
-    const { id } = req.params; // Aqui 'id' é o UUID do candidato
+    const { id } = req.params; // Aqui 'id' é o CPF
     const { status, observacoes, pet_id } = req.body;
-    const statusNormalizado = (status || "").toLowerCase();
 
     console.log("🔍 DEBUG - updateCandidatoStatus:");
-    console.log("  - ID (UUID):", id);
+    console.log("  - ID (CPF):", id);
     console.log("  - Status:", status);
     console.log("  - Pet ID:", pet_id);
     console.log("  - Observações:", observacoes);
 
     // Verificar se candidato existe
     const candidato = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { cpf: id },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -637,7 +422,7 @@ export const updateCandidatoStatus = async (req, res) => {
     console.log("📋 Candidato encontrado:", candidato ? "SIM" : "NÃO");
 
     if (!candidato) {
-      console.log("❌ Candidato não encontrado para ID:", id);
+      console.log("❌ Candidato não encontrado para CPF:", id);
       return res.status(404).json({
         success: false,
         error: {
@@ -658,7 +443,7 @@ export const updateCandidatoStatus = async (req, res) => {
     }
 
     // Se estiver aprovando, verificar se o pet ainda está disponível
-    if (statusNormalizado === "aprovado") {
+    if (status.toLowerCase() === "aprovado") {
       console.log("🐕 Buscando pet com ID:", pet_id);
 
       const pet = await prisma.pet.findUnique({
@@ -769,55 +554,21 @@ export const updateCandidatoStatus = async (req, res) => {
         `✅ Adoção automática criada: Pet ${pet_id} → Candidato ${id}`
       );
     } else {
-      // Para rejeição, atualizar o interesse
+      // Para rejeição, apenas atualizar o interesse
       await prisma.petInterest.updateMany({
         where: { candidato_id: id, pet_id },
         data: {
-          status: statusNormalizado,
+          status: status.toLowerCase(),
           data_avaliacao: new Date(),
           observacoes_admin: observacoes,
         },
       });
-
-      // Se for rejeição, verificar se ainda há outros interessados pendentes
-      if (statusNormalizado === "rejeitado") {
-        const outrosInteressados = await prisma.petInterest.count({
-          where: {
-            pet_id,
-            status: "interessado",
-            candidato_id: { not: id },
-          },
-        });
-
-        // Se não há outros interessados, voltar pet para disponivel
-        if (outrosInteressados === 0) {
-          const pet = await prisma.pet.findUnique({
-            where: { id: pet_id },
-            select: { status: true },
-          });
-
-          if (pet && pet.status === "em_processo") {
-            await prisma.pet.update({
-              where: { id: pet_id },
-              data: { status: "disponivel" },
-            });
-            console.log(
-              `✅ Pet ${pet_id} voltou para disponivel (nenhum interessado restante)`
-            );
-          }
-        }
-      }
     }
 
-    await prisma.adoptionCandidate.update({
-      where: { id },
-      data: { status: statusNormalizado },
-    });
-
     const candidatoAtualizado = await prisma.adoptionCandidate.findUnique({
-      where: { id },
+      where: { cpf: id },
       include: {
-        interesses: {
+        cidade: {
           include: {
             pet: {
               select: {
@@ -836,7 +587,7 @@ export const updateCandidatoStatus = async (req, res) => {
       success: true,
       data: candidatoAtualizado,
       message:
-        statusNormalizado === "aprovado"
+        status.toLowerCase() === "aprovado"
           ? "Candidato aprovado e adoção registrada automaticamente! Pet marcado como adotado."
           : "Candidato rejeitado com sucesso!",
     });

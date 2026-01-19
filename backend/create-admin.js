@@ -3,6 +3,9 @@
 
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 
@@ -10,8 +13,13 @@ async function createAdmin() {
   try {
     console.log("  Criando usuário admin...");
 
-    const email = "ongabrace63@gmail.com";
-    const senha = "Ongabrace25#";
+    const email = process.env.ADMIN_EMAIL;
+    const senha = process.env.ADMIN_PASSWORD;
+
+    if (!email || !senha) {
+      console.error("ADMIN_EMAIL ou ADMIN_PASSWORD não definidos no .env");
+      return;
+    }
 
     // Verificar se usuário já existe
     const existingUser = await prisma.user.findUnique({
@@ -45,7 +53,7 @@ async function createAdmin() {
 
     console.log(" Usuário admin criado com sucesso!");
     console.log(" Email:", user.email);
-    console.log(" Senha:", senha);
+    console.log(" Senha definida via variável de ambiente.");
     console.log(" Nome:", user.nome);
     // console.log(" Criado em:", user.data_criacao);
   } catch (error) {
