@@ -25,7 +25,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://seu-frontend.vercel.app"]
+        ? ["https://pet-lov-2.onrender.com"]
         : [
             "http://localhost:5173",
             "http://localhost:5174",
