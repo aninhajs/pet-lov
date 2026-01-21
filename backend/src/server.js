@@ -25,7 +25,7 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://pet-lov-2.onrender.com"]
+        ? ["https://pet-lov-2.onrender.com", "https://pet-lov.onrender.com"]
         : [
             "http://localhost:5173",
             "http://localhost:5174",
@@ -37,6 +37,11 @@ app.use(
 app.use(morgan("combined"));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Rota de teste para CORS e conexão
+app.get("/api/ping", (req, res) => {
+  res.json({ pong: true });
+});
 
 // Rota de saúde
 app.get("/api/health", (req, res) => {
