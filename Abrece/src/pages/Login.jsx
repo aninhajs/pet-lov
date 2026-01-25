@@ -130,12 +130,52 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl focus:outline-none"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-2xl focus:outline-none"
                   onClick={() => setShowPassword((prev) => !prev)}
                   tabIndex={-1}
                   aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? (
+                    // Olho fechado (Eye Slash)
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 0 0 2.25 12c2.036 3.807 6.053 6.75 9.75 6.75 1.563 0 3.06-.362 4.396-1.02M6.53 6.53A10.45 10.45 0 0 1 12 5.25c3.697 0 7.714 2.943 9.75 6.75a10.49 10.49 0 0 1-2.042 2.773M6.53 6.53l10.94 10.94M6.53 6.53l-2.55 2.55m13.49 13.49l-2.55-2.55"
+                      />
+                    </svg>
+                  ) : (
+                    // Olho aberto (Eye)
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-6 h-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 12C4.286 8.193 8.303 5.25 12 5.25c3.697 0 7.714 2.943 9.75 6.75-2.036 3.807-6.053 6.75-9.75 6.75-3.697 0-7.714-2.943-9.75-6.75z"
+                      />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="3"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        fill="none"
+                      />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>

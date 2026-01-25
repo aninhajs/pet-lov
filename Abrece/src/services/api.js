@@ -1,10 +1,15 @@
 import axios from "axios";
 
+// const api = axios.create({
+//   baseURL: API_BASE_URL,
+// });
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+import.meta.env.PROD
+  ? "https://pet-lov.onrender.com/api"
+  : "http://localhost:8081/api";
+
 const api = axios.create({
-  baseURL: "https://pet-lov.onrender.com/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: API_BASE_URL,
 });
 
 // Interceptador para adicionar token de autenticação automaticamente
@@ -32,7 +37,7 @@ api.interceptors.response.use(
 
 export default api;
 
-const API_BASE_URL = "https://pet-lov.onrender.com/api";
+// const API_BASE_URL = "https://pet-lov.onrender.com/api";
 
 // Função para cadastrar um pet
 export const createPet = async (petData, token) => {

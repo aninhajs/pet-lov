@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 import Header from "../components/Header";
 import { PetServices } from "../services/PetServices";
@@ -61,11 +62,11 @@ const Pets = () => {
           console.log("\u2705 Pets carregados do backend:", petsFormatados);
           console.log(
             "📍 Pet Esmeralda com localização:",
-            petsFormatados.find((p) => p.nome === "Esmeralda")
+            petsFormatados.find((p) => p.nome === "Esmeralda"),
           );
           console.log(
             "\ud83d\udcf8 Exemplo de pet com imagens:",
-            petsFormatados[0]
+            petsFormatados[0],
           );
         }
       } catch (error) {
@@ -204,7 +205,7 @@ const Pets = () => {
                 <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
                   {
                     pets.filter((pet) =>
-                      pet.localizacao?.toLowerCase().includes("fortaleza")
+                      pet.localizacao?.toLowerCase().includes("fortaleza"),
                     ).length
                   }
                 </span>
@@ -218,7 +219,7 @@ const Pets = () => {
                 <span className="text-3xl sm:text-4xl font-extrabold text-yellow-700">
                   {
                     pets.filter((pet) =>
-                      pet.localizacao?.toLowerCase().includes("aquiraz")
+                      pet.localizacao?.toLowerCase().includes("aquiraz"),
                     ).length
                   }
                 </span>
@@ -277,7 +278,7 @@ const Pets = () => {
                 <button
                   onClick={() =>
                     setCityFilter(
-                      cityFilter === "fortaleza-ce" ? null : "fortaleza-ce"
+                      cityFilter === "fortaleza-ce" ? null : "fortaleza-ce",
                     )
                   }
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -293,7 +294,7 @@ const Pets = () => {
                 <button
                   onClick={() =>
                     setCityFilter(
-                      cityFilter === "aquiraz-ce" ? null : "aquiraz-ce"
+                      cityFilter === "aquiraz-ce" ? null : "aquiraz-ce",
                     )
                   }
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -314,7 +315,7 @@ const Pets = () => {
               <button
                 onClick={() =>
                   setStatusFilter(
-                    statusFilter === "disponivel" ? null : "disponivel"
+                    statusFilter === "disponivel" ? null : "disponivel",
                   )
                 }
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -328,7 +329,7 @@ const Pets = () => {
               <button
                 onClick={() =>
                   setStatusFilter(
-                    statusFilter === "em_processo" ? null : "em_processo"
+                    statusFilter === "em_processo" ? null : "em_processo",
                   )
                 }
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -377,7 +378,7 @@ const Pets = () => {
                       src={optimizeImageUrl(
                         pet.imagens[currentImageIndexes[pet.id] || 0],
                         400,
-                        320
+                        320,
                       )}
                       alt={`${pet.nome} - Foto ${
                         (currentImageIndexes[pet.id] || 0) + 1
@@ -494,8 +495,8 @@ const Pets = () => {
                     {pet.tipo === "cão"
                       ? "🐕"
                       : pet.tipo === "gato"
-                      ? "🐱"
-                      : "🐾"}
+                        ? "🐱"
+                        : "🐾"}
                   </span>
                 </div>
 
@@ -506,16 +507,16 @@ const Pets = () => {
                       pet.status === "disponivel"
                         ? "bg-green-500 text-white"
                         : pet.status === "adotado"
-                        ? "bg-gray-500 text-white"
-                        : "bg-yellow-500 text-white"
+                          ? "bg-gray-500 text-white"
+                          : "bg-yellow-500 text-white"
                     }`}
                     style={{ minWidth: 70, textAlign: "center" }}
                   >
                     {pet.status === "disponivel"
                       ? "🟢 Disponível"
                       : pet.status === "adotado"
-                      ? "❤️ Adotado"
-                      : "⏳ Em Processo"}
+                        ? "❤️ Adotado"
+                        : "⏳ Em Processo"}
                   </span>
                 </div>
               </div>
@@ -628,7 +629,7 @@ const Pets = () => {
                       src={optimizeImageUrl(
                         selectedPet.imagens[modalImageIndex],
                         600,
-                        400
+                        400,
                       )}
                       alt={`${selectedPet.nome} - Foto ${modalImageIndex + 1}`}
                       className="w-full h-full object-contain relative"
@@ -670,8 +671,8 @@ const Pets = () => {
                             setModalImageIndex(
                               Math.min(
                                 selectedPet.imagens.length - 1,
-                                modalImageIndex + 1
-                              )
+                                modalImageIndex + 1,
+                              ),
                             )
                           }
                           disabled={
@@ -728,8 +729,8 @@ const Pets = () => {
                       {selectedPet.tipo === "cão"
                         ? "🐕"
                         : selectedPet.tipo === "gato"
-                        ? "🐱"
-                        : "🐾"}
+                          ? "🐱"
+                          : "🐾"}
                     </span>
                   </div>
                 )}
@@ -749,15 +750,15 @@ const Pets = () => {
                       selectedPet.status === "disponivel"
                         ? "bg-green-100 text-green-800"
                         : selectedPet.status === "adotado"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-yellow-100 text-yellow-800"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {selectedPet.status === "disponivel"
                       ? "🟢 Disponível para Adoção"
                       : selectedPet.status === "adotado"
-                      ? "❤️ Já Adotado"
-                      : "⏳ Em Processo de Adoção"}
+                        ? "❤️ Já Adotado"
+                        : "⏳ Em Processo de Adoção"}
                   </span>
                 </div>
 
@@ -862,12 +863,12 @@ const Pets = () => {
                         selectedPet.situacao === "Resgatada"
                           ? "bg-yellow-100 text-yellow-800"
                           : selectedPet.situacao === "Órfão"
-                          ? "bg-orange-100 text-orange-800"
-                          : selectedPet.situacao === "Maltratado"
-                          ? "bg-red-100 text-red-800"
-                          : selectedPet.situacao === "Filhote"
-                          ? "bg-pink-100 text-pink-800"
-                          : "bg-gray-100 text-gray-800"
+                            ? "bg-orange-100 text-orange-800"
+                            : selectedPet.situacao === "Maltratado"
+                              ? "bg-red-100 text-red-800"
+                              : selectedPet.situacao === "Filhote"
+                                ? "bg-pink-100 text-pink-800"
+                                : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {selectedPet.situacao}

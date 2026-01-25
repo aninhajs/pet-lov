@@ -101,7 +101,7 @@ const Footer = () => {
             {/* <div className="mt-6">
               <h5 className="font-medium mb-2">Links Rápidos</h5>
               <div className="space-y-2 text-sm text-gray-300">
-                <Link
+                <
                   to="/pets"
                   className="block hover:text-white transition-colors"
                 >
