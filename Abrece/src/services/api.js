@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3001/api",
+  baseURL: "https://pet-lov.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,12 +27,12 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
 
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = "https://pet-lov.onrender.com/api";
 
 // Função para cadastrar um pet
 export const createPet = async (petData, token) => {
